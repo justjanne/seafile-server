@@ -20,6 +20,7 @@ static const struct option long_opts[] = {
     { "version", no_argument, NULL, 'v', },
     { "force", no_argument, NULL, 'f', },
     { "repair", no_argument, NULL, 'r', },
+    { "shallow", no_argument, NULL, 's', },
     { "threads", required_argument, NULL, 't', },
     { "export", required_argument, NULL, 'E', },
     { "config-file", required_argument, NULL, 'c', },
@@ -31,8 +32,8 @@ static const struct option long_opts[] = {
 static void usage ()
 {
     fprintf (stderr,
-             "usage: seaf-fsck [-r] [-E exported_path] [-c config_dir] [-d seafile_dir] "
-             "[repo_id_1 [repo_id_2 ...]]\n");
+             "usage: seaf-fsck [-r] [-s] [-E exported_path] [-F central_config_dir] [-c config_dir] [-d seafile_dir] "
+             "[-t threads] [-f force] [repo_id_1 [repo_id_2 ...]]\n");
 }
 
 #ifdef WIN32
@@ -91,6 +92,7 @@ main(int argc, char *argv[])
 {
     int c;
     gboolean repair = FALSE;
+    gboolean shallow = FALSE;
     gboolean force = FALSE;
     char *export_path = NULL;
     int max_thread_num = 0;
@@ -118,6 +120,9 @@ main(int argc, char *argv[])
 	    break;
         case 'r':
             repair = TRUE;
+            break;
+        case 's':
+            shallow = TRUE;
             break;
         case 'E':
             export_path = strdup(optarg);
@@ -165,6 +170,10 @@ main(int argc, char *argv[])
         seaf_warning ("Failed to create seafile session.\n");
         exit (1);
     }
+    if (shallow && repair) {
+        seaf_warning ("You can not use repair and shallow together.\n");
+        exit (1);
+    }
 
     GList *repo_id_list = NULL;
     int i;
@@ -174,7 +183,7 @@ main(int argc, char *argv[])
     if (export_path) {
         export_file (repo_id_list, seafile_dir, export_path);
     } else {
-        seaf_fsck (repo_id_list, repair, max_thread_num);
+        seaf_fsck (repo_id_list, repair, shallow, max_thread_num);
     }
 
     return 0;
