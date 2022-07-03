@@ -14,7 +14,7 @@ static char *central_config_dir = NULL;
 
 SeafileSession *seaf;
 
-static const char *short_opts = "hvft:c:d:rE:F:";
+static const char *short_opts = "hvft:c:d:rsE:F:";
 static const struct option long_opts[] = {
     { "help", no_argument, NULL, 'h', },
     { "version", no_argument, NULL, 'v', },
