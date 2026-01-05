@@ -121,6 +121,8 @@ func parseContentType(fileName string) string {
 			contentType = "video/mp4"
 		case "webm":
 			contentType = "video/webm"
+		case "mkv":
+			contentType = "video/x-matroska"
 		case "jpeg", "JPEG", "jpg", "JPG":
 			contentType = "image/jpeg"
 		case "png", "PNG":
