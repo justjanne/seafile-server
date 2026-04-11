@@ -91,6 +91,11 @@ AC_ARG_WITH(mysql,
             [MYSQL_CONFIG=$with_mysql],
 	    [MYSQL_CONFIG="default_mysql_config"])
 
+AC_ARG_WITH(postgresql,
+            AC_HELP_STRING([--with-postgresql],[enable postgresql support]),
+            [with_postgresql=$withval],
+            [with_postgresql="no"])
+
 AC_ARG_ENABLE(httpserver, AC_HELP_STRING([--enable-httpserver], [enable httpserver]),
    [compile_httpserver=$enableval],[compile_httpserver="yes"])
 
@@ -100,6 +105,7 @@ AM_CONDITIONAL([COMPILE_FUSE], [test "${compile_fuse}" = "yes"])
 AM_CONDITIONAL([WIN32], [test "$bwin32" = "true"])
 AM_CONDITIONAL([MACOS], [test "$bmac" = "true"])
 AM_CONDITIONAL([LINUX], [test "$blinux" = "true"])
+AM_CONDITIONAL([HAVE_POSTGRESQL], [test "${with_postgresql}" = "yes"])
 
 
 # check libraries
@@ -243,6 +249,17 @@ else
     AC_SUBST(MYSQL_CFLAGS)
     AC_SUBST(MYSQL_LIBS)
     AC_DEFINE([HAVE_MYSQL], 1, [Define to 1 if MySQL support is enabled])
+fi
+
+if test "${with_postgresql}" = "yes"; then
+    PKG_CHECK_MODULES(PGSQL, [libpq], [have_pgsql="yes"], [have_pgsql="no"])
+    if test "x${have_pgsql}" = "xyes"; then
+        AC_SUBST(PGSQL_CFLAGS)
+        AC_SUBST(PGSQL_LIBS)
+        AC_DEFINE([HAVE_POSTGRESQL], 1, [Define to 1 if PostgreSQL support is enabled])
+    else
+        AC_MSG_ERROR([*** Unable to find libpq PostgreSQL library])
+    fi
 fi
 
 if test "${compile_ldap}" = "yes"; then
