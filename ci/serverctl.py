@@ -233,7 +233,7 @@ connection_charset = utf8
             'SEAFILE_CENTRAL_CONF_DIR': self.central_conf_dir,
             'CCNET_CONF_DIR': self.ccnet_conf_dir,
             'SEAFILE_CONF_DIR': self.seafile_conf_dir,
-            'SEAFILE_MYSQL_DB_CCNET_DB_NAME': 'ccnet',
+            'SEAFILE_CCNET_DB_NAME': 'ccnet',
         })
         return envs
 

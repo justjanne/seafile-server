@@ -160,7 +160,7 @@ func LoadFileServerOptions(centralDir string) {
 
 	loadCacheOptionFromEnv()
 
-	GroupTableName = os.Getenv("SEAFILE_MYSQL_DB_GROUP_TABLE_NAME")
+	GroupTableName = os.Getenv("SEAFILE_DB_GROUP_TABLE_NAME")
 	if GroupTableName == "" {
 		GroupTableName = "Group"
 	}
@@ -437,12 +437,12 @@ func loadDBOptionFromFile(centralDir string) (*DBOption, error) {
 }
 
 func loadDBOptionFromEnv(dbOpt *DBOption) *DBOption {
-	user := os.Getenv("SEAFILE_MYSQL_DB_USER")
-	password := os.Getenv("SEAFILE_MYSQL_DB_PASSWORD")
-	host := os.Getenv("SEAFILE_MYSQL_DB_HOST")
-	portStr := os.Getenv("SEAFILE_MYSQL_DB_PORT")
-	ccnetDbName := os.Getenv("SEAFILE_MYSQL_DB_CCNET_DB_NAME")
-	seafileDbName := os.Getenv("SEAFILE_MYSQL_DB_SEAFILE_DB_NAME")
+	user := os.Getenv("SEAFILE_DB_USER")
+	password := os.Getenv("SEAFILE_DB_PASSWORD")
+	host := os.Getenv("SEAFILE_DB_HOST")
+	portStr := os.Getenv("SEAFILE_DB_PORT")
+	ccnetDbName := os.Getenv("SEAFILE_CCNET_DB_NAME")
+	seafileDbName := os.Getenv("SEAFILE_SEAFILE_DB_NAME")
 
 	if dbOpt == nil {
 		dbOpt = new(DBOption)
@@ -469,13 +469,13 @@ func loadDBOptionFromEnv(dbOpt *DBOption) *DBOption {
 		dbOpt.CcnetDbName = ccnetDbName
 	} else if dbOpt.CcnetDbName == "" {
 		dbOpt.CcnetDbName = "ccnet_db"
-		log.Infof("Failed to read SEAFILE_MYSQL_DB_CCNET_DB_NAME, use ccnet_db by default")
+		log.Infof("Failed to read SEAFILE_CCNET_DB_NAME, use ccnet_db by default")
 	}
 	if seafileDbName != "" {
 		dbOpt.SeafileDbName = seafileDbName
 	} else if dbOpt.SeafileDbName == "" {
 		dbOpt.SeafileDbName = "seafile_db"
-		log.Infof("Failed to read SEAFILE_MYSQL_DB_SEAFILE_DB_NAME, use seafile_db by default")
+		log.Infof("Failed to read SEAFILE_SEAFILE_DB_NAME, use seafile_db by default")
 	}
 	return dbOpt
 }

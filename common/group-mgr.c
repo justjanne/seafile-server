@@ -40,7 +40,7 @@ ccnet_group_manager_init (CcnetGroupManager *manager)
 int
 ccnet_group_manager_prepare (CcnetGroupManager *manager)
 {
-    const char *table_name = g_getenv("SEAFILE_MYSQL_DB_GROUP_TABLE_NAME");
+    const char *table_name = g_getenv("SEAFILE_DB_GROUP_TABLE_NAME");
     if (!table_name || g_strcmp0 (table_name, "") == 0)
         manager->priv->table_name = g_strdup ("Group");
     else

@@ -109,35 +109,35 @@ type DBOption struct {
 }
 
 func loadDBOptionFromEnv() (*DBOption, error) {
-	user := os.Getenv("SEAFILE_MYSQL_DB_USER")
+	user := os.Getenv("SEAFILE_DB_USER")
 	if user == "" {
-		return nil, fmt.Errorf("failed to read SEAFILE_MYSQL_DB_USER")
+		return nil, fmt.Errorf("failed to read SEAFILE_DB_USER")
 	}
-	password := os.Getenv("SEAFILE_MYSQL_DB_PASSWORD")
+	password := os.Getenv("SEAFILE_DB_PASSWORD")
 	if password == "" {
-		return nil, fmt.Errorf("failed to read SEAFILE_MYSQL_DB_PASSWORD")
+		return nil, fmt.Errorf("failed to read SEAFILE_DB_PASSWORD")
 	}
-	host := os.Getenv("SEAFILE_MYSQL_DB_HOST")
+	host := os.Getenv("SEAFILE_DB_HOST")
 	if host == "" {
-		return nil, fmt.Errorf("failed to read SEAFILE_MYSQL_DB_HOST")
+		return nil, fmt.Errorf("failed to read SEAFILE_DB_HOST")
 	}
 	port := 3306
-	portStr := os.Getenv("SEAFILE_MYSQL_DB_PORT")
+	portStr := os.Getenv("SEAFILE_DB_PORT")
 	if portStr != "" {
 		p, _ := strconv.ParseUint(portStr, 10, 32)
 		if p > 0 {
 			port = int(p)
 		}
 	}
-	ccnetDbName := os.Getenv("SEAFILE_MYSQL_DB_CCNET_DB_NAME")
+	ccnetDbName := os.Getenv("SEAFILE_CCNET_DB_NAME")
 	if ccnetDbName == "" {
 		ccnetDbName = "ccnet_db"
-		log.Infof("Failed to read SEAFILE_MYSQL_DB_CCNET_DB_NAME, use ccnet_db by default")
+		log.Infof("Failed to read SEAFILE_CCNET_DB_NAME, use ccnet_db by default")
 	}
-	seafileDbName := os.Getenv("SEAFILE_MYSQL_DB_SEAFILE_DB_NAME")
+	seafileDbName := os.Getenv("SEAFILE_SEAFILE_DB_NAME")
 	if seafileDbName == "" {
 		seafileDbName = "seafile_db"
-		log.Infof("Failed to read SEAFILE_MYSQL_DB_SEAFILE_DB_NAME, use seafile_db by default")
+		log.Infof("Failed to read SEAFILE_SEAFILE_DB_NAME, use seafile_db by default")
 	}
 
 	log.Infof("Database: user = %s", user)
