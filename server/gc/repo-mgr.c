@@ -473,21 +473,12 @@ seaf_repo_manager_set_repo_history_limit (SeafRepoManager *mgr,
     }
 
     if (seaf_db_type(db) == SEAF_DB_TYPE_PGSQL) {
-        gboolean err;
-        snprintf(sql, sizeof(sql),
-                 "SELECT repo_id FROM RepoHistoryLimit "
-                 "WHERE repo_id='%s'", repo_id);
-        if (seaf_db_check_for_existence(db, sql, &err))
-            snprintf(sql, sizeof(sql),
-                     "UPDATE RepoHistoryLimit SET days=%d"
-                     "WHERE repo_id='%s'", days, repo_id);
-        else
-            snprintf(sql, sizeof(sql),
-                     "INSERT INTO RepoHistoryLimit (repo_id, days) VALUES "
-                     "('%s', %d)", repo_id, days);
-        if (err)
+        int rc = seaf_db_statement_query (db,
+                      "INSERT INTO RepoHistoryLimit (repo_id, days) VALUES (?, ?) "
+                      "ON CONFLICT (repo_id) DO UPDATE SET days = EXCLUDED.days",
+                      2, "string", repo_id, "int", days);
+        if (rc < 0)
             return -1;
-        return seaf_db_query(db, sql);
     } else {
         snprintf (sql, sizeof(sql),
                   "REPLACE INTO RepoHistoryLimit (repo_id, days) VALUES ('%s', %d)",
@@ -558,21 +549,11 @@ seaf_repo_manager_set_repo_valid_since (SeafRepoManager *mgr,
     char sql[256];
 
     if (seaf_db_type(db) == SEAF_DB_TYPE_PGSQL) {
-        gboolean err;
-        snprintf(sql, sizeof(sql),
-                 "SELECT repo_id FROM RepoValidSince WHERE "
-                 "repo_id='%s'", repo_id);
-        if (seaf_db_check_for_existence(db, sql, &err))
-            snprintf(sql, sizeof(sql),
-                     "UPDATE RepoValidSince SET timestamp=%"G_GINT64_FORMAT
-                     " WHERE repo_id='%s'", timestamp, repo_id);
-        else
-            snprintf(sql, sizeof(sql),
-                     "INSERT INTO RepoValidSince (repo_id, timestamp) VALUES "
-                     "('%s', %"G_GINT64_FORMAT")", repo_id, timestamp);
-        if (err)
-            return -1;
-        if (seaf_db_query (db, sql) < 0)
+        int rc = seaf_db_statement_query (db,
+                                          "INSERT INTO RepoValidSince (repo_id, \"timestamp\") VALUES (?, ?) "
+                                          "ON CONFLICT (repo_id) DO UPDATE SET \"timestamp\" = EXCLUDED.\"timestamp\"",
+                                          2, "string", repo_id, "int64", timestamp);
+        if (rc < 0)
             return -1;
     } else {
         snprintf (sql, sizeof(sql),

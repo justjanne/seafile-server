@@ -151,8 +151,9 @@ open_db (SeafBranchManager *mgr)
         break;
     case SEAF_DB_TYPE_PGSQL:
         sql = "CREATE TABLE IF NOT EXISTS Branch ("
-            "name VARCHAR(10), repo_id CHAR(40), commit_id CHAR(40),"
-            "PRIMARY KEY (repo_id, name))";
+            "id BIGSERIAL PRIMARY KEY, "
+            "name VARCHAR(10), repo_id CHAR(41), commit_id CHAR(41),"
+            "UNIQUE (repo_id, name))";
         if (seaf_db_query (mgr->seaf->db, sql) < 0)
             return -1;
         break;
@@ -201,29 +202,12 @@ seaf_branch_manager_add_branch (SeafBranchManager *mgr, SeafBranch *branch)
     SeafDB *db = mgr->seaf->db;
 
     if (seaf_db_type(db) == SEAF_DB_TYPE_PGSQL) {
-        gboolean exists, err;
-        int rc;
-
-        sql = "SELECT repo_id FROM Branch WHERE name=? AND repo_id=?";
-        exists = seaf_db_statement_exists(db, sql, &err,
-                                          2, "string", branch->name,
-                                          "string", branch->repo_id);
-        if (err)
-            return -1;
-
-        if (exists)
-            rc = seaf_db_statement_query (db,
-                                          "UPDATE Branch SET commit_id=? "
-                                          "WHERE name=? AND repo_id=?",
-                                          3, "string", branch->commit_id,
-                                          "string", branch->name,
-                                          "string", branch->repo_id);
-        else
-            rc = seaf_db_statement_query (db,
-                                          "INSERT INTO Branch (name, repo_id, commit_id) VALUES (?, ?, ?)",
-                                          3, "string", branch->name,
-                                          "string", branch->repo_id,
-                                          "string", branch->commit_id);
+        int rc = seaf_db_statement_query (db,
+                                 "INSERT INTO Branch (name, repo_id, commit_id) VALUES (?, ?, ?) "
+                                 "ON CONFLICT (repo_id, name) DO UPDATE SET commit_id = EXCLUDED.commit_id",
+                                 3, "string", branch->name,
+                                 "string", branch->repo_id,
+                                 "string", branch->commit_id);
         if (rc < 0)
             return -1;
     } else {

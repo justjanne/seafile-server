@@ -77,7 +77,6 @@ open_db (CcnetOrgManager *manager)
         db = open_sqlite_db (manager);
         break;
     case SEAF_DB_TYPE_PGSQL:
-    case SEAF_DB_TYPE_MYSQL:
         db = manager->session->ccnet_db;
         break;
     }
@@ -173,36 +172,45 @@ static int check_db_table (CcnetDB *db)
         if (seaf_db_query (db, sql) < 0)
             return -1;
     } else if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "CREATE TABLE IF NOT EXISTS Organization (org_id SERIAL"
-            " PRIMARY KEY, org_name VARCHAR(255),"
-            " url_prefix VARCHAR(255), creator VARCHAR(255), ctime BIGINT,"
-            " UNIQUE (url_prefix))";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-        
-        sql = "CREATE TABLE IF NOT EXISTS OrgUser (org_id INTEGER, "
-            "email VARCHAR(255), is_staff INTEGER NOT NULL, "
-            "UNIQUE (org_id, email))";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
+        sql = "CREATE TABLE IF NOT EXISTS Organization ("
+              "org_id BIGSERIAL PRIMARY KEY, "
+              "org_name VARCHAR(255), "
+              "url_prefix VARCHAR(255), "
+              "creator VARCHAR(255), "
+              "ctime BIGINT, "
+              "UNIQUE (url_prefix))";
 
-        //if (!pgsql_index_exists (db, "orguser_email_idx")) {
-        //    sql = "CREATE INDEX orguser_email_idx ON OrgUser (email)";
-        //    if (seaf_db_query (db, sql) < 0)
-        //        return -1;
-        //}
-
-        sql = "CREATE TABLE IF NOT EXISTS OrgGroup (org_id INTEGER, "
-            "group_id INTEGER, "
-            "UNIQUE (org_id, group_id))";
         if (seaf_db_query (db, sql) < 0)
             return -1;
 
-        //if (!pgsql_index_exists (db, "orggroup_groupid_idx")) {
-        //    sql = "CREATE INDEX orggroup_groupid_idx ON OrgGroup (group_id)";
-        //    if (seaf_db_query (db, sql) < 0)
-        //        return -1;
-        //}
+        sql = "CREATE TABLE IF NOT EXISTS OrgUser ( "
+              "id BIGSERIAL PRIMARY KEY, "
+              "org_id INTEGER, "
+              "email VARCHAR(255), "
+              "is_staff BOOL NOT NULL, "
+              "UNIQUE (org_id, email))";
+
+        if (seaf_db_query (db, sql) < 0)
+            return -1;
+
+        sql = "CREATE INDEX IF NOT EXISTS orguser_email_idx ON OrgUser (email)";
+
+        if (seaf_db_query (db, sql) < 0)
+            return -1;
+
+        sql = "CREATE TABLE IF NOT EXISTS OrgGroup ("
+              "id BIGSERIAL PRIMARY KEY, "
+              "org_id INTEGER, "
+              "group_id INTEGER, "
+              "UNIQUE (org_id, group_id))";
+
+        if (seaf_db_query (db, sql) < 0)
+            return -1;
+
+        sql = "CREATE INDEX IF NOT EXISTS orggroup_group_id_idx ON OrgGroup (group_id)";
+
+        if (seaf_db_query (db, sql) < 0)
+            return -1;
     }
 
     return 0;

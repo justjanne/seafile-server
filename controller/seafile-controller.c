@@ -471,7 +471,7 @@ should_start_go_fileserver()
     if (ret) {
         char *type = NULL;
         type = g_key_file_get_string (key_file, "database", "type", NULL);
-        if (!type || g_strcmp0 (type, "mysql") != 0) {
+        if (type && strcasecmp (type, "sqlite") == 0) {
             seaf_message ("Use C fileserver because go fileserver does not support sqlite.");
             ret = FALSE;
         }

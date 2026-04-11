@@ -672,26 +672,14 @@ func removeVirtualRepoOndisk(repoID string, cloudMode bool) error {
 		return err
 	}
 
-	var exists int
-	sqlStr = "SELECT 1 FROM GarbageRepos WHERE repo_id=?"
-	row := seafileDB.QueryRowContext(ctx, sqlStr, repoID)
-	if err := row.Scan(&exists); err != nil {
-		if err != sql.ErrNoRows {
-			return err
-		}
-	}
-	if exists == 0 {
-		sqlStr = "INSERT INTO GarbageRepos (repo_id) VALUES (?)"
-		_, err := seafileDB.ExecContext(ctx, sqlStr, repoID)
-		if err != nil {
-			return err
-		}
+	if option.DBType == "pgsql" {
+		sqlStr = "INSERT INTO GarbageRepos (repo_id) VALUES (?) ON CONFLICT (repo_id) DO NOTHING"
 	} else {
-		sqlStr = "REPLACE INTO GarbageRepos (repo_id) VALUES (?)"
-		_, err := seafileDB.ExecContext(ctx, sqlStr, repoID)
-		if err != nil {
-			return err
-		}
+		sqlStr = "INSERT IGNORE INTO GarbageRepos (repo_id) VALUES (?)"
+	}
+	_, err = seafileDB.ExecContext(ctx, sqlStr, repoID)
+	if err != nil {
+		return err
 	}
 
 	return nil

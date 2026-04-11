@@ -587,7 +587,57 @@ static int check_db_table (SeafDB *db)
           "cfg_key VARCHAR(255) NOT NULL, value VARCHAR(255), property INTEGER) ENGINE=INNODB";
         if (seaf_db_query (db, sql) < 0)
             return -1;
+    } else if (db_type == SEAF_DB_TYPE_PGSQL) {
+        /* EmailUser Table */
+        sql = "CREATE TABLE IF NOT EXISTS EmailUser ("
+              "id BIGSERIAL PRIMARY KEY, "
+              "email VARCHAR(255) UNIQUE, "
+              "passwd VARCHAR(256), "
+              "is_staff BOOLEAN NOT NULL, "
+              "is_active BOOLEAN NOT NULL, "
+              "ctime BIGINT, "
+              "reference_id VARCHAR(255) UNIQUE)";
+        if (seaf_db_query (db, sql) < 0)
+            return -1;
 
+        /* Binding Table */
+        sql = "CREATE TABLE IF NOT EXISTS Binding ("
+              "id BIGSERIAL PRIMARY KEY, "
+              "email VARCHAR(255), "
+              "peer_id CHAR(41) UNIQUE)";
+        if (seaf_db_query (db, sql) < 0)
+            return -1;
+        seaf_db_query (db, "CREATE INDEX IF NOT EXISTS Binding_email_idx ON Binding(email)");
+
+        /* UserRole Table */
+        sql = "CREATE TABLE IF NOT EXISTS UserRole ("
+              "id BIGSERIAL PRIMARY KEY, "
+              "email VARCHAR(255) UNIQUE, "
+              "role VARCHAR(255))";
+        if (seaf_db_query (db, sql) < 0)
+            return -1;
+
+        /* LDAPUsers Table */
+        sql = "CREATE TABLE IF NOT EXISTS LDAPUsers ("
+              "id BIGSERIAL PRIMARY KEY, "
+              "email VARCHAR(255) NOT NULL UNIQUE, "
+              "password VARCHAR(255) NOT NULL, "
+              "is_staff BOOLEAN NOT NULL, "
+              "is_active BOOLEAN NOT NULL, "
+              "extra_attrs TEXT, "
+              "reference_id VARCHAR(255) UNIQUE)";
+        if (seaf_db_query (db, sql) < 0)
+            return -1;
+
+        /* LDAPConfig Table */
+        sql = "CREATE TABLE IF NOT EXISTS LDAPConfig ("
+              "id BIGSERIAL PRIMARY KEY, "
+              "cfg_group VARCHAR(255) NOT NULL, "
+              "cfg_key VARCHAR(255) NOT NULL, "
+              "value VARCHAR(255), "
+              "property INTEGER)";
+        if (seaf_db_query (db, sql) < 0)
+            return -1;
     } else if (db_type == SEAF_DB_TYPE_SQLITE) {
         sql = "CREATE TABLE IF NOT EXISTS EmailUser ("
             "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
@@ -644,62 +694,6 @@ static int check_db_table (SeafDB *db)
         sql = "CREATE UNIQUE INDEX IF NOT EXISTS ldapusers_reference_id_index on LDAPUsers(reference_id)";
         if (seaf_db_query (db, sql) < 0)
             return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS LDAPConfig (cfg_group VARCHAR(255) NOT NULL,"
-          "cfg_key VARCHAR(255) NOT NULL, value VARCHAR(255), property INTEGER)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-    } else if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "CREATE TABLE IF NOT EXISTS EmailUser ("
-            "id SERIAL PRIMARY KEY, "
-            "email VARCHAR(255), passwd VARCHAR(256), "
-            "is_staff INTEGER NOT NULL, is_active INTEGER NOT NULL, "
-            "ctime BIGINT, reference_id VARCHAR(255), UNIQUE (email))";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        //if (!pgsql_index_exists (db, "emailuser_reference_id_idx")) {
-        //    sql = "CREATE UNIQUE INDEX emailuser_reference_id_idx ON EmailUser (reference_id)";
-        //    if (seaf_db_query (db, sql) < 0)
-        //        return -1;
-        //}
-
-        sql = "CREATE TABLE IF NOT EXISTS Binding (email VARCHAR(255), peer_id CHAR(41),"
-            "UNIQUE (peer_id))";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS UserRole (email VARCHAR(255), "
-          " role VARCHAR(255), UNIQUE (email, role))";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        //if (!pgsql_index_exists (db, "userrole_email_idx")) {
-        //    sql = "CREATE INDEX userrole_email_idx ON UserRole (email)";
-        //    if (seaf_db_query (db, sql) < 0)
-        //        return -1;
-        //}
-
-        sql = "CREATE TABLE IF NOT EXISTS LDAPUsers ("
-          "id SERIAL PRIMARY KEY, "
-          "email VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, "
-          "is_staff SMALLINT NOT NULL, is_active SMALLINT NOT NULL, extra_attrs TEXT,"
-          "reference_id VARCHAR(255))";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        //if (!pgsql_index_exists (db, "ldapusers_email_idx")) {
-        //    sql = "CREATE UNIQUE INDEX ldapusers_email_idx ON LDAPUsers (email)";
-        //    if (seaf_db_query (db, sql) < 0)
-        //        return -1;
-        //}
-
-        //if (!pgsql_index_exists (db, "ldapusers_reference_id_idx")) {
-        //    sql = "CREATE UNIQUE INDEX ldapusers_reference_id_idx ON LDAPUsers (reference_id)";
-        //    if (seaf_db_query (db, sql) < 0)
-        //        return -1;
-        //}
 
         sql = "CREATE TABLE IF NOT EXISTS LDAPConfig (cfg_group VARCHAR(255) NOT NULL,"
           "cfg_key VARCHAR(255) NOT NULL, value VARCHAR(255), property INTEGER)";
@@ -1348,6 +1342,7 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
                                    const char *status)
 {
     CcnetDB *db = manager->priv->db;
+    int db_type = seaf_db_type(db);
     const char *status_condition = "";
     char *sql = NULL;
     GList *ret = NULL;
@@ -1362,10 +1357,17 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
             return g_list_reverse (users);
         } else if (g_strcmp0 (source, "LDAPImport") == 0) {
             if (start == -1 && limit == -1) {
-                if (g_strcmp0(status, "active") == 0)
-                    status_condition = "WHERE t1.is_active = 1";
-                else if (g_strcmp0(status, "inactive") == 0)
-                    status_condition = "WHERE t1.is_active = 0";
+                if (db_type == SEAF_DB_TYPE_PGSQL) {
+                    if (g_strcmp0(status, "active") == 0)
+                        status_condition = "WHERE t1.is_active = true";
+                    else if (g_strcmp0(status, "inactive") == 0)
+                        status_condition = "WHERE t1.is_active = false";
+                } else {
+                    if (g_strcmp0(status, "active") == 0)
+                        status_condition = "WHERE t1.is_active = 1";
+                    else if (g_strcmp0(status, "inactive") == 0)
+                        status_condition = "WHERE t1.is_active = 0";
+                }
 
                 sql = g_strdup_printf ("SELECT t1.id, t1.email, t1.is_staff, "
                                        "t1.is_active, t2.role "
@@ -1379,10 +1381,17 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
                                                      &users, 0);
                 g_free (sql);
             } else {
-                if (g_strcmp0(status, "active") == 0)
-                    status_condition = "WHERE t1.is_active = 1";
-                else if (g_strcmp0(status, "inactive") == 0)
-                    status_condition = "WHERE t1.is_active = 0";
+                if (db_type == SEAF_DB_TYPE_PGSQL) {
+                    if (g_strcmp0(status, "active") == 0)
+                        status_condition = "WHERE t1.is_active = true";
+                    else if (g_strcmp0(status, "inactive") == 0)
+                        status_condition = "WHERE t1.is_active = false";
+                } else {
+                    if (g_strcmp0(status, "active") == 0)
+                        status_condition = "WHERE t1.is_active = 1";
+                    else if (g_strcmp0(status, "inactive") == 0)
+                        status_condition = "WHERE t1.is_active = 0";
+                }
 
                 sql = g_strdup_printf ("SELECT t1.id, t1.email, t1.is_staff, "
                                        "t1.is_active, t2.role "
@@ -1413,10 +1422,17 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
         return NULL;
 
     if (start == -1 && limit == -1) {
-        if (g_strcmp0(status, "active") == 0)
-            status_condition = "WHERE t1.is_active = 1";
-        else if (g_strcmp0(status, "inactive") == 0)
-            status_condition = "WHERE t1.is_active = 0";
+        if (db_type == SEAF_DB_TYPE_PGSQL) {
+            if (g_strcmp0(status, "active") == 0)
+                status_condition = "WHERE t1.is_active = true";
+            else if (g_strcmp0(status, "inactive") == 0)
+                status_condition = "WHERE t1.is_active = false";
+        } else {
+            if (g_strcmp0(status, "active") == 0)
+                status_condition = "WHERE t1.is_active = 1";
+            else if (g_strcmp0(status, "inactive") == 0)
+                status_condition = "WHERE t1.is_active = 0";
+        }
 
         sql = g_strdup_printf ("SELECT t1.id, t1.email, "
                                "t1.is_staff, t1.is_active, t1.ctime, "
@@ -1432,10 +1448,17 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
                                              0);
         g_free (sql);
     } else {
-        if (g_strcmp0(status, "active") == 0)
-            status_condition = "WHERE t1.is_active = 1";
-        else if (g_strcmp0(status, "inactive") == 0)
-            status_condition = "WHERE t1.is_active = 0";
+        if (db_type == SEAF_DB_TYPE_PGSQL) {
+            if (g_strcmp0(status, "active") == 0)
+                status_condition = "WHERE t1.is_active = true";
+            else if (g_strcmp0(status, "inactive") == 0)
+                status_condition = "WHERE t1.is_active = false";
+        } else {
+            if (g_strcmp0(status, "active") == 0)
+                status_condition = "WHERE t1.is_active = 1";
+            else if (g_strcmp0(status, "inactive") == 0)
+                status_condition = "WHERE t1.is_active = 0";
+        }
 
         sql = g_strdup_printf ("SELECT t1.id, t1.email, "
                                "t1.is_staff, t1.is_active, t1.ctime, "
@@ -1580,12 +1603,18 @@ gint64
 ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *source)
 {
     CcnetDB* db = manager->priv->db;
-    char sql[512];
+    int db_type = seaf_db_type(db);
+    char* sql;
     gint64 ret;
 
 #ifdef HAVE_LDAP
     if (manager->use_ldap && g_strcmp0(source, "LDAP") == 0) {
-        gint64 ret = seaf_db_get_int64 (db, "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = 1");
+        if (db_type == SEAF_DB_TYPE_PGSQL) {
+            sql = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = true";
+        } else {
+            sql = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = 1";
+        }
+        gint64 ret = seaf_db_get_int64 (db, sql);
         if (ret < 0)
             return -1;
         return ret;
@@ -1595,7 +1624,11 @@ ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *sour
     if (g_strcmp0 (source, "DB") != 0)
         return -1;
 
-    snprintf (sql, 512, "SELECT COUNT(id) FROM EmailUser WHERE is_active = 1");
+    if (db_type == SEAF_DB_TYPE_PGSQL) {
+        sql = "SELECT COUNT(id) FROM EmailUser WHERE is_active = true";
+    } else {
+        sql = "SELECT COUNT(id) FROM EmailUser WHERE is_active = 1";
+    }
 
     ret = seaf_db_get_int64 (db, sql);
     if (ret < 0)
@@ -1607,12 +1640,18 @@ gint64
 ccnet_user_manager_count_inactive_emailusers (CcnetUserManager *manager, const char *source)
 {
     CcnetDB* db = manager->priv->db;
-    char sql[512];
+    int db_type = seaf_db_type(db);
+    char* sql;
     gint64 ret;
 
 #ifdef HAVE_LDAP
     if (manager->use_ldap && g_strcmp0(source, "LDAP") == 0) {
-        gint64 ret = seaf_db_get_int64 (db, "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = 0");
+        if (db_type == SEAF_DB_TYPE_PGSQL) {
+            sql = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = false";
+        } else {
+            sql = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = 0";
+        }
+        gint64 ret = seaf_db_get_int64 (db, sql);
         if (ret < 0)
             return -1;
         return ret;
@@ -1622,7 +1661,11 @@ ccnet_user_manager_count_inactive_emailusers (CcnetUserManager *manager, const c
     if (g_strcmp0 (source, "DB") != 0)
         return -1;
 
-    snprintf (sql, 512, "SELECT COUNT(id) FROM EmailUser WHERE is_active = 0");
+    if (db_type == SEAF_DB_TYPE_PGSQL) {
+        sql = "SELECT COUNT(id) FROM EmailUser WHERE is_active = false";
+    } else {
+        sql = "SELECT COUNT(id) FROM EmailUser WHERE is_active = 0";
+    }
 
     ret = seaf_db_get_int64 (db, sql);
     if (ret < 0)
@@ -1762,16 +1805,25 @@ GList*
 ccnet_user_manager_get_superusers(CcnetUserManager *manager)
 {
     CcnetDB* db = manager->priv->db;
+    int db_type = seaf_db_type(db);
     GList *ret = NULL;
-    char sql[512];
+    char* sql;
 
-    snprintf (sql, 512,
-              "SELECT t1.id, t1.email, "
-              "t1.is_staff, t1.is_active, t1.ctime, "
-              "t2.role, t1.passwd FROM EmailUser t1 "
-              "LEFT JOIN UserRole t2 "
-              "ON t1.email = t2.email "
-              "WHERE is_staff = 1 AND t1.email NOT LIKE '%%@seafile_group';");
+    if (db_type == SEAF_DB_TYPE_PGSQL) {
+        sql = "SELECT t1.id, t1.email, "
+            "t1.is_staff, t1.is_active, t1.ctime, "
+            "t2.role, t1.passwd FROM EmailUser t1 "
+            "LEFT JOIN UserRole t2 "
+            "ON t1.email = t2.email "
+            "WHERE is_staff = true AND t1.email NOT LIKE '%%@seafile_group';";
+    } else {
+        sql = "SELECT t1.id, t1.email, "
+            "t1.is_staff, t1.is_active, t1.ctime, "
+            "t2.role, t1.passwd FROM EmailUser t1 "
+            "LEFT JOIN UserRole t2 "
+            "ON t1.email = t2.email "
+            "WHERE is_staff = 1 AND t1.email NOT LIKE '%%@seafile_group';";
+    }
 
     if (seaf_db_foreach_selected_row (db, sql, get_emailusers_cb, &ret) < 0) {
         while (ret != NULL) {
@@ -1782,14 +1834,22 @@ ccnet_user_manager_get_superusers(CcnetUserManager *manager)
     }
 
 #ifdef HAVE_LDAP
-    if (seaf_db_foreach_selected_row (db,
-                                       "SELECT t1.id, t1.email, "
-                                       "t1.is_staff, t1.is_active, "
-                                       "t2.role FROM LDAPUsers t1 "
-                                       "LEFT JOIN UserRole t2 "
-                                       "ON t1.email = t2.email "
-                                       "WHERE is_staff = 1",
-                                       get_ldap_emailusers_cb, &ret) < 0) {
+    if (db_type == SEAF_DB_TYPE_PGSQL) {
+        sql = "SELECT t1.id, t1.email, "
+            "t1.is_staff, t1.is_active, "
+            "t2.role FROM LDAPUsers t1 "
+            "LEFT JOIN \"userrole\" t2 "
+            "ON t1.email = t2.email "
+            "WHERE is_staff = true";
+    } else {
+        sql = "SELECT t1.id, t1.email, "
+            "t1.is_staff, t1.is_active, "
+            "t2.role FROM LDAPUsers t1 "
+            "LEFT JOIN UserRole t2 "
+            "ON t1.email = t2.email "
+            "WHERE is_staff = 1";
+    }
+    if (seaf_db_foreach_selected_row (db, sql, get_ldap_emailusers_cb, &ret) < 0) {
         while (ret != NULL) {
             g_object_unref (ret->data);
             ret = g_list_delete_link (ret, ret);

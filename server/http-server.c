@@ -1491,6 +1491,9 @@ head_commits_multi_cb (evhtp_request_t *req, void *arg)
     if (seaf_db_type (seaf->db) == SEAF_DB_TYPE_MYSQL)
         sql = g_strdup_printf ("SELECT repo_id, commit_id FROM Branch WHERE name='master' AND repo_id IN (%s) LOCK IN SHARE MODE",
                                 id_list_str->str);
+    else if (seaf_db_type (seaf->db) == SEAF_DB_TYPE_PGSQL)
+        sql = g_strdup_printf ("SELECT repo_id, commit_id FROM Branch WHERE name='master' AND repo_id IN (%s) FOR SHARE",
+                                id_list_str->str);
     else
         sql = g_strdup_printf ("SELECT repo_id, commit_id FROM Branch WHERE name='master' AND repo_id IN (%s)",
                                 id_list_str->str);

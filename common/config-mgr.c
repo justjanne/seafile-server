@@ -13,6 +13,13 @@ seaf_cfg_manager_init (SeafCfgManager *mgr)
         sql = "CREATE TABLE IF NOT EXISTS SeafileConf ("
               "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, cfg_group VARCHAR(255) NOT NULL,"
               "cfg_key VARCHAR(255) NOT NULL, value VARCHAR(255), property INTEGER) ENGINE=INNODB";
+    else if (db_type == SEAF_DB_TYPE_PGSQL)
+        sql = "CREATE TABLE IF NOT EXISTS SeafileConf ("
+              "id BIGSERIAL PRIMARY KEY, "
+              "cfg_group VARCHAR(255) NOT NULL, "
+              "cfg_key VARCHAR(255) NOT NULL, "
+              "value VARCHAR(255), "
+              "property INTEGER)";
     else
         sql = "CREATE TABLE IF NOT EXISTS SeafileConf (cfg_group VARCHAR(255) NOT NULL,"
               "cfg_key VARCHAR(255) NOT NULL, value VARCHAR(255), property INTEGER)";
