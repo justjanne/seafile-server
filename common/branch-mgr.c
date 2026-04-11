@@ -423,23 +423,10 @@ seaf_branch_manager_test_and_update_branch (SeafBranchManager *mgr,
         g_free (gc_id);
     }
 
-    switch (seaf_db_type (mgr->seaf->db)) {
-    case SEAF_DB_TYPE_MYSQL:
-    case SEAF_DB_TYPE_PGSQL:
-        sql = "SELECT commit_id FROM Branch WHERE name=? "
-            "AND repo_id=? FOR UPDATE";
-        break;
-    case SEAF_DB_TYPE_SQLITE:
-        sql = "SELECT commit_id FROM Branch WHERE name=? "
-            "AND repo_id=?";
-        break;
-    default:
-        g_return_val_if_reached (-1);
-    }
-    if (seaf_db_trans_foreach_selected_row (trans, sql,
-                                            get_commit_id, commit_id,
-                                            2, "string", branch->name,
-                                            "string", branch->repo_id) < 0) {
+    const SeafDBQueries *queries = seaf_db_get_queries (mgr->seaf->db);
+    if (seaf_db_trans_foreach_selected_row (trans, queries->get_branch_commit_id_for_update,
+            get_commit_id, commit_id,
+            2, "string", branch->name, "string", branch->repo_id) < 0) {
         seaf_db_rollback (trans);
         seaf_db_trans_close (trans);
         return -1;

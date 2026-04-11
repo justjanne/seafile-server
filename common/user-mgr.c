@@ -1603,18 +1603,12 @@ gint64
 ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *source)
 {
     CcnetDB* db = manager->priv->db;
-    int db_type = seaf_db_type(db);
-    char* sql;
+    SeafDBQueries *queries = seaf_db_get_queries (db);
     gint64 ret;
 
 #ifdef HAVE_LDAP
     if (manager->use_ldap && g_strcmp0(source, "LDAP") == 0) {
-        if (db_type == SEAF_DB_TYPE_PGSQL) {
-            sql = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = true";
-        } else {
-            sql = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = 1";
-        }
-        gint64 ret = seaf_db_get_int64 (db, sql);
+        gint64 ret = seaf_db_get_int64 (db, queries->ldap_user_count);
         if (ret < 0)
             return -1;
         return ret;
@@ -1624,13 +1618,7 @@ ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *sour
     if (g_strcmp0 (source, "DB") != 0)
         return -1;
 
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "SELECT COUNT(id) FROM EmailUser WHERE is_active = true";
-    } else {
-        sql = "SELECT COUNT(id) FROM EmailUser WHERE is_active = 1";
-    }
-
-    ret = seaf_db_get_int64 (db, sql);
+    ret = seaf_db_get_int64 (db, queries->user_count);
     if (ret < 0)
         return -1;
     return ret;
@@ -1640,18 +1628,12 @@ gint64
 ccnet_user_manager_count_inactive_emailusers (CcnetUserManager *manager, const char *source)
 {
     CcnetDB* db = manager->priv->db;
-    int db_type = seaf_db_type(db);
-    char* sql;
+    SeafDBQueries *queries = seaf_db_get_queries (db);
     gint64 ret;
 
 #ifdef HAVE_LDAP
     if (manager->use_ldap && g_strcmp0(source, "LDAP") == 0) {
-        if (db_type == SEAF_DB_TYPE_PGSQL) {
-            sql = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = false";
-        } else {
-            sql = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = 0";
-        }
-        gint64 ret = seaf_db_get_int64 (db, sql);
+        gint64 ret = seaf_db_get_int64 (db, queries->ldap_inactive_user_count);
         if (ret < 0)
             return -1;
         return ret;
@@ -1661,13 +1643,7 @@ ccnet_user_manager_count_inactive_emailusers (CcnetUserManager *manager, const c
     if (g_strcmp0 (source, "DB") != 0)
         return -1;
 
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "SELECT COUNT(id) FROM EmailUser WHERE is_active = false";
-    } else {
-        sql = "SELECT COUNT(id) FROM EmailUser WHERE is_active = 0";
-    }
-
-    ret = seaf_db_get_int64 (db, sql);
+    ret = seaf_db_get_int64 (db, queries->inactive_user_count);
     if (ret < 0)
         return -1;
     return ret;
@@ -1805,27 +1781,12 @@ GList*
 ccnet_user_manager_get_superusers(CcnetUserManager *manager)
 {
     CcnetDB* db = manager->priv->db;
-    int db_type = seaf_db_type(db);
+    SeafDBQueries *queries = seaf_db_get_queries (db);
+
     GList *ret = NULL;
-    char* sql;
 
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "SELECT t1.id, t1.email, "
-            "t1.is_staff, t1.is_active, t1.ctime, "
-            "t2.role, t1.passwd FROM EmailUser t1 "
-            "LEFT JOIN UserRole t2 "
-            "ON t1.email = t2.email "
-            "WHERE is_staff = true AND t1.email NOT LIKE '%%@seafile_group';";
-    } else {
-        sql = "SELECT t1.id, t1.email, "
-            "t1.is_staff, t1.is_active, t1.ctime, "
-            "t2.role, t1.passwd FROM EmailUser t1 "
-            "LEFT JOIN UserRole t2 "
-            "ON t1.email = t2.email "
-            "WHERE is_staff = 1 AND t1.email NOT LIKE '%%@seafile_group';";
-    }
-
-    if (seaf_db_foreach_selected_row (db, sql, get_emailusers_cb, &ret) < 0) {
+    if (seaf_db_foreach_selected_row (db, queries->get_superusers,
+            get_emailusers_cb, &ret) < 0) {
         while (ret != NULL) {
             g_object_unref (ret->data);
             ret = g_list_delete_link (ret, ret);
@@ -1834,22 +1795,8 @@ ccnet_user_manager_get_superusers(CcnetUserManager *manager)
     }
 
 #ifdef HAVE_LDAP
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "SELECT t1.id, t1.email, "
-            "t1.is_staff, t1.is_active, "
-            "t2.role FROM LDAPUsers t1 "
-            "LEFT JOIN \"userrole\" t2 "
-            "ON t1.email = t2.email "
-            "WHERE is_staff = true";
-    } else {
-        sql = "SELECT t1.id, t1.email, "
-            "t1.is_staff, t1.is_active, "
-            "t2.role FROM LDAPUsers t1 "
-            "LEFT JOIN UserRole t2 "
-            "ON t1.email = t2.email "
-            "WHERE is_staff = 1";
-    }
-    if (seaf_db_foreach_selected_row (db, sql, get_ldap_emailusers_cb, &ret) < 0) {
+    if (seaf_db_foreach_selected_row (db, queries->get_ldap_superusers,
+            get_ldap_emailusers_cb, &ret) < 0) {
         while (ret != NULL) {
             g_object_unref (ret->data);
             ret = g_list_delete_link (ret, ret);

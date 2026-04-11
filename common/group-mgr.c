@@ -574,7 +574,7 @@ int ccnet_group_manager_add_member (CcnetGroupManager *mgr,
                                     GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    int db_type = seaf_db_type (db);
+    SeafDBQueries *queries = seaf_db_get_queries (db);
 
     /* check whether group exists */
     if (!check_group_exists (mgr, db, group_id)) {
@@ -584,13 +584,8 @@ int ccnet_group_manager_add_member (CcnetGroupManager *mgr,
 
     char *member_name_l = g_ascii_strdown (member_name, -1);
 
-    char *sql;
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "INSERT INTO \"groupuser\" (group_id, user_name, is_staff) VALUES (?, ?, ?)";
-    } else {
-        sql = "INSERT INTO GroupUser (group_id, user_name, is_staff) VALUES (?, ?, ?)";
-    }
-    int rc = seaf_db_statement_query (db, sql, 3, "int", group_id, "string", member_name_l, "int", 0);
+    int rc = seaf_db_statement_query (db, queries->add_group_member,
+        3, "int", group_id, "string", member_name_l, "int", 0);
     g_free (member_name_l);
     if (rc < 0) {
         g_set_error (error, CCNET_DOMAIN, 0, "Failed to add member to group");
@@ -607,8 +602,7 @@ int ccnet_group_manager_remove_member (CcnetGroupManager *mgr,
                                        GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    int db_type = seaf_db_type (db);
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries (db);
 
     /* check whether group exists */
     if (!check_group_exists (mgr, db, group_id)) {
@@ -623,12 +617,8 @@ int ccnet_group_manager_remove_member (CcnetGroupManager *mgr,
     }
 
 
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "DELETE FROM \"groupuser\" WHERE group_id=? AND user_name=?";
-    } else {
-        sql = "DELETE FROM GroupUser WHERE group_id=? AND user_name=?";
-    }
-    seaf_db_statement_query (db, sql, 2, "int", group_id, "string", member_name);
+    seaf_db_statement_query (db, queries->remove_group_member,
+        2, "int", group_id, "string", member_name);
 
     return 0;
 }
@@ -639,17 +629,10 @@ int ccnet_group_manager_set_admin (CcnetGroupManager *mgr,
                                    GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    int db_type = seaf_db_type (db);
+    SeafDBQueries *queries = seaf_db_get_queries (db);
 
-    char* sql;
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "UPDATE \"groupuser\" SET is_staff = 1 WHERE group_id = ? and user_name = ?";
-    } else {
-        sql = "UPDATE GroupUser SET is_staff = 1 WHERE group_id = ? and user_name = ?";
-    }
-
-    seaf_db_statement_query (db, sql,
-                              2, "int", group_id, "string", member_name);
+    seaf_db_statement_query (db, queries->set_group_admin,
+        2, "int", group_id, "string", member_name);
 
     return 0;
 }
@@ -660,17 +643,10 @@ int ccnet_group_manager_unset_admin (CcnetGroupManager *mgr,
                                      GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    int db_type = seaf_db_type (db);
+    SeafDBQueries *queries = seaf_db_get_queries (db);
 
-    char* sql;
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "UPDATE \"groupuser\" SET is_staff = 0 WHERE group_id = ? and user_name = ?";
-    } else {
-        sql = "UPDATE GroupUser SET is_staff = 0 WHERE group_id = ? and user_name = ?";
-    }
-
-    seaf_db_statement_query (db, sql,
-                              2, "int", group_id, "string", member_name);
+    seaf_db_statement_query (db, queries->unset_group_admin,
+        2, "int", group_id, "string", member_name);
 
     return 0;
 }
@@ -705,7 +681,7 @@ int ccnet_group_manager_quit_group (CcnetGroupManager *mgr,
                                     GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    int db_type = seaf_db_type (db);
+    SeafDBQueries *queries = seaf_db_get_queries (db);
     
     /* check whether group exists */
     if (!check_group_exists (mgr, db, group_id)) {
@@ -713,15 +689,8 @@ int ccnet_group_manager_quit_group (CcnetGroupManager *mgr,
         return -1;
     }
 
-    char* sql;
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "DELETE FROM \"groupuser\" WHERE group_id=? AND user_name=?";
-    } else {
-        sql = "DELETE FROM GroupUser WHERE group_id=? AND user_name=?";
-    }
-
-    seaf_db_statement_query (db, sql,
-                              2, "int", group_id, "string", user_name);
+    seaf_db_statement_query (db, queries->remove_group_member,
+        2, "int", group_id, "string", user_name);
 
     return 0;
 }

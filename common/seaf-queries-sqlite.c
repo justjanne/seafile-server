@@ -3,4 +3,156 @@
 
 
 SeafDBQueries queries_sqlite = {
+    .user_count = "SELECT COUNT(id) FROM EmailUser WHERE is_active = 1",
+    .inactive_user_count = "SELECT COUNT(id) FROM EmailUser WHERE is_active = 0",
+    .ldap_user_count = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = 1",
+    .ldap_inactive_user_count = "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = 0",
+    .get_superusers = "SELECT t1.id, t1.email, "
+        "t1.is_staff, t1.is_active, t1.ctime, "
+        "t2.role, t1.passwd FROM EmailUser t1 "
+        "LEFT JOIN UserRole t2 "
+        "ON t1.email = t2.email "
+        "WHERE is_staff = 1 AND t1.email NOT LIKE '%%@seafile_group'",
+    .get_ldap_superusers = "SELECT t1.id, t1.email, "
+        "t1.is_staff, t1.is_active, "
+        "t2.role FROM LDAPUsers t1 "
+        "LEFT JOIN UserRole t2 "
+        "ON t1.email = t2.email "
+        "WHERE is_staff = 1",
+
+    .get_branch_commit_id_for_update = "SELECT commit_id FROM Branch WHERE name=? "
+        "AND repo_id=?",
+    .replace_branch = "REPLACE INTO Branch (name, repo_id, commit_id) VALUES (?, ?, ?)",
+
+    .add_group_member = "INSERT INTO GroupUser (group_id, user_name, is_staff) VALUES (?, ?, ?)",
+    .remove_group_member = "DELETE FROM GroupUser WHERE group_id=? AND user_name=?",
+    .set_group_admin = "UPDATE GroupUser SET is_staff = 1 WHERE group_id = ? and user_name = ?",
+    .unset_group_admin = "UPDATE GroupUser SET is_staff = 0 WHERE group_id = ? and user_name = ?",
+
+    .create_table_repo =
+        "CREATE TABLE IF NOT EXISTS Repo ("
+            "repo_id CHAR(37) PRIMARY KEY"
+        ");",
+    .create_table_repo_owner =
+        "CREATE TABLE IF NOT EXISTS RepoOwner ("
+            "repo_id CHAR(37) PRIMARY KEY,"
+            "owner_id TEXT"
+        ");"
+        "CREATE INDEX IF NOT EXISTS OwnerIndex"
+            " ON RepoOwner (owner_id)",
+    .create_table_repo_group =
+        "CREATE TABLE IF NOT EXISTS RepoGroup ("
+            "repo_id CHAR(37),"
+            "group_id INTEGER,"
+            "user_name TEXT,"
+            "permission CHAR(15)"
+        ");"
+        "CREATE UNIQUE INDEX IF NOT EXISTS groupid_repoid_indx"
+            " ON RepoGroup (group_id, repo_id);"
+        "CREATE INDEX IF NOT EXISTS repogroup_repoid_index"
+            " ON RepoGroup (repo_id);"
+        "CREATE INDEX IF NOT EXISTS repogroup_username_indx"
+            " ON RepoGroup (user_name);",
+    .create_table_inner_pub_repo =
+        "CREATE TABLE IF NOT EXISTS InnerPubRepo ("
+            "repo_id CHAR(37) PRIMARY KEY,"
+            "permission CHAR(15)"
+        ");",
+    .create_table_repo_user_token =
+        "CREATE TABLE IF NOT EXISTS RepoUserToken ("
+            "repo_id CHAR(37),"
+            "email VARCHAR(255),"
+            "token CHAR(41)"
+        ");"
+        "CREATE UNIQUE INDEX IF NOT EXISTS repo_token_indx"
+            " ON RepoUserToken (repo_id, token);"
+        "CREATE INDEX IF NOT EXISTS repo_token_email_indx"
+            " ON RepoUserToken (email);",
+    .create_table_repo_token_peer_info =
+        "CREATE TABLE IF NOT EXISTS RepoTokenPeerInfo ("
+            "token CHAR(41) PRIMARY KEY,"
+            "peer_id CHAR(41),"
+            "peer_ip VARCHAR(50),"
+            "peer_name VARCHAR(255),"
+            "sync_time BIGINT,"
+            "client_ver VARCHAR(20)"
+        ");",
+    .create_table_repo_head =
+        "CREATE TABLE IF NOT EXISTS RepoHead ("
+            "repo_id CHAR(37) PRIMARY KEY,"
+            "branch_name VARCHAR(10)"
+        ");",
+    .create_table_repo_size =
+        "CREATE TABLE IF NOT EXISTS RepoSize ("
+            "repo_id CHAR(37) PRIMARY KEY,"
+            "size BIGINT UNSIGNED,"
+            "head_id CHAR(41)"
+        ");",
+    .create_table_repo_history_limit =
+        "CREATE TABLE IF NOT EXISTS RepoHistoryLimit ("
+            "repo_id CHAR(37) PRIMARY KEY,"
+            "days INTEGER"
+        ");",
+    .create_table_repo_valid_since =
+        "CREATE TABLE IF NOT EXISTS RepoValidSince ("
+            "repo_id CHAR(37) PRIMARY KEY,"
+            "timestamp BIGINT"
+        ");",
+    .create_table_web_ap =
+        "CREATE TABLE IF NOT EXISTS WebAP ("
+            "repo_id CHAR(37) PRIMARY KEY,"
+           "access_property CHAR(10)"
+       ");",
+    .create_table_virtual_repo =
+        "CREATE TABLE IF NOT EXISTS VirtualRepo ("
+            "repo_id CHAR(36) PRIMARY KEY,"
+            "origin_repo CHAR(36),"
+            "path TEXT,"
+            "base_commit CHAR(40)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS virtualrepo_origin_repo_idx"
+            " ON VirtualRepo (origin_repo);",
+    .create_table_garbage_repos =
+        "CREATE TABLE IF NOT EXISTS GarbageRepos ("
+            "repo_id CHAR(36) PRIMARY KEY"
+        ");",
+    .create_table_gcid = NULL,
+    .create_table_last_gcid = NULL,
+    .create_table_repo_trash =
+        "CREATE TABLE IF NOT EXISTS RepoTrash ("
+            "repo_id CHAR(36) PRIMARY KEY,"
+            "repo_name VARCHAR(255),"
+            "head_id CHAR(40),"
+            "owner_id VARCHAR(255),"
+            "size BIGINT UNSIGNED,"
+            "org_id INTEGER,"
+            "del_time BIGINT"
+        ");"
+        "CREATE INDEX IF NOT EXISTS repotrash_owner_id_idx"
+            " ON RepoTrash(owner_id);"
+        "CREATE INDEX IF NOT EXISTS repotrash_org_id_idx"
+            " ON RepoTrash(org_id);",
+    .create_table_repo_file_count =
+        "CREATE TABLE IF NOT EXISTS RepoFileCount ("
+            "repo_id CHAR(36) PRIMARY KEY,"
+            "file_count BIGINT UNSIGNED"
+        ");",
+    .create_table_repo_info =
+        "CREATE TABLE IF NOT EXISTS RepoInfo ("
+            "repo_id CHAR(36) PRIMARY KEY,"
+            "name VARCHAR(255) NOT NULL,"
+            "update_time INTEGER,"
+            "version INTEGER,"
+            "is_encrypted INTEGER,"
+            "last_modifier VARCHAR(255),"
+            "status INTEGER DEFAULT 0"
+        ");",
+    .create_table_webupload_temp_files =
+        "CREATE TABLE IF NOT EXISTS WebUploadTempFiles ("
+            "repo_id CHAR(40) NOT NULL,"
+            "file_path TEXT NOT NULL,"
+            "tmp_file_path TEXT NOT NULL"
+        ");"
+        "CREATE INDEX IF NOT EXISTS webuploadtempfiles_repo_id_idx"
+            " ON WebUploadTempFiles(repo_id);",
 };
