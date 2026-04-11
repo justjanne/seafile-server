@@ -32,6 +32,9 @@ seaf_fuse_SOURCES = seaf-fuse.c \
                     ../common/fs-mgr.c \
                     ../common/log.c \
                     ../common/seaf-db.c \
+                    ../common/seaf-queries-pgsql.c \
+                    ../common/seaf-queries-mysql.c \
+                    ../common/seaf-queries-sqlite.c \
                     ../common/seaf-utils.c \
                     ../common/obj-store.c \
                     ../common/obj-backend-fs.c \

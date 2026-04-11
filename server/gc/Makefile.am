@@ -26,6 +26,9 @@ common_sources = \
 	seafile-session.c \
 	repo-mgr.c \
 	../../common/seaf-db.c \
+    ../../common/seaf-queries-pgsql.c \
+    ../../common/seaf-queries-mysql.c \
+    ../../common/seaf-queries-sqlite.c \
 	../../common/branch-mgr.c \
 	../../common/fs-mgr.c \
 	../../common/block-mgr.c \

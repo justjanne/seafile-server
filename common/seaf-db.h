@@ -1,6 +1,8 @@
 #ifndef SEAF_DB_H
 #define SEAF_DB_H
 
+#include "seaf-queries.h"
+
 enum {
     SEAF_DB_TYPE_SQLITE,
     SEAF_DB_TYPE_MYSQL,
@@ -13,6 +15,8 @@ typedef struct SeafDBRow SeafDBRow;
 typedef struct SeafDBRow CcnetDBRow;
 typedef struct SeafDBTrans SeafDBTrans;
 typedef struct SeafDBTrans CcnetDBTrans;
+
+const SeafDBQueries *seaf_db_get_queries (SeafDB *db);
 
 typedef gboolean (*SeafDBRowFunc) (SeafDBRow *, void *);
 typedef gboolean (*CcnetDBRowFunc) (CcnetDBRow *, void *);

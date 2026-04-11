@@ -65,6 +65,9 @@ seaf_server_SOURCES = \
 	change-set.c \
 	metric-mgr.c \
 	../common/seaf-db.c \
+    ../common/seaf-queries-pgsql.c \
+    ../common/seaf-queries-mysql.c \
+    ../common/seaf-queries-sqlite.c \
 	../common/branch-mgr.c ../common/fs-mgr.c \
 	../common/config-mgr.c \
 	repo-mgr.c ../common/commit-mgr.c \

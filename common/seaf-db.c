@@ -71,6 +71,24 @@ init_conn_pool_common (int max_connections)
     return pool;
 }
 
+extern SeafDBQueries queries_mysql;
+extern SeafDBQueries queries_pgsql;
+extern SeafDBQueries queries_sqlite;
+
+SeafDBQueries *seaf_db_get_queries (SeafDB *db)
+{
+    if (!db) {
+        seaf_error ("[%s] db is NULL\n", __func__);
+        g_assert_not_reached ();
+    }
+    int db_type = seaf_db_type(db);
+    if (db_type == SEAF_DB_TYPE_PGSQL)
+        return &queries_pgsql;
+    if (db_type == SEAF_DB_TYPE_SQLITE)
+        return &queries_sqlite;
+    return &queries_mysql;
+}
+
 #ifdef HAVE_MYSQL
 
 /* MySQL Ops */
