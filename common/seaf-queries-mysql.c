@@ -193,4 +193,62 @@ SeafDBQueries queries_mysql = {
             "tmp_file_path TEXT NOT NULL,"
             "INDEX(repo_id)"
         ") ENGINE=INNODB",
+
+    .create_table_user_quota =
+        "CREATE TABLE IF NOT EXISTS `UserQuota` ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "user VARCHAR(255),"
+            "quota BIGINT,"
+            "UNIQUE INDEX(user)"
+        ") ENGINE=INNODB",
+    .create_table_user_share_quota =
+        "CREATE TABLE IF NOT EXISTS `UserShareQuota` ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "user VARCHAR(255),"
+            "quota BIGINT,"
+            "UNIQUE INDEX(user)"
+        ") ENGINE=INNODB",
+    .create_table_org_quota =
+        "CREATE TABLE IF NOT EXISTS `OrgQuota` ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "org_id INTEGER,"
+            "quota BIGINT,"
+            "UNIQUE INDEX(org_id)"
+        ") ENGINE=INNODB",
+    .create_table_org_user_quota =
+        "CREATE TABLE IF NOT EXISTS `OrgUserQuota` ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "org_id INTEGER,"
+            "user VARCHAR(255),"
+            "quota BIGINT,"
+            "UNIQUE INDEX(org_id, user)"
+        ") ENGINE=INNODB",
+
+    .create_table_system_info =
+        "CREATE TABLE IF NOT EXISTS `SystemInfo` ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "info_key VARCHAR(256),"
+            "info_value VARCHAR(1024)"
+        ");",
+
+    .create_table_shared_repo =
+        "CREATE TABLE IF NOT EXISTS `SharedRepo` ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "repo_id CHAR(37),"
+            "from_email VARCHAR(255),"
+            "to_email VARCHAR(255),"
+            "permission CHAR(15),"
+            "INDEX (repo_id),"
+            "INDEX(from_email),"
+            "INDEX(to_email)"
+        ") ENGINE=INNODB;",
+
+    .create_table_seafile_conf =
+        "CREATE TABLE IF NOT EXISTS `SeafileConf` ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "cfg_group VARCHAR(255) NOT NULL,"
+            "cfg_key VARCHAR(255) NOT NULL,"
+            "value VARCHAR(255),"
+            "property INTEGER"
+        ") ENGINE=INNODB;",
 };

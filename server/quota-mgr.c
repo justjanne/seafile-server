@@ -76,103 +76,16 @@ seaf_quota_manager_new (struct _SeafileSession *session)
 int
 seaf_quota_manager_init (SeafQuotaManager *mgr)
 {
-
-    if (!mgr->session->create_tables && seaf_db_type (mgr->session->db) != SEAF_DB_TYPE_PGSQL)
+    if (!mgr->session->create_tables)
         return 0;
 
     SeafDB *db = mgr->session->db;
-    const char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    switch (seaf_db_type(db)) {
-    case SEAF_DB_TYPE_PGSQL:
-        sql = "CREATE TABLE IF NOT EXISTS UserQuota ("
-              "id BIGSERIAL PRIMARY KEY, "
-              "\"user\" VARCHAR(255), "
-              "quota BIGINT, "
-              "UNIQUE (\"user\"))";
-
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS UserShareQuota ("
-              "id BIGSERIAL PRIMARY KEY, "
-              "\"user\" VARCHAR(255), "
-              "quota BIGINT, "
-              "UNIQUE (\"user\"))";
-
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS OrgQuota ("
-              "id BIGSERIAL PRIMARY KEY, "
-              "org_id INTEGER, "
-              "quota BIGINT, "
-              "UNIQUE (org_id))";
-
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS OrgUserQuota ("
-              "id BIGSERIAL PRIMARY KEY, "
-              "org_id INTEGER, "
-              "\"user\" VARCHAR(255), "
-              "quota BIGINT, "
-              "UNIQUE (org_id, \"user\"))";
-
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        break;
-    case SEAF_DB_TYPE_SQLITE:
-        sql = "CREATE TABLE IF NOT EXISTS UserQuota (user VARCHAR(255) PRIMARY KEY,"
-            "quota BIGINT)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS UserShareQuota (user VARCHAR(255) PRIMARY KEY,"
-            "quota BIGINT)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS OrgQuota (org_id INTEGER PRIMARY KEY,"
-            "quota BIGINT)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS OrgUserQuota (org_id INTEGER,"
-            "user VARCHAR(255), quota BIGINT, PRIMARY KEY (org_id, user))";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        break;
-    case SEAF_DB_TYPE_MYSQL:
-        sql = "CREATE TABLE IF NOT EXISTS UserQuota (id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-            "user VARCHAR(255),"
-            "quota BIGINT, UNIQUE INDEX(user)) ENGINE=INNODB";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS UserShareQuota (id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-            "user VARCHAR(255),"
-            "quota BIGINT, UNIQUE INDEX(user)) ENGINE=INNODB";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS OrgQuota (id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-            "org_id INTEGER,"
-            "quota BIGINT, UNIQUE INDEX(org_id)) ENGINE=INNODB";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE TABLE IF NOT EXISTS OrgUserQuota (id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-            "org_id INTEGER,"
-            "user VARCHAR(255), quota BIGINT, UNIQUE INDEX(org_id, user))"
-            "ENGINE=INNODB";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        break;
-    }
+    if (seaf_db_query (db, queries->create_table_user_quota) < 0) return -1;
+    if (seaf_db_query (db, queries->create_table_user_share_quota) < 0) return -1;
+    if (seaf_db_query (db, queries->create_table_org_quota) < 0) return -1;
+    if (seaf_db_query (db, queries->create_table_org_user_quota) < 0) return -1;
 
     return 0;
 }

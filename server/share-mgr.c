@@ -29,53 +29,9 @@ seaf_share_manager_start (SeafShareManager *mgr)
         return 0;
 
     SeafDB *db = mgr->seaf->db;
-    const char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    int db_type = seaf_db_type (db);
-    if (db_type == SEAF_DB_TYPE_MYSQL) {
-        sql = "CREATE TABLE IF NOT EXISTS SharedRepo "
-            "(id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
-            "repo_id CHAR(37) , from_email VARCHAR(255), to_email VARCHAR(255), "
-            "permission CHAR(15), INDEX (repo_id), "
-            "INDEX(from_email), INDEX(to_email)) ENGINE=INNODB";
-
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-    } else if (db_type == SEAF_DB_TYPE_PGSQL) {
-        sql = "CREATE TABLE IF NOT EXISTS SharedRepo ("
-              "id BIGSERIAL PRIMARY KEY, "
-              "repo_id CHAR(37), "
-              "from_email VARCHAR(255), "
-              "to_email VARCHAR(255), "
-              "permission CHAR(15))";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-
-        sql = "CREATE INDEX IF NOT EXISTS SharedRepo_repo_id_idx ON SharedRepo(repo_id)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-        sql = "CREATE INDEX IF NOT EXISTS SharedRepo_from_email_idx ON SharedRepo(from_email)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-        sql = "CREATE INDEX IF NOT EXISTS SharedRepo_to_email_idx ON SharedRepo(to_email)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-    } else if (db_type == SEAF_DB_TYPE_SQLITE) {
-        sql = "CREATE TABLE IF NOT EXISTS SharedRepo "
-            "(repo_id CHAR(37) , from_email VARCHAR(255), to_email VARCHAR(255), "
-            "permission CHAR(15))";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-        sql = "CREATE INDEX IF NOT EXISTS RepoIdIndex on SharedRepo (repo_id)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-        sql = "CREATE INDEX IF NOT EXISTS FromEmailIndex on SharedRepo (from_email)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-        sql = "CREATE INDEX IF NOT EXISTS ToEmailIndex on SharedRepo (to_email)";
-        if (seaf_db_query (db, sql) < 0)
-            return -1;
-    }
+    if (seaf_db_query (db, queries->create_table_shared_repo) < 0) return -1;
     
     return 0;
 }

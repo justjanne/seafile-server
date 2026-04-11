@@ -36,6 +36,17 @@ struct SeafDBQueries {
     const char *create_table_repo_file_count;
     const char *create_table_repo_info;
     const char *create_table_webupload_temp_files;
+
+    const char *create_table_user_quota;
+    const char *create_table_user_share_quota;
+    const char *create_table_org_quota;
+    const char *create_table_org_user_quota;
+
+    const char *create_table_system_info;
+
+    const char *create_table_shared_repo;
+
+    const char *create_table_seafile_conf;
 };
 typedef const struct SeafDBQueries SeafDBQueries;
 

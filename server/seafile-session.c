@@ -669,20 +669,13 @@ create_system_default_repo (void *data)
 void
 schedule_create_system_default_repo (SeafileSession *session)
 {
-    int db_type = seaf_db_type (session->db);
-    char *sql;
-
-    if (db_type == SEAF_DB_TYPE_MYSQL)
-        sql = "CREATE TABLE IF NOT EXISTS SystemInfo "
-        "(id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-        "info_key VARCHAR(256), info_value VARCHAR(1024))";
-    else
-        sql = "CREATE TABLE IF NOT EXISTS SystemInfo( "
-        "info_key VARCHAR(256), info_value VARCHAR(1024))";
-
-    if ((session->create_tables || db_type == SEAF_DB_TYPE_PGSQL)
-        && seaf_db_query (session->db, sql) < 0)
+    if (!session->create_tables)
         return;
+
+    SeafDB *db = session->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
+    if (seaf_db_query (db, queries->create_table_system_info) < 0) return;
 
     ccnet_job_manager_schedule_job (session->job_mgr,
                                     create_system_default_repo,

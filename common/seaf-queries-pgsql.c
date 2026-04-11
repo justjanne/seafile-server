@@ -190,4 +190,65 @@ SeafDBQueries queries_pgsql = {
         ");"
         "CREATE INDEX IF NOT EXISTS WebUploadTempFiles_repo_id_idx"
             " ON WebUploadTempFiles(repo_id);",
+
+    .create_table_user_quota =
+        "CREATE TABLE IF NOT EXISTS UserQuota ("
+              "id BIGSERIAL PRIMARY KEY,"
+              "\"user\" VARCHAR(255),"
+              "quota BIGINT,"
+              "UNIQUE (\"user\")"
+        ");",
+    .create_table_user_share_quota =
+        "CREATE TABLE IF NOT EXISTS UserShareQuota ("
+              "id BIGSERIAL PRIMARY KEY,"
+              "\"user\" VARCHAR(255),"
+              "quota BIGINT,"
+              "UNIQUE (\"user\")"
+        ");",
+    .create_table_org_quota =
+        "CREATE TABLE IF NOT EXISTS OrgQuota ("
+              "id BIGSERIAL PRIMARY KEY,"
+              "org_id INTEGER,"
+              "quota BIGINT,"
+              "UNIQUE (org_id)"
+        ");",
+    .create_table_org_user_quota =
+        "CREATE TABLE IF NOT EXISTS OrgUserQuota ("
+              "id BIGSERIAL PRIMARY KEY,"
+              "org_id INTEGER,"
+              "\"user\" VARCHAR(255),"
+              "quota BIGINT,"
+              "UNIQUE (org_id, \"user\")"
+        ");",
+
+    .create_table_system_info =
+        "CREATE TABLE IF NOT EXISTS SystemInfo ("
+            "id BIGSERIAL PRIMARY KEY, "
+            "info_key VARCHAR(256), "
+            "info_value VARCHAR(1024)"
+        ");",
+
+    .create_table_shared_repo =
+        "CREATE TABLE IF NOT EXISTS SharedRepo ("
+              "id BIGSERIAL PRIMARY KEY,"
+              "repo_id CHAR(37),"
+              "from_email VARCHAR(255),"
+              "to_email VARCHAR(255),"
+              "permission CHAR(15)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS SharedRepo_repo_id_idx"
+            " ON SharedRepo(repo_id);"
+        "CREATE INDEX IF NOT EXISTS SharedRepo_from_email_idx"
+            " ON SharedRepo(from_email);"
+        "CREATE INDEX IF NOT EXISTS SharedRepo_to_email_idx"
+            " ON SharedRepo(to_email);",
+
+    .create_table_seafile_conf =
+        "CREATE TABLE IF NOT EXISTS SeafileConf ("
+            "id BIGSERIAL PRIMARY KEY,"
+            "cfg_group VARCHAR(255) NOT NULL,"
+            "cfg_key VARCHAR(255) NOT NULL,"
+            "value VARCHAR(255),"
+            "property INTEGER"
+        ");",
 };
