@@ -236,4 +236,34 @@ SeafDBQueries queries_sqlite = {
         ");"
         "CREATE INDEX IF NOT EXISTS path_indx"
             " ON `GroupStructure` (`path`);",
+
+    .create_table_organization =
+        "CREATE TABLE IF NOT EXISTS Organization ("
+            "org_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "org_name VARCHAR(255),"
+            "url_prefix VARCHAR(255), "
+            "creator VARCHAR(255),"
+            "ctime BIGINT"
+        ");"
+        "CREATE UNIQUE INDEX IF NOT EXISTS url_prefix_indx"
+            " ON Organization (url_prefix);",
+    .create_table_org_user =
+        "CREATE TABLE IF NOT EXISTS OrgUser ("
+            "org_id INTEGER,"
+            "email TEXT,"
+            "is_staff bool NOT NULL"
+        ");"
+        "CREATE INDEX IF NOT EXISTS email_indx"
+            " ON OrgUser (email);"
+        "CREATE UNIQUE INDEX IF NOT EXISTS orgid_email_indx"
+            " ON OrgUser (org_id, email);",
+    .create_table_org_group =
+        "CREATE TABLE IF NOT EXISTS OrgGroup ("
+            "org_id INTEGER,"
+            "group_id INTEGER"
+        ");"
+        "CREATE INDEX IF NOT EXISTS groupid_indx"
+            " ON OrgGroup (group_id);"
+        "CREATE UNIQUE INDEX IF NOT EXISTS org_group_indx"
+            " ON OrgGroup (org_id, group_id);",
 };

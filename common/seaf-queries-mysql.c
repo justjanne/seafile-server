@@ -281,4 +281,31 @@ SeafDBQueries queries_mysql = {
             "path VARCHAR(1024),"
             "UNIQUE INDEX(group_id)"
         ") ENGINE=INNODB;",
+
+    .create_table_organization =
+        "CREATE TABLE IF NOT EXISTS Organization ("
+            "org_id BIGINT PRIMARY KEY AUTO_INCREMENT,"
+            "org_name VARCHAR(255),"
+            "url_prefix VARCHAR(255),"
+            "creator VARCHAR(255),"
+            "ctime BIGINT,"
+            "UNIQUE INDEX (url_prefix)"
+        ") ENGINE=INNODB;",
+    .create_table_org_user =
+        "CREATE TABLE IF NOT EXISTS OrgUser ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "org_id INTEGER,"
+            "email VARCHAR(255),"
+            "is_staff BOOL NOT NULL,"
+            "INDEX (email),"
+            "UNIQUE INDEX(org_id, email)"
+        ") ENGINE=INNODB;",
+    .create_table_org_group =
+        "CREATE TABLE IF NOT EXISTS OrgGroup ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "org_id INTEGER,"
+            "group_id INTEGER,"
+            "INDEX (group_id),"
+            "UNIQUE INDEX(org_id, group_id)"
+        ") ENGINE=INNODB;",
 };

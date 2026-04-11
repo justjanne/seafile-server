@@ -50,6 +50,10 @@ struct SeafDBQueries {
     const char *create_table_group_user;
     const char *create_table_group_dn_pair;
     const char *create_table_group_structure;
+
+    const char *create_table_organization;
+    const char *create_table_org_user;
+    const char *create_table_org_group;
 };
 typedef const struct SeafDBQueries SeafDBQueries;
 

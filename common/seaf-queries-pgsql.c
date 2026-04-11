@@ -282,4 +282,33 @@ SeafDBQueries queries_pgsql = {
             "path VARCHAR(1024),"
             "UNIQUE (group_id)"
         ");",
+
+    .create_table_organization =
+        "CREATE TABLE IF NOT EXISTS Organization ("
+            "org_id BIGSERIAL PRIMARY KEY,"
+            "org_name VARCHAR(255),"
+            "url_prefix VARCHAR(255),"
+            "creator VARCHAR(255),"
+            "ctime BIGINT,"
+            "UNIQUE (url_prefix)"
+        ");",
+    .create_table_org_user =
+        "CREATE TABLE IF NOT EXISTS OrgUser ("
+            "id BIGSERIAL PRIMARY KEY,"
+            "org_id INTEGER,"
+            "email VARCHAR(255),"
+            "is_staff BOOL NOT NULL,"
+            "UNIQUE (org_id, email)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS orguser_email_idx"
+            " ON OrgUser (email);",
+    .create_table_org_group =
+        "CREATE TABLE IF NOT EXISTS OrgGroup ("
+            "id BIGSERIAL PRIMARY KEY,"
+            "org_id INTEGER,"
+            "group_id INTEGER,"
+            "UNIQUE (org_id, group_id)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS orggroup_group_id_idx"
+            " ON OrgGroup (group_id)",
 };
