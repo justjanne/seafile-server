@@ -119,6 +119,7 @@ load_config (SeafileSession *session, const char *config_file_path)
     const char *log_to_stdout = NULL;
     const char *node_name = NULL;
     const char *use_go_fileserver = NULL;
+    const char *inner_service_url = NULL;
 
     config = g_key_file_new ();
     if (!g_key_file_load_from_file (config, config_file_path,
@@ -148,6 +149,11 @@ load_config (SeafileSession *session, const char *config_file_path)
     enable_notif_server = g_getenv("ENABLE_NOTIFICATION_SERVER");
     node_name = g_getenv("NODE_NAME");
     use_go_fileserver = g_getenv("ENABLE_GO_FILESERVER");
+    inner_service_url = g_getenv("INNER_SERVICE_URL");
+
+    if (!inner_service_url) {
+        inner_service_url = "http://127.0.0.1:8000";
+    }
 
     if (!private_key) {
         seaf_warning ("Failed to read JWT_PRIVATE_KEY.\n");
@@ -163,7 +169,7 @@ load_config (SeafileSession *session, const char *config_file_path)
     if (!site_root || g_strcmp0 (site_root, "") == 0) {
         site_root = "/";
     }
-    session->seahub_url = g_strdup_printf("http://127.0.0.1:8000%sapi/v2.1/internal", site_root);
+    session->seahub_url = g_strdup_printf("%s%sapi/v2.1/internal", inner_service_url, site_root);
     session->seahub_conn_pool = connection_pool_new ();
 
     if (g_strcmp0 (log_to_stdout, "true") == 0) {
