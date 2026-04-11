@@ -43,10 +43,13 @@ struct SeafDBQueries {
     const char *create_table_org_user_quota;
 
     const char *create_table_system_info;
-
     const char *create_table_shared_repo;
-
     const char *create_table_seafile_conf;
+
+    const char *create_table_group;
+    const char *create_table_group_user;
+    const char *create_table_group_dn_pair;
+    const char *create_table_group_structure;
 };
 typedef const struct SeafDBQueries SeafDBQueries;
 

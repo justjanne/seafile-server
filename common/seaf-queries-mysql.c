@@ -230,7 +230,6 @@ SeafDBQueries queries_mysql = {
             "info_key VARCHAR(256),"
             "info_value VARCHAR(1024)"
         ");",
-
     .create_table_shared_repo =
         "CREATE TABLE IF NOT EXISTS `SharedRepo` ("
             "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
@@ -242,7 +241,6 @@ SeafDBQueries queries_mysql = {
             "INDEX(from_email),"
             "INDEX(to_email)"
         ") ENGINE=INNODB;",
-
     .create_table_seafile_conf =
         "CREATE TABLE IF NOT EXISTS `SeafileConf` ("
             "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
@@ -250,5 +248,37 @@ SeafDBQueries queries_mysql = {
             "cfg_key VARCHAR(255) NOT NULL,"
             "value VARCHAR(255),"
             "property INTEGER"
+        ") ENGINE=INNODB;",
+
+    .create_table_group =
+        "CREATE TABLE IF NOT EXISTS `Group` ("
+            "`group_id` BIGINT PRIMARY KEY AUTO_INCREMENT,"
+            "`group_name` VARCHAR(255),"
+            "`creator_name` VARCHAR(255),"
+            "`timestamp` BIGINT,"
+            "`type` VARCHAR(32),"
+            "`parent_group_id` INTEGER"
+        ") ENGINE=INNODB;",
+    .create_table_group_user =
+        "CREATE TABLE IF NOT EXISTS `GroupUser` ("
+            "`id` BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "`group_id` BIGINT,"
+            "`user_name` VARCHAR(255),"
+            "`is_staff` tinyint,"
+            "UNIQUE INDEX (`group_id`, `user_name`),"
+            "INDEX (`user_name`)"
+        ") ENGINE=INNODB;",
+    .create_table_group_dn_pair =
+        "CREATE TABLE IF NOT EXISTS GroupDNPair ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "group_id INTEGER,"
+            "dn VARCHAR(255)"
+        ") ENGINE=INNODB;",
+    .create_table_group_structure =
+        "CREATE TABLE IF NOT EXISTS GroupStructure ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "group_id INTEGER,"
+            "path VARCHAR(1024),"
+            "UNIQUE INDEX(group_id)"
         ") ENGINE=INNODB;",
 };

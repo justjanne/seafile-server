@@ -184,7 +184,6 @@ SeafDBQueries queries_sqlite = {
             "info_key VARCHAR(256),"
             "info_value VARCHAR(1024)"
         ");",
-
     .create_table_shared_repo =
         "CREATE TABLE IF NOT EXISTS SharedRepo ("
             "repo_id CHAR(37),"
@@ -198,12 +197,43 @@ SeafDBQueries queries_sqlite = {
             " ON SharedRepo (from_email);"
         "CREATE INDEX IF NOT EXISTS ToEmailIndex"
             " ON SharedRepo (to_email);",
-
     .create_table_seafile_conf =
         "CREATE TABLE IF NOT EXISTS SeafileConf ("
             "cfg_group VARCHAR(255) NOT NULL,"
             "cfg_key VARCHAR(255) NOT NULL,"
             "value VARCHAR(255),"
             "property INTEGER"
-    ");",
+        ");",
+
+    .create_table_group =
+        "CREATE TABLE IF NOT EXISTS `Group` ("
+            "`group_id` INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "`group_name` VARCHAR(255),"
+            "`creator_name` VARCHAR(255),"
+            "`timestamp` BIGINT,"
+            "`type` VARCHAR(32),"
+            "`parent_group_id` INTEGER"
+        ");",
+    .create_table_group_user =
+        "CREATE TABLE IF NOT EXISTS `GroupUser` ("
+            "`group_id` INTEGER,"
+            "`user_name` VARCHAR(255),"
+            "`is_staff` tinyint"
+        ");"
+        "CREATE UNIQUE INDEX IF NOT EXISTS groupid_username_indx"
+            " ON `GroupUser` (`group_id`, `user_name`)"
+        "CREATE INDEX IF NOT EXISTS username_indx"
+            " ON `GroupUser` (`user_name`)",
+    .create_table_group_dn_pair =
+        "CREATE TABLE IF NOT EXISTS GroupDNPair ("
+            "group_id INTEGER,"
+            "dn VARCHAR(255)"
+        ");",
+    .create_table_group_structure =
+        "CREATE TABLE IF NOT EXISTS GroupStructure ("
+            "group_id INTEGER PRIMARY KEY,"
+            "path VARCHAR(1024)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS path_indx"
+            " ON `GroupStructure` (`path`);",
 };
