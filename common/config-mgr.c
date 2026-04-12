@@ -6,9 +6,10 @@
 int
 seaf_cfg_manager_init (SeafCfgManager *mgr)
 {
-    SeafDBQueries *queries = seaf_db_get_queries(mgr->db);
+    SeafDB *db = mgr->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    if (seaf_db_query (mgr->db, queries->create_table_seafile_conf) < 0) return -1;
+    if (seaf_db_query (db, queries->create_table_seafile_conf) < 0) return -1;
 
     return 0;
 }

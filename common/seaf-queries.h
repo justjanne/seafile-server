@@ -4,15 +4,11 @@
 struct SeafDBQueries {
     const char *user_count;
     const char *inactive_user_count;
+    const char *get_superusers;
+
     const char *ldap_user_count;
     const char *ldap_inactive_user_count;
-    const char *get_superusers;
     const char *get_ldap_superusers;
-
-    const char *add_group_member;
-    const char *remove_group_member;
-    const char *set_group_admin;
-    const char *unset_group_admin;
 
     const char *create_table_repo;
     const char *create_table_repo_owner;
@@ -49,13 +45,71 @@ struct SeafDBQueries {
     const char *update_seafile_conf;
 
     const char *create_table_group;
+    const char *insert_group;
+    const char *get_group;
+    const char *get_group_group_id;
+    const char *get_group_exists;
+    const char *get_group_has_children;
+    const char *list_group_by_path;
+    const char *list_group_by_user;
+    const char *list_group_by_parent;
+    const char *list_group_by_ancestor;
+    const char *update_group;
+    const char *delete_group;
+
     const char *create_table_group_user;
+    const char *insert_group_user;
+    const char *get_group_user_is_staff;
+    const char *get_group_user_group_id;
+    const char *list_group_user;
+    const char *list_group_user_paginated;
+    const char *update_group_user_is_staff_true;
+    const char *update_group_user_is_staff_false;
+    const char *delete_group_user;
+    const char *delete_group_user_by_group;
+
     const char *create_table_group_dn_pair;
     const char *create_table_group_structure;
+    const char *insert_group_structure;
+    const char *get_group_structure_path;
+    const char *delete_group_structure_by_group;
 
     const char *create_table_organization;
+    const char *insert_organization;
+    const char *list_organization;
+    const char *list_organization_paginated;
+    const char *count_organization;
+    const char *get_organization;
+    const char *get_organization_by_url_prefix;
+    const char *get_organization_org_id;
+    const char *get_organization_url_prefix;
+    const char *update_organization_org_name;
+    const char *delete_organization;
+
     const char *create_table_org_user;
+    const char *insert_org_user;
+    const char *get_org_user_by_email;
+    const char *list_org_user;
+    const char *list_org_user_paginated;
+    const char *get_org_user_exists;
+    const char *get_org_user_is_staff;
+    const char *update_org_user_is_staff_true;
+    const char *update_org_user_is_staff_false;
+    const char *delete_org_user;
+    const char *delete_org_user_by_org;
+
     const char *create_table_org_group;
+    const char *insert_org_group;
+    const char *get_org_group_exists;
+    const char *get_org_group_org_id;
+    const char *list_org_group_id;
+    const char *list_org_group_id_paginated;
+    const char *list_org_group_parent;
+    const char *list_org_group;
+    const char *list_org_group_paginated;
+    const char *list_org_group_membership;
+    const char *delete_org_group;
+    const char *delete_org_group_by_org;
 
     const char *create_table_email_user;
     const char *create_table_binding;

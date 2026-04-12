@@ -118,33 +118,31 @@ int ccnet_org_manager_create_org (CcnetOrgManager *mgr,
                                   GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     gint64 now = get_current_time();
     int rc;
 
-    rc = seaf_db_statement_query (db,
-                                   "INSERT INTO Organization(org_name, url_prefix,"
-                                   " creator, ctime) VALUES (?, ?, ?, ?)",
-                                   4, "string", org_name, "string", url_prefix,
-                                   "string", creator, "int64", now);
+    rc = seaf_db_statement_query (db, queries->insert_organization,
+        4, "string", org_name, "string", url_prefix, "string", creator, "int64", now);
     
     if (rc < 0) {
         g_set_error (error, CCNET_DOMAIN, 0, "Failed to create organization");
         return -1;
     }
 
-    int org_id = seaf_db_statement_get_int (db,
-                                             "SELECT org_id FROM Organization WHERE "
-                                             "url_prefix = ?", 1, "string", url_prefix);
+    int org_id = seaf_db_statement_get_int (db, queries->get_organization_org_id,
+        1, "string", url_prefix);
     if (org_id < 0) {
         g_set_error (error, CCNET_DOMAIN, 0, "Failed to create organization");
         return -1;
     }
 
-    rc = seaf_db_statement_query (db, "INSERT INTO OrgUser (org_id, email, is_staff) values (?, ?, ?)",
-                                   3, "int", org_id, "string", creator, "int", 1);
+    rc = seaf_db_statement_query (db, queries->insert_org_user,
+        3, "int", org_id, "string", creator, "int", 1);
     if (rc < 0) {
-        seaf_db_statement_query (db, "DELETE FROM Organization WHERE org_id=?",
-                                  1, "int", org_id);
+        seaf_db_statement_query (db, queries->delete_organization,
+            1, "int", org_id);
         g_set_error (error, CCNET_DOMAIN, 0, "Failed to create organization");
         return -1;
     }
@@ -158,15 +156,17 @@ ccnet_org_manager_remove_org (CcnetOrgManager *mgr,
                               GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    seaf_db_statement_query (db, "DELETE FROM Organization WHERE org_id = ?",
-                              1, "int", org_id);
 
-    seaf_db_statement_query (db, "DELETE FROM OrgUser WHERE org_id = ?",
-                              1, "int", org_id);
+    seaf_db_statement_query (db, queries->delete_organization,
+        1, "int", org_id);
 
-    seaf_db_statement_query (db, "DELETE FROM OrgGroup WHERE org_id = ?",
-                              1, "int", org_id);
+    seaf_db_statement_query (db, queries->delete_org_user_by_org,
+        1, "int", org_id);
+
+    seaf_db_statement_query (db, queries->delete_org_group_by_org,
+        1, "int", org_id);
 
     return 0;
 }
@@ -208,17 +208,18 @@ ccnet_org_manager_get_all_orgs (CcnetOrgManager *mgr,
                                 int limit)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     GList *ret = NULL;
     int rc;
 
     if (start == -1 && limit == -1) {
-        sql = "SELECT * FROM Organization ORDER BY org_id";
-        rc = seaf_db_statement_foreach_row (db, sql, get_all_orgs_cb, &ret, 0);
+        rc = seaf_db_statement_foreach_row (db, queries->list_organization,
+            get_all_orgs_cb, &ret, 0);
     } else {
-        sql = "SELECT * FROM Organization ORDER BY org_id LIMIT ? OFFSET ?";
-        rc = seaf_db_statement_foreach_row (db, sql, get_all_orgs_cb, &ret,
-                                             2, "int", limit, "int", start);
+        rc = seaf_db_statement_foreach_row (db, queries->list_organization_paginated,
+            get_all_orgs_cb, &ret,
+            2, "int", limit, "int", start);
     }
 
     if (rc < 0)
@@ -231,12 +232,11 @@ int
 ccnet_org_manager_count_orgs (CcnetOrgManager *mgr)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     gint64 ret;
 
-    sql = "SELECT count(*) FROM Organization";
-
-    ret = seaf_db_get_int64 (db, sql);
+    ret = seaf_db_get_int64 (db, queries->count_organization);
     if (ret < 0)
         return -1;
     return ret;
@@ -274,14 +274,13 @@ ccnet_org_manager_get_org_by_url_prefix (CcnetOrgManager *mgr,
                                          GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     CcnetOrganization *org = NULL;
 
-    sql = "SELECT org_id, org_name, url_prefix, creator,"
-        " ctime FROM Organization WHERE url_prefix = ?";
-
-    if (seaf_db_statement_foreach_row (db, sql, get_org_cb, &org,
-                                        1, "string", url_prefix) < 0) {
+    if (seaf_db_statement_foreach_row (db, queries->get_organization_by_url_prefix,
+            get_org_cb, &org,
+            1, "string", url_prefix) < 0) {
         return NULL;
     }
 
@@ -294,14 +293,13 @@ ccnet_org_manager_get_org_by_id (CcnetOrgManager *mgr,
                                  GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     CcnetOrganization *org = NULL;
 
-    sql = "SELECT org_id, org_name, url_prefix, creator,"
-        " ctime FROM Organization WHERE org_id = ?";
-
-    if (seaf_db_statement_foreach_row (db, sql, get_org_cb, &org,
-                                        1, "int", org_id) < 0) {
+    if (seaf_db_statement_foreach_row (db, queries->get_organization,
+            get_org_cb, &org,
+            1, "int", org_id) < 0) {
         return NULL;
     }
 
@@ -316,10 +314,10 @@ ccnet_org_manager_add_org_user (CcnetOrgManager *mgr,
                                 GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    return seaf_db_statement_query (db, "INSERT INTO OrgUser (org_id, email, is_staff) values (?, ?, ?)",
-                                     3, "int", org_id, "string", email,
-                                     "int", is_staff);
+    return seaf_db_statement_query (db, queries->insert_org_user,
+        3, "int", org_id, "string", email, "int", is_staff);
 }
 
 int
@@ -329,9 +327,10 @@ ccnet_org_manager_remove_org_user (CcnetOrgManager *mgr,
                                    GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    return seaf_db_statement_query (db, "DELETE FROM OrgUser WHERE org_id=? AND "
-                                     "email=?", 2, "int", org_id, "string", email);
+    return seaf_db_statement_query (db, queries->delete_org_user,
+        2, "int", org_id, "string", email);
 }
 
 static gboolean
@@ -375,15 +374,13 @@ ccnet_org_manager_get_orgs_by_user (CcnetOrgManager *mgr,
                                    GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     GList *ret = NULL;
 
-    sql = "SELECT t1.org_id, email, is_staff, org_name,"
-        " url_prefix, creator, ctime FROM OrgUser t1, Organization t2"
-        " WHERE t1.org_id = t2.org_id AND email = ?";
-
-    if (seaf_db_statement_foreach_row (db, sql, get_orgs_by_user_cb, &ret,
-                                        1, "string", email) < 0) {
+    if (seaf_db_statement_foreach_row (db, queries->get_org_user_by_email,
+            get_orgs_by_user_cb, &ret,
+            1, "string", email) < 0) {
         g_list_free (ret);
         return NULL;
     }
@@ -407,25 +404,19 @@ ccnet_org_manager_get_org_emailusers (CcnetOrgManager *mgr,
                                       int start, int limit)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     GList *ret = NULL;
     int rc;
 
     if (start == -1 && limit == -1) {
-        sql = "SELECT u.email FROM OrgUser u, Organization o "
-            "WHERE u.org_id = o.org_id AND "
-            "o.url_prefix = ? "
-            "ORDER BY email";
-        rc = seaf_db_statement_foreach_row (db, sql, get_org_emailusers, &ret,
-                                             1, "string", url_prefix);
+        rc = seaf_db_statement_foreach_row (db, queries->list_org_user,
+            get_org_emailusers, &ret,
+            1, "string", url_prefix);
     } else {
-        sql = "SELECT u.email FROM OrgUser u, Organization o "
-            "WHERE u.org_id = o.org_id AND "
-            "o.url_prefix = ? "
-            " ORDER BY email LIMIT ? OFFSET ?";
-        rc = seaf_db_statement_foreach_row (db, sql, get_org_emailusers, &ret,
-                                             3, "string", url_prefix,
-                                             "int", limit, "int", start);
+        rc = seaf_db_statement_foreach_row (db, queries->list_org_user_paginated,
+            get_org_emailusers, &ret,
+            3, "string", url_prefix, "int", limit, "int", start);
     }
 
     if (rc < 0)
@@ -441,9 +432,11 @@ ccnet_org_manager_add_org_group (CcnetOrgManager *mgr,
                                  GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    return seaf_db_statement_query (db, "INSERT INTO OrgGroup (org_id, group_id) VALUES (?, ?)",
-                                     2, "int", org_id, "int", group_id);
+
+    return seaf_db_statement_query (db, queries->insert_org_group,
+        2, "int", org_id, "int", group_id);
 }
 
 int
@@ -453,10 +446,10 @@ ccnet_org_manager_remove_org_group (CcnetOrgManager *mgr,
                                     GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    return seaf_db_statement_query (db, "DELETE FROM OrgGroup WHERE org_id=?"
-                                     " AND group_id=?",
-                                     2, "int", org_id, "string", group_id);
+    return seaf_db_statement_query (db, queries->delete_org_group,
+        2, "int", org_id, "string", group_id);
 }
 
 int
@@ -467,9 +460,10 @@ ccnet_org_manager_is_org_group (CcnetOrgManager *mgr,
     gboolean exists, err;
 
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    exists = seaf_db_statement_exists (db, "SELECT group_id FROM OrgGroup "
-                                        "WHERE group_id = ?", &err, 1, "int", group_id);
+    exists = seaf_db_statement_exists (db, queries->get_org_group_exists, &err,
+        1, "int", group_id);
     if (err) {
         ccnet_warning ("DB error when check group exist in OrgGroup.\n");
         return 0;
@@ -483,10 +477,10 @@ ccnet_org_manager_get_org_id_by_group (CcnetOrgManager *mgr,
                                        GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    sql = "SELECT org_id FROM OrgGroup WHERE group_id = ?";
-    return seaf_db_statement_get_int (db, sql, 1, "int", group_id);
+    return seaf_db_statement_get_int (db, queries->get_org_group_org_id,
+        1, "int", group_id);
 }
 
 static gboolean
@@ -508,22 +502,19 @@ ccnet_org_manager_get_org_group_ids (CcnetOrgManager *mgr,
                                      int limit)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     GList *ret = NULL;
     int rc;
 
     if (limit == -1) {
-        rc = seaf_db_statement_foreach_row (db,
-                                             "SELECT group_id FROM OrgGroup WHERE "
-                                             "org_id = ?",
-                                             get_org_group_ids, &ret,
-                                             1, "int", org_id);
+        rc = seaf_db_statement_foreach_row (db, queries->list_org_group_id,
+            get_org_group_ids, &ret,
+            1, "int", org_id);
     } else {
-        rc = seaf_db_statement_foreach_row (db,
-                                             "SELECT group_id FROM OrgGroup WHERE "
-                                             "org_id = ? LIMIT ? OFFSET ?",
-                                             get_org_group_ids, &ret,
-                                             3, "int", org_id, "int", limit,
-                                             "int", start);
+        rc = seaf_db_statement_foreach_row (db, queries->list_org_group_id_paginated,
+            get_org_group_ids, &ret,
+            3, "int", org_id, "int", limit, "int", start);
     }
     
     if (rc < 0) {
@@ -564,17 +555,14 @@ GList *
 ccnet_org_manager_get_org_top_groups (CcnetOrgManager *mgr, int org_id, GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     GList *ret = NULL;
-    char *sql;
     int rc;
 
-    sql = "SELECT g.group_id, group_name, creator_name, timestamp, parent_group_id FROM "
-          "`OrgGroup` o, `Group` g WHERE o.group_id = g.group_id AND "
-          "org_id=? AND parent_group_id=-1 ORDER BY timestamp DESC";
-
-    rc = seaf_db_statement_foreach_row (db, sql,
-                                         get_org_groups, &ret,
-                                         1, "int", org_id);
+    rc = seaf_db_statement_foreach_row (db, queries->list_org_group_parent,
+        get_org_groups, &ret,
+        1, "int", org_id);
     if (rc < 0)
         return NULL;
 
@@ -588,26 +576,19 @@ ccnet_org_manager_get_org_groups (CcnetOrgManager *mgr,
                                   int limit)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     GList *ret = NULL;
     int rc;
 
     if (limit == -1) {
-        sql = "SELECT g.group_id, group_name, creator_name, timestamp, parent_group_id FROM "
-            "OrgGroup o, `Group` g WHERE o.group_id = g.group_id AND org_id = ?";
-        rc = seaf_db_statement_foreach_row (db,
-                                             sql,
-                                             get_org_groups, &ret,
-                                             1, "int", org_id);
+        rc = seaf_db_statement_foreach_row (db, queries->list_org_group,
+            get_org_groups, &ret,
+            1, "int", org_id);
     } else {
-        sql = "SELECT g.group_id, group_name, creator_name, timestamp, parent_group_id FROM "
-            "OrgGroup o, `Group` g WHERE o.group_id = g.group_id AND org_id = ? "
-            "LIMIT ? OFFSET ?";
-        rc = seaf_db_statement_foreach_row (db,
-                                             sql,
-                                             get_org_groups, &ret,
-                                             3, "int", org_id, "int", limit,
-                                             "int", start);
+        rc = seaf_db_statement_foreach_row (db, queries->list_org_group_paginated,
+            get_org_groups, &ret,
+            3, "int", org_id, "int", limit, "int", start);
     }
     
     if (rc < 0) {
@@ -623,18 +604,14 @@ ccnet_org_manager_get_org_groups_by_user (CcnetOrgManager *mgr,
                                           int org_id)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     GList *ret = NULL;
     int rc;
 
-    sql = "SELECT g.group_id, group_name, creator_name, timestamp FROM "
-          "OrgGroup o, `Group` g, GroupUser u "
-          "WHERE o.group_id = g.group_id AND org_id = ? AND "
-          "g.group_id = u.group_id AND user_name = ?";
-    rc = seaf_db_statement_foreach_row (db,
-                                         sql,
-                                         get_org_groups, &ret,
-                                         2, "int", org_id, "string", user);
+    rc = seaf_db_statement_foreach_row (db, queries->list_org_group_membership,
+        get_org_groups, &ret,
+        2, "int", org_id, "string", user);
     if (rc < 0)
         return NULL;
 
@@ -650,10 +627,10 @@ ccnet_org_manager_org_user_exists (CcnetOrgManager *mgr,
     gboolean exists, err;
 
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    exists = seaf_db_statement_exists (db, "SELECT org_id FROM OrgUser WHERE "
-                                        "org_id = ? AND email = ?", &err,
-                                        2, "int", org_id, "string", email);
+    exists = seaf_db_statement_exists (db, queries->get_org_user_exists, &err,
+        2, "int", org_id, "string", email);
     if (err) {
         ccnet_warning ("DB error when check user exist in OrgUser.\n");
         return 0;
@@ -667,11 +644,10 @@ ccnet_org_manager_get_url_prefix_by_org_id (CcnetOrgManager *mgr,
                                             GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    sql = "SELECT url_prefix FROM Organization WHERE org_id = ?";
-
-    return seaf_db_statement_get_string (db, sql, 1, "int", org_id);
+    return seaf_db_statement_get_string (db, queries->get_organization_url_prefix,
+        1, "int", org_id);
 }
 
 int
@@ -681,11 +657,10 @@ ccnet_org_manager_is_org_staff (CcnetOrgManager *mgr,
                                 GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    char *sql;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    sql = "SELECT is_staff FROM OrgUser WHERE org_id=? AND email=?";
-
-    return seaf_db_statement_get_int (db, sql, 2, "int", org_id, "string", email);
+    return seaf_db_statement_get_int (db, queries->get_org_user_is_staff,
+        2, "int", org_id, "string", email);
 }
 
 int
@@ -695,10 +670,10 @@ ccnet_org_manager_set_org_staff (CcnetOrgManager *mgr,
                                  GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    return seaf_db_statement_query (db, "UPDATE OrgUser SET is_staff = 1 "
-                                     "WHERE org_id=? AND email=?", 2,
-                                     "int", org_id, "string", email);
+    return seaf_db_statement_query (db, queries->update_org_user_is_staff_true,
+        2, "int", org_id, "string", email);
 }
 
 int
@@ -708,10 +683,10 @@ ccnet_org_manager_unset_org_staff (CcnetOrgManager *mgr,
                                    GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    return seaf_db_statement_query (db, "UPDATE OrgUser SET is_staff = 0 "
-                                     "WHERE org_id=? AND email=?", 2,
-                                     "int", org_id, "string", email);
+    return seaf_db_statement_query (db, queries->update_org_user_is_staff_false,
+        2, "int", org_id, "string", email);
 }
 
 int
@@ -721,11 +696,9 @@ ccnet_org_manager_set_org_name(CcnetOrgManager *mgr,
                                GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    return seaf_db_statement_query (db,
-                                     "UPDATE `Organization` set org_name = ? "
-                                     "WHERE org_id = ?",
-                                     2, "string", org_name, "int", org_id);
-    return 0;
+    return seaf_db_statement_query (db, queries->update_organization_org_name,
+        2, "string", org_name, "int", org_id);
 }
 
