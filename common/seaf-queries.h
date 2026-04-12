@@ -41,7 +41,12 @@ struct SeafDBQueries {
 
     const char *create_table_system_info;
     const char *create_table_shared_repo;
+
     const char *create_table_seafile_conf;
+    const char *get_seafile_conf_exists;
+    const char *get_seafile_conf_value;
+    const char *insert_seafile_conf;
+    const char *update_seafile_conf;
 
     const char *create_table_group;
     const char *create_table_group_user;

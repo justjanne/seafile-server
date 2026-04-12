@@ -237,6 +237,7 @@ SeafDBQueries queries_mysql = {
             "INDEX(from_email),"
             "INDEX(to_email)"
         ") ENGINE=INNODB;",
+
     .create_table_seafile_conf =
         "CREATE TABLE IF NOT EXISTS `SeafileConf` ("
             "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
@@ -245,6 +246,18 @@ SeafDBQueries queries_mysql = {
             "value VARCHAR(255),"
             "property INTEGER"
         ") ENGINE=INNODB;",
+    .get_seafile_conf_exists =
+        "SELECT 1 FROM SeafileConf"
+        " WHERE cfg_group=? AND cfg_key=?",
+    .get_seafile_conf_value =
+        "SELECT value FROM SeafileConf"
+        " WHERE cfg_group=? AND cfg_key=?;",
+    .insert_seafile_conf =
+        "INSERT INTO SeafileConf (value, cfg_group, cfg_key, property)"
+        " VALUES (?,?,?,0);",
+    .update_seafile_conf =
+        "UPDATE SeafileConf SET value=?"
+        " WHERE cfg_group=? AND cfg_key=?;",
 
     .create_table_group =
         "CREATE TABLE IF NOT EXISTS `Group` ("

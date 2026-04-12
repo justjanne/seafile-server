@@ -84,10 +84,12 @@ seaf_cfg_manager_set_config_boolean (SeafCfgManager *mgr,
 int
 seaf_cfg_manager_set_config (SeafCfgManager *mgr, const char *group, const char *key, const char *value)
 {
+    SeafDB *db = mgr->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
     gboolean exists, err = FALSE;
 
-    char *sql = "SELECT 1 FROM SeafileConf WHERE cfg_group=? AND cfg_key=?";
-    exists = seaf_db_statement_exists(mgr->db, sql, &err,
+    const char *sql = queries->get_seafile_conf_exists;
+    exists = seaf_db_statement_exists(db, sql, &err,
                                       2, "string", group,
                                       "string", key);
     if (err) {
@@ -95,13 +97,11 @@ seaf_cfg_manager_set_config (SeafCfgManager *mgr, const char *group, const char 
         return -1;
     }
     if (exists)
-        sql = "UPDATE SeafileConf SET value=? WHERE cfg_group=? AND cfg_key=?";
+        sql = queries->update_seafile_conf;
     else
-        sql = "INSERT INTO SeafileConf (value, cfg_group, cfg_key, property) VALUES "
-              "(?,?,?,0)";
-    if (seaf_db_statement_query (mgr->db, sql, 3,
-                                 "string", value, "string",
-                                 group, "string", key) < 0) {
+        sql = queries->insert_seafile_conf;
+    if (seaf_db_statement_query (db, sql,
+            3, "string", value, "string", group, "string", key) < 0) {
         seaf_warning ("Failed to set config [%s:%s] to db.\n", group, key);
         return -1;
     }
@@ -206,9 +206,11 @@ seaf_cfg_manager_get_config_string (SeafCfgManager *mgr, const char *group, cons
 char *
 seaf_cfg_manager_get_config (SeafCfgManager *mgr, const char *group, const char *key)
 {
-    char *sql = "SELECT value FROM SeafileConf WHERE cfg_group=? AND cfg_key=?";
-    char *value = seaf_db_statement_get_string(mgr->db, sql, 
-                                               2, "string", group, "string", key);
+    SeafDB *db = mgr->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
+    char *value = seaf_db_statement_get_string(db, queries->get_seafile_conf_value,
+        2, "string", group, "string", key);
     if (value != NULL)
         value = g_strstrip(value);
 
