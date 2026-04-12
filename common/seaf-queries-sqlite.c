@@ -266,4 +266,58 @@ SeafDBQueries queries_sqlite = {
             " ON OrgGroup (group_id);"
         "CREATE UNIQUE INDEX IF NOT EXISTS org_group_indx"
             " ON OrgGroup (org_id, group_id);",
+
+    .create_table_email_user =
+        "CREATE TABLE IF NOT EXISTS EmailUser ("
+            "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+            "email TEXT,"
+            "passwd TEXT,"
+            "is_staff bool NOT NULL,"
+            "is_active bool NOT NULL,"
+            "ctime INTEGER,"
+            "reference_id TEXT"
+        ");"
+        "CREATE UNIQUE INDEX IF NOT EXISTS email_index"
+            " ON EmailUser (email);"
+        "CREATE UNIQUE INDEX IF NOT EXISTS reference_id_index"
+            " ON EmailUser (reference_id);",
+    .create_table_binding =
+        "CREATE TABLE IF NOT EXISTS Binding ("
+            "email TEXT,"
+            "peer_id TEXT"
+        ");"
+        "CREATE INDEX IF NOT EXISTS email_index"
+            " ON Binding (email);"
+        "CREATE UNIQUE INDEX IF NOT EXISTS peer_index"
+            " ON Binding (peer_id);",
+    .create_table_user_role =
+        "CREATE TABLE IF NOT EXISTS UserRole ("
+            "email TEXT,"
+            "role TEXT"
+        ");"
+        "CREATE INDEX IF NOT EXISTS userrole_email_index"
+            " ON UserRole (email);"
+        "CREATE UNIQUE INDEX IF NOT EXISTS userrole_userrole_index"
+            " ON UserRole (email, role);",
+    .create_table_ldap_users =
+        "CREATE TABLE IF NOT EXISTS LDAPUsers ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "email TEXT NOT NULL,"
+            "password TEXT NOT NULL,"
+            "is_staff BOOL NOT NULL,"
+            "is_active BOOL NOT NULL,"
+            "extra_attrs TEXT,"
+            "reference_id TEXT"
+        ");"
+        "CREATE UNIQUE INDEX IF NOT EXISTS ldapusers_email_index"
+            " ON LDAPUsers(email);"
+        "CREATE UNIQUE INDEX IF NOT EXISTS ldapusers_reference_id_index"
+            " ON LDAPUsers(reference_id);",
+    .create_table_ldap_config =
+        "CREATE TABLE IF NOT EXISTS LDAPConfig ("
+            "cfg_group VARCHAR(255) NOT NULL,"
+            "cfg_key VARCHAR(255) NOT NULL,"
+            "value VARCHAR(255),"
+            "property INTEGER"
+        ");",
 };

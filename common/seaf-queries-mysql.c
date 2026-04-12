@@ -308,4 +308,52 @@ SeafDBQueries queries_mysql = {
             "INDEX (group_id),"
             "UNIQUE INDEX(org_id, group_id)"
         ") ENGINE=INNODB;",
+
+    .create_table_email_user =
+        "CREATE TABLE IF NOT EXISTS EmailUser ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "email VARCHAR(255),"
+            "passwd VARCHAR(256),"
+            "is_staff BOOL NOT NULL,"
+            "is_active BOOL NOT NULL,"
+            "ctime BIGINT,"
+            "reference_id VARCHAR(255),"
+            "UNIQUE INDEX (email),"
+            "UNIQUE INDEX (reference_id)"
+        ") ENGINE=INNODB;",
+    .create_table_binding =
+        "CREATE TABLE IF NOT EXISTS Binding ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "email VARCHAR(255),"
+            "peer_id CHAR(41),"
+            "UNIQUE INDEX (peer_id),"
+            "INDEX (email(20))"
+        ") ENGINE=INNODB;",
+    .create_table_user_role =
+        "CREATE TABLE IF NOT EXISTS UserRole ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "email VARCHAR(255),"
+            "role VARCHAR(255),"
+            "UNIQUE INDEX (email)"
+        ") ENGINE=INNODB;",
+    .create_table_ldap_users =
+        "CREATE TABLE IF NOT EXISTS LDAPUsers ("
+            "id BIGINT PRIMARY KEY AUTO_INCREMENT,"
+            "email VARCHAR(255) NOT NULL,"
+            "password varchar(255) NOT NULL,"
+            "is_staff BOOL NOT NULL,"
+            "is_active BOOL NOT NULL,"
+            "extra_attrs TEXT,"
+            "reference_id VARCHAR(255),"
+            "UNIQUE INDEX(email),"
+            "UNIQUE INDEX(reference_id)"
+        ") ENGINE=INNODB;",
+    .create_table_ldap_config =
+        "CREATE TABLE IF NOT EXISTS LDAPConfig ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "cfg_group VARCHAR(255) NOT NULL,"
+            "cfg_key VARCHAR(255) NOT NULL,"
+            "value VARCHAR(255),"
+            "property INTEGER"
+        ") ENGINE=INNODB;",
 };

@@ -268,7 +268,7 @@ SeafDBQueries queries_pgsql = {
             "UNIQUE (\"group_id\", \"user_name\")"
         ");"
         "CREATE INDEX IF NOT EXISTS groupuser_username_idx"
-            " ON \"groupuser\" (\"user_name\")",
+            " ON \"groupuser\" (\"user_name\");",
     .create_table_group_dn_pair =
         "CREATE TABLE IF NOT EXISTS GroupDNPair ("
             "id BIGSERIAL PRIMARY KEY,"
@@ -310,5 +310,48 @@ SeafDBQueries queries_pgsql = {
             "UNIQUE (org_id, group_id)"
         ");"
         "CREATE INDEX IF NOT EXISTS orggroup_group_id_idx"
-            " ON OrgGroup (group_id)",
+            " ON OrgGroup (group_id);",
+
+    .create_table_email_user =
+        "CREATE TABLE IF NOT EXISTS EmailUser ("
+            "id BIGSERIAL PRIMARY KEY,"
+            "email VARCHAR(255) UNIQUE,"
+            "passwd VARCHAR(256),"
+            "is_staff BOOLEAN NOT NULL,"
+            "is_active BOOLEAN NOT NULL,"
+            "ctime BIGINT,"
+            "reference_id VARCHAR(255) UNIQUE"
+        ");",
+    .create_table_binding =
+        "CREATE TABLE IF NOT EXISTS Binding ("
+            "id BIGSERIAL PRIMARY KEY,"
+            "email VARCHAR(255),"
+            "peer_id CHAR(41) UNIQUE"
+        ");"
+        "CREATE INDEX IF NOT EXISTS Binding_email_idx"
+            " ON Binding(email);",
+    .create_table_user_role =
+        "CREATE TABLE IF NOT EXISTS UserRole ("
+            "id BIGSERIAL PRIMARY KEY,"
+            "email VARCHAR(255) UNIQUE,"
+            "role VARCHAR(255)"
+        ");",
+    .create_table_ldap_users =
+        "CREATE TABLE IF NOT EXISTS LDAPUsers ("
+            "id BIGSERIAL PRIMARY KEY,"
+            "email VARCHAR(255) NOT NULL UNIQUE,"
+            "password VARCHAR(255) NOT NULL,"
+            "is_staff BOOLEAN NOT NULL,"
+            "is_active BOOLEAN NOT NULL,"
+            "extra_attrs TEXT,"
+            "reference_id VARCHAR(255) UNIQUE"
+        ");",
+    .create_table_ldap_config =
+        "CREATE TABLE IF NOT EXISTS LDAPConfig ("
+            "id BIGSERIAL PRIMARY KEY,"
+            "cfg_group VARCHAR(255) NOT NULL,"
+            "cfg_key VARCHAR(255) NOT NULL,"
+            "value VARCHAR(255),"
+            "property INTEGER"
+        ");",
 };

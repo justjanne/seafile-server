@@ -54,6 +54,12 @@ struct SeafDBQueries {
     const char *create_table_organization;
     const char *create_table_org_user;
     const char *create_table_org_group;
+
+    const char *create_table_email_user;
+    const char *create_table_binding;
+    const char *create_table_user_role;
+    const char *create_table_ldap_users;
+    const char *create_table_ldap_config;
 };
 typedef const struct SeafDBQueries SeafDBQueries;
 
