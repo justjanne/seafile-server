@@ -138,34 +138,10 @@ open_db (SeafBranchManager *mgr)
         return -1;
 
 #elif defined FULL_FEATURE
+    SeafDB *db = mgr->seaf->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    char *sql;
-    switch (seaf_db_type (mgr->seaf->db)) {
-    case SEAF_DB_TYPE_MYSQL:
-        sql = "CREATE TABLE IF NOT EXISTS Branch ("
-            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-            "name VARCHAR(10), repo_id CHAR(41), commit_id CHAR(41),"
-            "UNIQUE INDEX(repo_id, name)) ENGINE = INNODB";
-        if (seaf_db_query (mgr->seaf->db, sql) < 0)
-            return -1;
-        break;
-    case SEAF_DB_TYPE_PGSQL:
-        sql = "CREATE TABLE IF NOT EXISTS Branch ("
-            "id BIGSERIAL PRIMARY KEY, "
-            "name VARCHAR(10), repo_id CHAR(41), commit_id CHAR(41),"
-            "UNIQUE (repo_id, name))";
-        if (seaf_db_query (mgr->seaf->db, sql) < 0)
-            return -1;
-        break;
-    case SEAF_DB_TYPE_SQLITE:
-        sql = "CREATE TABLE IF NOT EXISTS Branch ("
-            "name VARCHAR(10), repo_id CHAR(41), commit_id CHAR(41),"
-            "PRIMARY KEY (repo_id, name))";
-        if (seaf_db_query (mgr->seaf->db, sql) < 0)
-            return -1;
-        break;
-    }
-
+    if (seaf_db_query (db, queries->create_table_branch) < 0) return -1;
 #endif
 
     return 0;
@@ -198,27 +174,14 @@ seaf_branch_manager_add_branch (SeafBranchManager *mgr, SeafBranch *branch)
 
     return 0;
 #else
-    char *sql;
     SeafDB *db = mgr->seaf->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    if (seaf_db_type(db) == SEAF_DB_TYPE_PGSQL) {
-        int rc = seaf_db_statement_query (db,
-                                 "INSERT INTO Branch (name, repo_id, commit_id) VALUES (?, ?, ?) "
-                                 "ON CONFLICT (repo_id, name) DO UPDATE SET commit_id = EXCLUDED.commit_id",
-                                 3, "string", branch->name,
-                                 "string", branch->repo_id,
-                                 "string", branch->commit_id);
-        if (rc < 0)
-            return -1;
-    } else {
-        int rc = seaf_db_statement_query (db,
-                                 "REPLACE INTO Branch (name, repo_id, commit_id) VALUES (?, ?, ?)",
-                                 3, "string", branch->name,
-                                 "string", branch->repo_id,
-                                 "string", branch->commit_id);
-        if (rc < 0)
-            return -1;
-    }
+    int rc = seaf_db_statement_query (db, queries->upsert_branch,
+        3, "string", branch->name, "string", branch->repo_id, "string", branch->commit_id);
+    if (rc < 0)
+        return -1;
+
     return 0;
 #endif
 }
@@ -243,9 +206,10 @@ seaf_branch_manager_del_branch (SeafBranchManager *mgr,
 
     return 0;
 #else
-    int rc = seaf_db_statement_query (mgr->seaf->db,
-                                      "DELETE FROM Branch WHERE name=? AND repo_id=?",
-                                      2, "string", name, "string", repo_id);
+    SeafDB *db = mgr->seaf->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+    int rc = seaf_db_statement_query (db, queries->delete_branch,
+        2, "string", name, "string", repo_id);
     if (rc < 0)
         return -1;
     return 0;
@@ -272,12 +236,10 @@ seaf_branch_manager_update_branch (SeafBranchManager *mgr, SeafBranch *branch)
 
     return 0;
 #else
-    int rc = seaf_db_statement_query (mgr->seaf->db,
-                                      "UPDATE Branch SET commit_id = ? "
-                                      "WHERE name = ? AND repo_id = ?",
-                                      3, "string", branch->commit_id,
-                                      "string", branch->name,
-                                      "string", branch->repo_id);
+    SeafDB *db = mgr->seaf->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+    int rc = seaf_db_statement_query (db, queries->update_branch,
+        3, "string", branch->commit_id, "string", branch->name, "string", branch->repo_id);
     if (rc < 0)
         return -1;
     return 0;
@@ -423,7 +385,8 @@ seaf_branch_manager_test_and_update_branch (SeafBranchManager *mgr,
         g_free (gc_id);
     }
 
-    const SeafDBQueries *queries = seaf_db_get_queries (mgr->seaf->db);
+    SeafDB *db = mgr->seaf->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
     if (seaf_db_trans_foreach_selected_row (trans, queries->get_branch_commit_id_for_update,
             get_commit_id, commit_id,
             2, "string", branch->name, "string", branch->repo_id) < 0) {
@@ -437,11 +400,8 @@ seaf_branch_manager_test_and_update_branch (SeafBranchManager *mgr,
         return -1;
     }
 
-    sql = "UPDATE Branch SET commit_id = ? "
-        "WHERE name = ? AND repo_id = ?";
-    if (seaf_db_trans_query (trans, sql, 3, "string", branch->commit_id,
-                             "string", branch->name,
-                             "string", branch->repo_id) < 0) {
+    if (seaf_db_trans_query (trans, queries->update_branch,
+        3, "string", branch->commit_id, "string", branch->name, "string", branch->repo_id) < 0) {
         seaf_db_rollback (trans);
         seaf_db_trans_close (trans);
         return -1;
@@ -545,14 +505,15 @@ real_get_branch (SeafBranchManager *mgr,
                  const char *repo_id,
                  const char *name)
 {
-    char commit_id[41];
-    char *sql;
+    SeafDB *db = mgr->seaf->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
+    char commit_id[41];
     commit_id[0] = 0;
-    sql = "SELECT commit_id FROM Branch WHERE name=? AND repo_id=?";
-    if (seaf_db_statement_foreach_row (mgr->seaf->db, sql, 
-                                       get_branch, commit_id,
-                                       2, "string", name, "string", repo_id) < 0) {
+
+    if (seaf_db_statement_foreach_row (db, queries->get_branch_commit_id,
+            get_branch, commit_id,
+            2, "string", name, "string", repo_id) < 0) {
         seaf_warning ("[branch mgr] DB error when get branch %s.\n", name);
         return NULL;
     }
@@ -602,10 +563,11 @@ seaf_branch_manager_branch_exists (SeafBranchManager *mgr,
 #else
     gboolean db_err = FALSE;
 
-    return seaf_db_statement_exists (mgr->seaf->db,
-                                     "SELECT name FROM Branch WHERE name=? "
-                                     "AND repo_id=?", &db_err,
-                                     2, "string", name, "string", repo_id);
+    SeafDB *db = mgr->seaf->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
+    return seaf_db_statement_exists (db, queries->get_branch_name,  &db_err,
+        2, "string", name, "string", repo_id);
 #endif
 }
 
@@ -683,13 +645,14 @@ GList *
 seaf_branch_manager_get_branch_list (SeafBranchManager *mgr,
                                      const char *repo_id)
 {
-    GList *ret = NULL;
-    char *sql;
+    SeafDB *db = mgr->seaf->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    sql = "SELECT name, repo_id, commit_id FROM Branch WHERE repo_id=?";
-    if (seaf_db_statement_foreach_row (mgr->seaf->db, sql, 
-                                       get_branches, &ret,
-                                       1, "string", repo_id) < 0) {
+    GList *ret = NULL;
+
+    if (seaf_db_statement_foreach_row (db, queries->get_branch,
+            get_branches, &ret,
+            1, "string", repo_id) < 0) {
         seaf_warning ("[branch mgr] DB error when get branch list.\n");
         return NULL;
     }

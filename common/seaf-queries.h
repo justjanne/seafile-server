@@ -9,9 +9,6 @@ struct SeafDBQueries {
     const char *get_superusers;
     const char *get_ldap_superusers;
 
-    const char *get_branch_commit_id_for_update;
-    const char *replace_branch;
-
     const char *add_group_member;
     const char *remove_group_member;
     const char *set_group_admin;
@@ -60,6 +57,15 @@ struct SeafDBQueries {
     const char *create_table_user_role;
     const char *create_table_ldap_users;
     const char *create_table_ldap_config;
+
+    const char *create_table_branch;
+    const char *upsert_branch;
+    const char *delete_branch;
+    const char *update_branch;
+    const char *get_branch_commit_id_for_update;
+    const char *get_branch_commit_id;
+    const char *get_branch_name;
+    const char *get_branch;
 };
 typedef const struct SeafDBQueries SeafDBQueries;
 

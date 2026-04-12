@@ -20,10 +20,6 @@ SeafDBQueries queries_sqlite = {
         "ON t1.email = t2.email "
         "WHERE is_staff = 1",
 
-    .get_branch_commit_id_for_update = "SELECT commit_id FROM Branch WHERE name=? "
-        "AND repo_id=?",
-    .replace_branch = "REPLACE INTO Branch (name, repo_id, commit_id) VALUES (?, ?, ?)",
-
     .add_group_member = "INSERT INTO GroupUser (group_id, user_name, is_staff) VALUES (?, ?, ?)",
     .remove_group_member = "DELETE FROM GroupUser WHERE group_id=? AND user_name=?",
     .set_group_admin = "UPDATE GroupUser SET is_staff = 1 WHERE group_id = ? and user_name = ?",
@@ -320,4 +316,33 @@ SeafDBQueries queries_sqlite = {
             "value VARCHAR(255),"
             "property INTEGER"
         ");",
+
+    .create_table_branch =
+        "CREATE TABLE IF NOT EXISTS Branch ("
+            "name VARCHAR(10),"
+            "repo_id CHAR(41),"
+            "commit_id CHAR(41),"
+            "PRIMARY KEY (repo_id, name)"
+        ");",
+    .upsert_branch =
+        "REPLACE INTO Branch (name, repo_id, commit_id)"
+        " VALUES (?, ?, ?)",
+    .delete_branch =
+        "DELETE FROM Branch"
+        " WHERE name=? AND repo_id=?",
+    .update_branch =
+        "UPDATE Branch SET commit_id = ?"
+        " WHERE name = ? AND repo_id = ?",
+    .get_branch_commit_id_for_update =
+        "SELECT commit_id FROM Branch"
+        " WHERE name=? AND repo_id=?",
+    .get_branch_commit_id =
+        "SELECT commit_id FROM Branch"
+        " WHERE name=? AND repo_id=?",
+    .get_branch_name =
+        "SELECT name FROM Branch"
+        " WHERE name=? AND repo_id=?",
+    .get_branch =
+        "SELECT name, repo_id, commit_id FROM Branch"
+        " WHERE repo_id=?",
 };

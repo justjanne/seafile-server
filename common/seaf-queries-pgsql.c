@@ -20,11 +20,6 @@ SeafDBQueries queries_pgsql = {
         "ON t1.email = t2.email "
         "WHERE is_staff = true",
 
-    .get_branch_commit_id_for_update = "SELECT commit_id FROM Branch WHERE name=? "
-        "AND repo_id=? FOR UPDATE",
-    .replace_branch = "INSERT INTO Branch (name, repo_id, commit_id) VALUES (?, ?, ?) "
-        "ON CONFLICT (repo_id, name) DO UPDATE SET commit_id = EXCLUDED.commit_id",
-
     .add_group_member = "INSERT INTO \"groupuser\" (group_id, user_name, is_staff) VALUES (?, ?, ?)",
     .remove_group_member = "DELETE FROM \"groupuser\" WHERE group_id=? AND user_name=?",
     .set_group_admin = "UPDATE \"groupuser\" SET is_staff = 1 WHERE group_id = ? and user_name = ?",
@@ -354,4 +349,37 @@ SeafDBQueries queries_pgsql = {
             "value VARCHAR(255),"
             "property INTEGER"
         ");",
+
+    .create_table_branch =
+        "CREATE TABLE IF NOT EXISTS Branch ("
+            "id BIGSERIAL PRIMARY KEY,"
+            "name VARCHAR(10),"
+            "repo_id CHAR(41),"
+            "commit_id CHAR(41),"
+            "UNIQUE (repo_id, name)"
+        ");",
+    .upsert_branch =
+        "INSERT INTO Branch (name, repo_id, commit_id)"
+        " VALUES (?, ?, ?)"
+        " ON CONFLICT (repo_id, name)"
+        " DO UPDATE SET commit_id = EXCLUDED.commit_id",
+    .delete_branch =
+        "DELETE FROM Branch"
+        " WHERE name=? AND repo_id=?",
+    .update_branch =
+        "UPDATE Branch SET commit_id = ?"
+        " WHERE name = ? AND repo_id = ?",
+    .get_branch_commit_id_for_update =
+        "SELECT commit_id FROM Branch"
+        " WHERE name=? AND repo_id=?"
+        " FOR UPDATE",
+    .get_branch_commit_id =
+        "SELECT commit_id FROM Branch"
+        " WHERE name=? AND repo_id=?",
+    .get_branch_name =
+        "SELECT name FROM Branch"
+        " WHERE name=? AND repo_id=?",
+    .get_branch =
+        "SELECT name, repo_id, commit_id FROM Branch"
+        " WHERE repo_id=?",
 };
