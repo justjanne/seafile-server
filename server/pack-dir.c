@@ -88,7 +88,7 @@ add_file_to_archive (PackDirData *data,
     char *blk_id = nullptr;
     uint32_t remain = 0;
     EVP_CIPHER_CTX *ctx;
-    gboolean enc_init = FALSE;
+    gboolean enc_init = false;
     char *dec_out = nullptr;
     int dec_out_len = -1;
     int ret = 0;
@@ -165,7 +165,7 @@ add_file_to_archive (PackDirData *data,
                 ret = -1;
                 goto out;
             }
-            enc_init = TRUE;
+            enc_init = true;
         }
 
         while (remain != 0) {
@@ -412,10 +412,10 @@ name_exists (GList *file_list, const char *filename)
     for (ptr = file_list; ptr != nullptr; ptr = ptr->next) {
         name = ptr->data;
         if (strcmp (name, filename) == 0)
-            return TRUE;
+            return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 static char *

@@ -61,13 +61,13 @@ fs_callback (SeafFSManager *mgr,
     }
 
     if (data->traverse_base_commit) {
-        return TRUE;
+        return true;
     }
 
     if (type == SEAF_METADATA_TYPE_FILE && check_blocks (data, obj_id) < 0)
-        return FALSE;
+        return false;
 
-    return TRUE;
+    return true;
 }
 
 static gboolean
@@ -87,7 +87,7 @@ traverse_commit (SeafCommit *commit, void *vdata, gboolean *stop)
 
     if (data->truncate_time == 0)
     {
-        *stop = TRUE;
+        *stop = true;
         /* Stop after traversing the head commit. */
     }
     else if (data->truncate_time > 0 &&
@@ -99,11 +99,11 @@ traverse_commit (SeafCommit *commit, void *vdata, gboolean *stop)
          * we need to access this commit in order to restore it
          * from trash.
          */
-        *stop = TRUE;
+        *stop = true;
     }
 
     if (!data->traversed_head)
-        data->traversed_head = TRUE;
+        data->traversed_head = true;
 
     ret = seaf_fs_manager_traverse_tree (seaf->fs_mgr,
                                          repo->store_id,
@@ -112,13 +112,13 @@ traverse_commit (SeafCommit *commit, void *vdata, gboolean *stop)
                                          fs_callback,
                                          vdata, FALSE);
     if (ret < 0)
-        return FALSE;
+        return false;
 
     int dummy;
     g_hash_table_replace (data->visited_commits,
                           g_strdup (commit->commit_id), &dummy);
 
-    return TRUE;
+    return true;
 }
 
 static int
@@ -129,7 +129,7 @@ verify_virtual_repos (VerifyData *data)
         return 0;
     }
 
-    data->traverse_base_commit = TRUE;
+    data->traverse_base_commit = true;
 
     GList *vrepo_ids = nullptr, *ptr;
     char *repo_id;
@@ -159,7 +159,7 @@ verify_virtual_repos (VerifyData *data)
             goto out;
         }
     }
-    data->traverse_base_commit = FALSE;
+    data->traverse_base_commit = false;
 
 out:
     string_list_free (vrepo_ids);
@@ -176,7 +176,7 @@ collect_exist_blocks (const char *store_id, int version,
 
     g_hash_table_replace (exist_blocks, copy, copy);
 
-    return TRUE;
+    return true;
 }
 
 static int

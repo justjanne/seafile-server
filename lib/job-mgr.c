@@ -121,7 +121,7 @@ void
 ccnet_job_manager_free (CcnetJobManager *mgr)
 {
     g_hash_table_destroy (mgr->jobs);
-    g_thread_pool_free (mgr->thread_pool, TRUE, FALSE);
+    g_thread_pool_free (mgr->thread_pool, true, FALSE);
     g_free (mgr);
 }
 

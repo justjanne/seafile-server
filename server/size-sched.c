@@ -142,7 +142,7 @@ static gboolean get_head_id (SeafDBRow *row, void *data)
     head_id = seaf_db_row_get_column_text (row, 0);
     memcpy (head_id_out, head_id, 40);
 
-    return FALSE;
+    return false;
 }
 
 static int
@@ -241,16 +241,16 @@ create_old_repo_info (SeafDBRow *row, void *data)
     gint64 file_count = seaf_db_row_get_column_int64 (row, 2);
 
     if (!head_id)
-        return FALSE;
+        return false;
     
     *info = g_new0(RepoInfo, 1);
     if (!*info)
-        return FALSE;
+        return false;
     (*info)->head_id = g_strdup(head_id);
     (*info)->size = size;
     (*info)->file_count = file_count;
 
-    return TRUE;
+    return true;
 }
 
 static RepoInfo*
@@ -275,14 +275,14 @@ get_old_repo_info_from_db (SeafDB *db, const char *repo_id, gboolean *is_db_err)
         break;
     default:
         seaf_warning("Unexpected database type.\n");
-        *is_db_err = TRUE;
+        *is_db_err = true;
         return nullptr;
     }
     int ret = seaf_db_statement_foreach_row (db, sql,
                                              create_old_repo_info, &info,
                                              1, "string", repo_id);
     if (ret < 0)
-        *is_db_err = TRUE;
+        *is_db_err = true;
 
     return info;
 
@@ -326,7 +326,7 @@ compute_repo_size (void *vjob)
     int ret;
     RepoInfo *info = nullptr;
     GError *error = nullptr;
-    gboolean is_db_err = FALSE;
+    gboolean is_db_err = false;
 
     repo = seaf_repo_manager_get_repo (sched->seaf->repo_mgr, job->repo_id);
     if (!repo) {

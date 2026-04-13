@@ -28,7 +28,7 @@ gboolean
 is_repo_id_valid (const char *id)
 {
     if (!id)
-        return FALSE;
+        return false;
 
     return is_uuid_valid (id);
 }
@@ -117,7 +117,7 @@ collect_commit (SeafCommit *commit, void *vlist, gboolean *stop)
      */
     seaf_commit_ref (commit);
     *commits = g_list_prepend (*commits, commit);
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -195,7 +195,7 @@ static gboolean
 repo_exists_in_db (SeafDB *db, const char *id)
 {
     char sql[256];
-    gboolean db_err = FALSE;
+    gboolean db_err = false;
 
     snprintf (sql, sizeof(sql), "SELECT repo_id FROM Repo WHERE repo_id = '%s'",
               id);
@@ -245,7 +245,7 @@ load_repo_commit (SeafRepoManager *manager,
                                                         branch->commit_id);
     if (!commit) {
         seaf_warning ("Commit %s is missing\n", branch->commit_id);
-        repo->is_corrupted = TRUE;
+        repo->is_corrupted = true;
         return;
     }
 
@@ -264,7 +264,7 @@ load_virtual_info (SeafDBRow *row, void *vrepo_id)
     origin_repo_id = seaf_db_row_get_column_text (row, 0);
     memcpy (ret_repo_id, origin_repo_id, 37);
 
-    return FALSE;
+    return false;
 }
 
 char *
@@ -303,7 +303,7 @@ load_repo (SeafRepoManager *manager, const char *repo_id)
     branch = seaf_branch_manager_get_branch (seaf->branch_mgr, repo_id, "master");
     if (!branch) {
         seaf_warning ("Failed to get master branch of repo %.8s.\n", repo_id);
-        repo->is_corrupted = TRUE;
+        repo->is_corrupted = true;
     } else {
         load_repo_commit (manager, repo, branch);
         seaf_branch_unref (branch);
@@ -334,7 +334,7 @@ collect_repo_id (SeafDBRow *row, void *data)
     repo_id = seaf_db_row_get_column_text (row, 0);
     *p_ids = g_list_prepend (*p_ids, g_strdup(repo_id));
 
-    return TRUE;
+    return true;
 }
 
 GList *

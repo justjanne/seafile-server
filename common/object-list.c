@@ -21,7 +21,7 @@ object_list_free (ObjectList *ol)
 {
     if (ol->obj_hash)
         g_hash_table_destroy (ol->obj_hash);
-    g_ptr_array_free (ol->obj_ids, TRUE);
+    g_ptr_array_free (ol->obj_ids, true);
     g_free (ol);
 }
 
@@ -47,9 +47,9 @@ gboolean
 object_list_insert (ObjectList *ol, const char *object_id)
 {
     if (g_hash_table_lookup (ol->obj_hash, object_id))
-        return FALSE;
+        return false;
     char *id = g_strdup(object_id);
     g_hash_table_replace (ol->obj_hash, id, id);
     g_ptr_array_add (ol->obj_ids, id);
-    return TRUE;
+    return true;
 }

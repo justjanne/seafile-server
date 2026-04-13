@@ -124,7 +124,7 @@ static int readdir_user(SeafileSession *seaf, const char *user,
         name = g_string_new ("");
         g_string_printf (name, "%s_%s", repo->id, clean_repo_name);
         filler(buf, name->str, nullptr, 0);
-        g_string_free (name, TRUE);
+        g_string_free (name, true);
         g_free (clean_repo_name);
 
         seaf_repo_unref (repo);

@@ -56,7 +56,7 @@ gboolean
 is_repo_id_valid (const char *id)
 {
     if (!id)
-        return FALSE;
+        return false;
 
     return is_uuid_valid (id);
 }
@@ -208,7 +208,7 @@ collect_commit (SeafCommit *commit, void *vlist, gboolean *stop)
      */
     seaf_commit_ref (commit);
     *commits = g_list_prepend (*commits, commit);
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -265,24 +265,24 @@ should_ignore_file(const char *filename, void *data)
         file_name = components[j];
         if (g_strcmp0(file_name, "..") == 0) {
             g_strfreev (components);
-            return TRUE;
+            return true;
         }
     }
     g_strfreev (components);
 
     if (!g_utf8_validate (filename, -1, nullptr)) {
         seaf_warning ("File name %s contains non-UTF8 characters, skip.\n", filename);
-        return TRUE;
+        return true;
     }
 
     /* Ignore file/dir if its name is too long. */
     if (strlen(filename) >= SEAF_DIR_NAME_LEN)
-        return TRUE;
+        return true;
 
     if (strchr (filename, '/'))
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 static gboolean
@@ -310,7 +310,7 @@ scan_trash (void *data)
     if (ret < 0) {
         seaf_warning ("Get expired repo from trash failed.");
         string_list_free (repo_ids);
-        return TRUE;
+        return true;
     }
 
     GList *iter;
@@ -324,7 +324,7 @@ scan_trash (void *data)
 
     string_list_free (repo_ids);
 
-    return TRUE;
+    return true;
 }
 
 static void
@@ -527,7 +527,7 @@ get_branch (SeafDBRow *row, void *vid)
     commit_id = seaf_db_row_get_column_text (row, 0);
     memcpy (ret, commit_id, 41);
 
-    return FALSE;
+    return false;
 }
 
 static SeafCommit*
@@ -541,7 +541,7 @@ get_head_commit (SeafRepoManager *mgr, const char *repo_id, gboolean *has_err)
     if (seaf_db_statement_foreach_row (mgr->seaf->db, sql,
                                        get_branch, commit_id,
                                        2, "string", "master", "string", repo_id) < 0) {
-        *has_err = TRUE;
+        *has_err = true;
         return nullptr;
     }
 
@@ -559,7 +559,7 @@ seaf_repo_manager_del_repo (SeafRepoManager *mgr,
                             const char *repo_id,
                             GError **error)
 {
-    gboolean has_err = FALSE;
+    gboolean has_err = false;
 
     SeafCommit *head_commit = get_head_commit (mgr, repo_id, &has_err);
     if (has_err) {
@@ -693,11 +693,11 @@ create_repo_fill_size (SeafDBRow *row, void *data)
 
     *repo = seaf_repo_new (repo_id, nullptr, nullptr);
     if (!*repo)
-        return FALSE;
+        return false;
 
     if (!commit_id) {
-        (*repo)->is_corrupted = TRUE;
-        return FALSE;
+        (*repo)->is_corrupted = true;
+        return false;
     }
 
     (*repo)->size = size;
@@ -726,7 +726,7 @@ create_repo_fill_size (SeafDBRow *row, void *data)
         (*repo)->type = g_strdup(type);
     }
 
-    return TRUE;
+    return true;
 }
 
 static SeafRepo*
@@ -758,7 +758,7 @@ get_repo_from_db (SeafRepoManager *mgr, const char *id, gboolean *db_err)
                                              create_repo_fill_size, &repo,
                                              1, "string", id);
     if (ret < 0)
-        *db_err = TRUE;
+        *db_err = true;
 
     return repo;
 }
@@ -768,7 +768,7 @@ seaf_repo_manager_get_repo (SeafRepoManager *manager, const gchar *id)
 {
     int len = strlen(id);
     SeafRepo *repo = nullptr;
-    gboolean has_err = FALSE;
+    gboolean has_err = false;
 
     if (len >= 37)
         return nullptr;
@@ -795,7 +795,7 @@ SeafRepo*
 seaf_repo_manager_get_repo_ex (SeafRepoManager *manager, const gchar *id)
 {
     int len = strlen(id);
-    gboolean has_err = FALSE;
+    gboolean has_err = false;
     SeafRepo *ret = nullptr;
 
     if (len >= 37)
@@ -804,7 +804,7 @@ seaf_repo_manager_get_repo_ex (SeafRepoManager *manager, const gchar *id)
     ret = get_repo_from_db (manager, id, &has_err);
     if (has_err) {
         ret = seaf_repo_new(id, nullptr, nullptr);
-        ret->is_corrupted = TRUE;
+        ret->is_corrupted = true;
         return ret;
     }
 
@@ -822,7 +822,7 @@ seaf_repo_manager_get_repo_ex (SeafRepoManager *manager, const gchar *id)
 gboolean
 seaf_repo_manager_repo_exists (SeafRepoManager *manager, const gchar *id)
 {
-    gboolean db_err = FALSE;
+    gboolean db_err = false;
     return repo_exists_in_db (manager->seaf->db, id, &db_err);
 }
 
@@ -860,7 +860,7 @@ set_repo_commit_to_db (const char *repo_id, const char *repo_name, gint64 update
                        int version, gboolean is_encrypted, const char *last_modifier)
 {
     char *sql;
-    gboolean exists = FALSE, db_err = FALSE;
+    gboolean exists = FALSE, db_err = false;
 
     sql = "SELECT 1 FROM RepoInfo WHERE repo_id=?";
     exists = seaf_db_statement_exists (seaf->db, sql, &db_err, 1, "string", repo_id);
@@ -912,7 +912,7 @@ load_repo_commit (SeafRepoManager *manager,
                                                         repo->head->commit_id);
     if (!commit) {
         seaf_warning ("Commit %s:%s is missing\n", repo->id, repo->head->commit_id);
-        repo->is_corrupted = TRUE;
+        repo->is_corrupted = true;
         return;
     }
 
@@ -940,7 +940,7 @@ load_mini_repo (SeafRepoManager *manager, SeafRepo *repo)
                                                         repo->head->commit_id);
     if (!commit) {
         seaf_warning ("Commit %s:%s is missing\n", repo->id, repo->head->commit_id);
-        repo->is_corrupted = TRUE;
+        repo->is_corrupted = true;
         return;
     }
 
@@ -1099,7 +1099,7 @@ gboolean
 seaf_repo_manager_token_peer_info_exists (SeafRepoManager *mgr,
                                           const char *token)
 {
-    gboolean db_error = FALSE;
+    gboolean db_error = false;
 
     return seaf_db_statement_exists (mgr->seaf->db,
                                      "SELECT token FROM RepoTokenPeerInfo WHERE token=?",
@@ -1188,7 +1188,7 @@ collect_repo_token (SeafDBRow *row, void *data)
     g_free (owner_l);
     g_free (email_l);
 
-    return TRUE;
+    return true;
 }
 
 static void
@@ -1221,7 +1221,7 @@ seaf_repo_manager_list_repo_tokens (SeafRepoManager *mgr,
 {
     GList *ret_list = nullptr;
     char *sql;
-    gboolean db_err = FALSE;
+    gboolean db_err = false;
 
     if (!repo_exists_in_db (mgr->seaf->db, repo_id, &db_err)) {
         if (db_err) {
@@ -1288,7 +1288,7 @@ collect_token_list (SeafDBRow *row, void *data)
     token = seaf_db_row_get_column_text (row, 0);
     *p_tokens = g_list_prepend (*p_tokens, g_strdup(token));
 
-    return TRUE;
+    return true;
 }
 
 /**
@@ -1371,11 +1371,11 @@ seaf_repo_manager_delete_repo_tokens_by_peer_id (SeafRepoManager *mgr,
 
         rc = seaf_db_statement_query (mgr->seaf->db, sql->str, 0);
         if (rc < 0) {
-            g_string_free (sql, TRUE);
+            g_string_free (sql, true);
             g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_INTERNAL, "DB error");
             goto out;
         }
-        g_string_free (sql, TRUE);
+        g_string_free (sql, true);
 
         sql = g_string_new ("");
         g_string_append_printf (sql, "DELETE FROM RepoTokenPeerInfo WHERE peer_id = '%s' AND token IN (", peer_id);
@@ -1392,11 +1392,11 @@ seaf_repo_manager_delete_repo_tokens_by_peer_id (SeafRepoManager *mgr,
 
         rc = seaf_db_statement_query (mgr->seaf->db, sql->str, 0);
         if (rc < 0) {
-            g_string_free (sql, TRUE);
+            g_string_free (sql, true);
             g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_INTERNAL, "DB error");
             goto out;
         }
-        g_string_free (sql, TRUE);
+        g_string_free (sql, true);
     }
 
 out:
@@ -1467,7 +1467,7 @@ get_email_by_token_cb (SeafDBRow *row, void *data)
     const char *email = (const char *) seaf_db_row_get_column_text (row, 0);
     *email_ptr = g_ascii_strdown (email, -1);
     /* There should be only one result. */
-    return FALSE;
+    return false;
 }
 
 char *
@@ -1498,7 +1498,7 @@ get_repo_size (SeafDBRow *row, void *vsize)
 
     *psize = seaf_db_row_get_column_int64 (row, 0);
 
-    return FALSE;
+    return false;
 }
 
 gint64
@@ -1554,7 +1554,7 @@ get_history_limit_cb (SeafDBRow *row, void *data)
 
     *limit = seaf_db_row_get_column_int (row, 0);
 
-    return FALSE;
+    return false;
 }
 
 int
@@ -1718,7 +1718,7 @@ get_owner (SeafDBRow *row, void *data)
     const char *owner = (const char *) seaf_db_row_get_column_text (row, 0);
     *owner_id = g_ascii_strdown (owner, -1);
     /* There should be only one result. */
-    return FALSE;
+    return false;
 }
 
 char *
@@ -1748,7 +1748,7 @@ collect_repo_id (SeafDBRow *row, void *data)
     repo_id = seaf_db_row_get_column_text (row, 0);
     *p_ids = g_list_prepend (*p_ids, g_strdup(repo_id));
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -1791,17 +1791,17 @@ collect_repos_fill_size_commit (SeafDBRow *row, void *data)
     const char *repo_name = seaf_db_row_get_column_text (row, 3);
     gint64 update_time = seaf_db_row_get_column_int64 (row, 4);
     int version = seaf_db_row_get_column_int (row, 5);
-    gboolean is_encrypted = seaf_db_row_get_column_int (row, 6) ? TRUE : FALSE;
+    gboolean is_encrypted = (bool) seaf_db_row_get_column_int (row, 6);
     const char *last_modifier = seaf_db_row_get_column_text (row, 7);
     int status = seaf_db_row_get_column_int (row, 8);
     const char *type = seaf_db_row_get_column_text (row, 9);
 
     repo = seaf_repo_new (repo_id, nullptr, nullptr);
     if (!repo)
-        return TRUE;
+        return true;
 
     if (!commit_id) {
-        repo->is_corrupted = TRUE;
+        repo->is_corrupted = true;
         goto out;
     }
 
@@ -1827,7 +1827,7 @@ collect_repos_fill_size_commit (SeafDBRow *row, void *data)
 out:
     *prepos = g_list_prepend (*prepos, repo);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -1870,7 +1870,7 @@ seaf_repo_manager_get_repos_by_owner (SeafRepoManager *mgr,
                                            collect_repos_fill_size_commit, &repo_list,
                                            1, "string", email) < 0) {
             if (db_err)
-                *db_err = TRUE;
+                *db_err = true;
             return nullptr;
         }
     } else {
@@ -1904,7 +1904,7 @@ seaf_repo_manager_get_repos_by_owner (SeafRepoManager *mgr,
                                            "int", limit,
                                            "int", start) < 0) {
             if (db_err)
-                *db_err = TRUE;
+                *db_err = true;
             return nullptr;
         }
     }
@@ -2172,7 +2172,7 @@ seaf_repo_manager_get_repo_list (SeafRepoManager *mgr, int start, int limit, con
                 g_string_append_printf (sql, "ORDER BY i.update_time DESC, i.repo_id");
             break;
         default:
-            g_string_free (sql, TRUE);
+            g_string_free (sql, true);
             return nullptr;
         }
 
@@ -2238,7 +2238,7 @@ seaf_repo_manager_get_repo_list (SeafRepoManager *mgr, int start, int limit, con
                 g_string_append_printf (sql, "ORDER BY i.update_time DESC, i.repo_id LIMIT ? OFFSET ?");
             break;
         default:
-            g_string_free (sql, TRUE);
+            g_string_free (sql, true);
             return nullptr;
         }
 
@@ -2247,7 +2247,7 @@ seaf_repo_manager_get_repo_list (SeafRepoManager *mgr, int start, int limit, con
                                             2, "int", limit, "int", start);
     }
 
-    g_string_free (sql, TRUE);
+    g_string_free (sql, true);
 
     if (rc < 0)
         return nullptr;
@@ -2307,7 +2307,7 @@ collect_trash_repo (SeafDBRow *row, void *data)
 
 
     if (!repo_id || !repo_name || !head_id || !owner_id)
-        return TRUE;
+        return true;
 
     SeafileTrashRepo *trash_repo = g_object_new (SEAFILE_TYPE_TRASH_REPO,
                                                  "repo_id", repo_id,
@@ -2318,21 +2318,21 @@ collect_trash_repo (SeafDBRow *row, void *data)
                                                  "del_time", del_time,
                                                  nullptr);
     if (!trash_repo)
-        return FALSE;
+        return false;
 
     SeafCommit *commit = seaf_commit_manager_get_commit_compatible (seaf->commit_mgr,
                                                                     repo_id, head_id);
     if (!commit) {
         seaf_warning ("Commit %s not found in repo %s\n", head_id, repo_id);
         g_object_unref (trash_repo);
-        return TRUE;
+        return true;
     }
     g_object_set (trash_repo, "encrypted", commit->encrypted, nullptr);
     seaf_commit_unref (commit);
 
     *trash_repos = g_list_prepend (*trash_repos, trash_repo);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -2505,7 +2505,7 @@ seaf_repo_manager_restore_repo_from_trash (SeafRepoManager *mgr,
 {
     SeafileTrashRepo *repo = nullptr;
     int ret = 0;
-    gboolean exists = FALSE;
+    gboolean exists = false;
     gboolean db_err;
     const char *head_id = nullptr;
     SeafCommit *commit = nullptr;
@@ -2699,7 +2699,7 @@ get_ap (SeafDBRow *row, void *data)
 
     *ap = g_strdup (seaf_db_row_get_column_text (row, 0));
 
-    return FALSE;
+    return false;
 }
 
 char *
@@ -2759,7 +2759,7 @@ get_group_ids_cb (SeafDBRow *row, void *data)
 
     *plist = g_list_prepend (*plist, (gpointer)(long)group_id);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -2793,7 +2793,7 @@ get_group_perms_cb (SeafDBRow *row, void *data)
 
     *plist = g_list_prepend (*plist, perm);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -2858,7 +2858,7 @@ get_group_repoids_cb (SeafDBRow *row, void *data)
 
     *p_list = g_list_prepend (*p_list, repo_id);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -2893,7 +2893,7 @@ get_group_repos_cb (SeafDBRow *row, void *data)
     const char *repo_name = seaf_db_row_get_column_text (row, 9);
     gint64 update_time = seaf_db_row_get_column_int64 (row, 10);
     int version = seaf_db_row_get_column_int (row, 11);
-    gboolean is_encrypted = seaf_db_row_get_column_int (row, 12) ? TRUE : FALSE;
+    gboolean is_encrypted = (bool) seaf_db_row_get_column_int (row, 12);
     const char *last_modifier = seaf_db_row_get_column_text (row, 13);
     int status = seaf_db_row_get_column_int (row, 14);
     const char *type = seaf_db_row_get_column_text (row, 15);
@@ -2941,7 +2941,7 @@ get_group_repos_cb (SeafDBRow *row, void *data)
         *p_list = g_list_prepend (*p_list, srepo);
     }
 
-    return TRUE;
+    return true;
 }
 
 void
@@ -3082,7 +3082,7 @@ get_group_repo_owner (SeafDBRow *row, void *data)
     const char *owner = (const char *) seaf_db_row_get_column_text (row, 0);
     *share_from = g_ascii_strdown (owner, -1);
     /* There should be only one result. */
-    return FALSE;
+    return false;
 }
 
 char *
@@ -3164,7 +3164,7 @@ gboolean
 seaf_repo_manager_is_inner_pub_repo (SeafRepoManager *mgr,
                                      const char *repo_id)
 {
-    gboolean db_err = FALSE;
+    gboolean db_err = false;
 
     return seaf_db_statement_exists (mgr->seaf->db,
                                      "SELECT repo_id FROM InnerPubRepo WHERE repo_id=?",
@@ -3188,7 +3188,7 @@ collect_public_repos (SeafDBRow *row, void *data)
     const char *repo_name = seaf_db_row_get_column_text (row, 8);
     gint64 update_time = seaf_db_row_get_column_int64 (row, 9);
     int version = seaf_db_row_get_column_int (row, 10);
-    gboolean is_encrypted = seaf_db_row_get_column_int (row, 11) ? TRUE : FALSE;
+    gboolean is_encrypted = (bool) seaf_db_row_get_column_int (row, 11);
     const char *last_modifier = seaf_db_row_get_column_text (row, 12);
     int status = seaf_db_row_get_column_int (row, 13);
     const char *type = seaf_db_row_get_column_text (row, 14);
@@ -3235,7 +3235,7 @@ collect_public_repos (SeafDBRow *row, void *data)
         *ret = g_list_prepend (*ret, srepo);
     }
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -3262,7 +3262,7 @@ seaf_repo_manager_list_inner_pub_repos (SeafRepoManager *mgr, gboolean *db_err)
             g_object_unref (p->data);
         g_list_free (ret);
         if (db_err)
-            *db_err = TRUE;
+            *db_err = true;
         return nullptr;
     }
 
@@ -3424,10 +3424,10 @@ create_repo_common (SeafRepoManager *mgr,
 
     repo = seaf_repo_new (repo_id, repo_name, repo_desc);
 
-    repo->no_local_history = TRUE;
+    repo->no_local_history = true;
 
     if (enc_version >= 2) {
-        repo->encrypted = TRUE;
+        repo->encrypted = true;
         repo->enc_version = enc_version;
         if (!crypt_info->pwd_hash_algo)
             memcpy (repo->magic, crypt_info->magic, 64);
@@ -3624,7 +3624,7 @@ static int reap_token (void *data)
 
     pthread_rwlock_unlock (&mgr->priv->lock);
 
-    return TRUE;
+    return true;
 }
 
 static void decrypted_token_free (DecryptedToken *token)
@@ -3695,7 +3695,7 @@ get_shared_users (SeafDBRow *row, void *data)
                                             nullptr);
     *shared_users = g_list_prepend (*shared_users, uobj);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -3743,7 +3743,7 @@ get_shared_groups (SeafDBRow *row, void *data)
 
     *shared_groups = g_list_prepend (*shared_groups, gobj);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -3875,7 +3875,7 @@ get_total_file_number_cb (SeafDBRow *row, void *vdata)
     gint64 count = seaf_db_row_get_column_int64 (row, 0);
     *data = count;
 
-    return FALSE;
+    return false;
 }
 
 gint64
@@ -3908,7 +3908,7 @@ get_total_storage_cb(SeafDBRow *row, void *vdata)
     gint64 size = seaf_db_row_get_column_int64 (row, 0);
     *data = size;
 
-    return FALSE;
+    return false;
 }
 
 gint64
@@ -3983,7 +3983,7 @@ gboolean
 seaf_repo_has_last_gc_id (SeafRepo *repo, const char *client_id)
 {
     if (seaf_db_type(seaf->db) == SEAF_DB_TYPE_SQLITE)
-        return FALSE;
+        return false;
 
     char *sql = "SELECT 1 FROM LastGCID WHERE repo_id = ? AND client_id = ?";
     gboolean db_err;
@@ -4000,7 +4000,7 @@ seaf_repo_set_last_gc_id (SeafRepo *repo,
     if (seaf_db_type(seaf->db) == SEAF_DB_TYPE_SQLITE)
         return 0;
 
-    gboolean id_exists, db_err = FALSE;
+    gboolean id_exists, db_err = false;
     char *sql;
     int ret = 0;
 
@@ -4107,7 +4107,7 @@ get_tmp_file_path (SeafDBRow *row, void *data)
 
     *path = g_strdup (seaf_db_row_get_column_text (row, 0));
 
-    return FALSE;
+    return false;
 }
 
 char *
@@ -4396,7 +4396,7 @@ seaf_get_group_repos_by_user (SeafRepoManager *mgr,
 
 out:
     if (sql)
-        g_string_free (sql, TRUE);
+        g_string_free (sql, true);
 
     for (p = groups; p != nullptr; p = p->next)
         g_object_unref ((GObject *)p->data);
@@ -4427,7 +4427,7 @@ convert_repo_path_cb (SeafDBRow *row, void *data)
     rp->group_id = group_id;
     *repo_paths = g_list_append (*repo_paths, rp);
 
-    return TRUE;
+    return true;
 }
 
 static void
@@ -4559,7 +4559,7 @@ seaf_repo_manager_convert_repo_path (SeafRepoManager *mgr,
     if (rc < 0) {
         seaf_warning("Failed to convert repo path [%s:%s] to virtual repo path, db error.\n",
                      repo_id, path);
-        g_string_free (sql, TRUE);
+        g_string_free (sql, true);
         goto out;
     }
     ret = filter_path(repo_paths, r_path);
@@ -4569,7 +4569,7 @@ out:
     g_free (r_path);
     if (vinfo)
         seaf_virtual_repo_info_free (vinfo);
-    g_string_free (sql, TRUE);
+    g_string_free (sql, true);
     for (p1 = groups; p1 != nullptr; p1 = p1->next)
         g_object_unref ((GObject *)p1->data);
     g_list_free (groups);

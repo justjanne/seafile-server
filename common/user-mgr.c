@@ -113,22 +113,22 @@ static gboolean
 check_user_number (CcnetUserManager *manager, gboolean allow_equal)
 {
     if (manager->priv->max_users == 0) {
-        return TRUE;
+        return true;
     }
 
     int cur_num = get_current_user_number (manager);
     if (cur_num < 0) {
-        return FALSE;
+        return false;
     }
 
     if ((allow_equal && cur_num > manager->priv->max_users) ||
         (!allow_equal && cur_num >= manager->priv->max_users)) {
         ccnet_warning ("The number of users exceeds limit, max %d, current %d\n",
                        manager->priv->max_users, cur_num);
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 int
@@ -149,7 +149,7 @@ ccnet_user_manager_prepare (CcnetUserManager *manager)
     if (ret < 0)
         return ret;
 
-    if (!check_user_number (manager, TRUE)) {
+    if (!check_user_number (manager, true)) {
         return -1;
     }
 
@@ -190,7 +190,7 @@ static int try_load_ldap_settings (CcnetUserManager *manager)
     if (!manager->ldap_host)
         return 0;
 
-    manager->use_ldap = TRUE;
+    manager->use_ldap = true;
 
 #ifdef WIN32
     manager->use_ssl = g_key_file_get_boolean (config, "LDAP", "USE_SSL", nullptr);
@@ -226,7 +226,7 @@ static int try_load_ldap_settings (CcnetUserManager *manager)
     if (error) {
         /* Default is follow referrals. */
         g_clear_error (&error);
-        manager->follow_referrals = TRUE;
+        manager->follow_referrals = true;
     }
 
     return 0;
@@ -304,7 +304,7 @@ get_uid_cb (CcnetDBRow *row, void *data)
 {
     int *id = data;
     *id = seaf_db_row_get_column_int (row, 0);
-    return FALSE;
+    return false;
 }
 
 static int
@@ -517,8 +517,8 @@ static GList *ldap_list_users (CcnetUserManager *manager, const char *uid,
             user = g_object_new (CCNET_TYPE_EMAIL_USER,
                                  "id", 0,
                                  "email", email_l,
-                                 "is_staff", FALSE,
-                                 "is_active", TRUE,
+                                 "is_staff", false,
+                                 "is_active", true,
                                  "ctime", (gint64)0,
                                  "source", "LDAP",
                                  "password", "!",
@@ -689,14 +689,14 @@ validate_passwd_pbkdf2_sha256 (const char *passwd, const char *db_passwd)
     char hashed_passwd[SHA256_DIGEST_LENGTH*2+1];
 
     if (g_strcmp0 (db_passwd, "!") == 0)
-        return FALSE;
+        return false;
 
     tokens = g_strsplit (db_passwd, "$", -1);
     if (!tokens || g_strv_length (tokens) != 4) {
         if (tokens)
             g_strfreev (tokens);
         ccnet_warning ("Invalide db passwd format %s.\n", db_passwd);
-        return FALSE;
+        return false;
     }
 
     iter = atoi (tokens[1]);
@@ -725,22 +725,22 @@ validate_passwd (const char *passwd, const char *stored_passwd,
     char hashed_passwd[SHA256_DIGEST_LENGTH * 2 + 1];
     int hash_len = strlen(stored_passwd);
 
-    *need_upgrade = FALSE;
+    *need_upgrade = false;
 
     if (hash_len == SHA256_DIGEST_LENGTH * 2) {
         hash_password_salted (passwd, hashed_passwd);
-        *need_upgrade = TRUE;
+        *need_upgrade = true;
     } else if (hash_len == SHA_DIGEST_LENGTH * 2) {
         hash_password (passwd, hashed_passwd);
-        *need_upgrade = TRUE;
+        *need_upgrade = true;
     } else {
         return validate_passwd_pbkdf2_sha256 (passwd, stored_passwd);
     }
 
     if (strcmp (hashed_passwd, stored_passwd) == 0)
-        return TRUE;
+        return true;
     else
-        return FALSE;
+        return false;
 }
 
 static int
@@ -850,7 +850,7 @@ get_password (CcnetDBRow *row, void *data)
     char **p_passwd = data;
 
     *p_passwd = g_strdup(seaf_db_row_get_column_text (row, 0));
-    return FALSE;
+    return false;
 }
 
 int
@@ -864,7 +864,7 @@ ccnet_user_manager_validate_emailuser (CcnetUserManager *manager,
     char *email_down;
     char *login_id;
     char *stored_passwd = nullptr;
-    gboolean need_upgrade = FALSE;
+    gboolean need_upgrade = false;
 
     /* Users with password "!" are for internal book keeping only. */
     if (g_strcmp0 (passwd, "!") == 0)
@@ -951,7 +951,7 @@ get_emailuser_cb (CcnetDBRow *row, void *data)
                                  nullptr);
     g_free (email_l);
 
-    return FALSE;
+    return false;
 }
 
 static char*
@@ -982,7 +982,7 @@ get_ldap_emailuser_cb (CcnetDBRow *row, void *data)
                                  "role", role ? role : "",
                                  nullptr);
 
-    return FALSE;
+    return false;
 }
 
 static CcnetEmailUser*
@@ -1070,7 +1070,7 @@ get_emailuser (CcnetUserManager *manager,
 
                 // add user to LDAPUsers
                 ret = add_ldapuser (manager->priv->db, email_down, "",
-                                    FALSE, TRUE, nullptr);
+                                    FALSE, true, nullptr);
                 if (ret < 0) {
                     ccnet_warning ("add ldapuser to db failed.\n");
                     g_free (email_down);
@@ -1106,7 +1106,7 @@ ccnet_user_manager_get_emailuser_with_import (CcnetUserManager *manager,
                                               const char *email,
                                               GError **error)
 {
-    return get_emailuser (manager, email, TRUE, error);
+    return get_emailuser (manager, email, true, error);
 }
 
 CcnetEmailUser*
@@ -1155,7 +1155,7 @@ get_emailusers_cb (CcnetDBRow *row, void *data)
 
     *plist = g_list_prepend (*plist, emailuser);
 
-    return TRUE;
+    return true;
 }
 
 static gboolean
@@ -1181,11 +1181,11 @@ get_ldap_emailusers_cb (CcnetDBRow *row, void *data)
                               "password", "!",
                               nullptr);
     if (!emailuser)
-        return FALSE;
+        return false;
 
     *plist = g_list_prepend (*plist, emailuser);
 
-    return TRUE;
+    return true;
 }
 
 GList*
@@ -1537,7 +1537,7 @@ ccnet_user_manager_filter_emailusers_by_emails(CcnetUserManager *manager,
     }
 
     g_free (copy);
-    g_string_free (sql, TRUE);
+    g_string_free (sql, true);
 
     return g_list_reverse (ret);
 }
@@ -1593,7 +1593,7 @@ get_role_emailuser_cb (CcnetDBRow *row, void *data)
 {
     *((char **)data) = g_strdup (seaf_db_row_get_column_text (row, 0));
 
-    return FALSE;
+    return false;
 }
 
 static char*
@@ -1867,7 +1867,7 @@ ccnet_user_manager_get_emailusers_in_list (CcnetUserManager *manager,
 
 out:
     json_decref (j_array);
-    g_string_free (sql, TRUE);
+    g_string_free (sql, true);
 
     return ret;
 }
@@ -1970,6 +1970,6 @@ ccnet_user_manager_update_emailuser_id (CcnetUserManager *manager,
 
     ret = 0;
 out:
-    g_string_free (sql, TRUE);
+    g_string_free (sql, true);
     return ret;
 }

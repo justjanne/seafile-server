@@ -1086,7 +1086,7 @@ static void start_rpc_service (const char *seafile_dir,
         exit (1);
     }
 
-    rpc_server->use_epoll = TRUE;
+    rpc_server->use_epoll = true;
 
     if (searpc_named_pipe_server_start(rpc_server) < 0) {
         seaf_warning ("Failed to start rpc server.\n");
@@ -1224,7 +1224,7 @@ main (int argc, char **argv)
     char *rpc_pipe_path = nullptr;
     const char *debug_str = nullptr;
     int daemon_mode = 1;
-    gboolean test_config = FALSE;
+    gboolean test_config = false;
     char *repo_id = nullptr;
 
 #ifdef WIN32
@@ -1266,7 +1266,7 @@ main (int argc, char **argv)
             rpc_pipe_path = g_strdup (optarg);
             break;
         case 't':
-            test_config = TRUE;
+            test_config = true;
             break;
         case 'r':
             repo_id = g_strdup (optarg);

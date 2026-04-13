@@ -116,7 +116,7 @@ gboolean seaf_block_manager_block_exists (SeafBlockManager *mgr,
 {
     if (!store_id || !is_uuid_valid(store_id) ||
         !block_id || !is_object_id_valid(block_id))
-        return FALSE;
+        return false;
 
     return mgr->backend->exists (mgr->backend, store_id, version, block_id);
 }
@@ -198,7 +198,7 @@ get_block_number (const char *store_id,
 
     ++(*n_blocks);
 
-    return TRUE;
+    return true;
 }
 
 guint64
@@ -233,8 +233,8 @@ seaf_block_manager_verify_block (SeafBlockManager *mgr,
                                        block_id, BLOCK_READ);
     if (!h) {
         seaf_warning ("Failed to open block %s:%.8s.\n", store_id, block_id);
-        *io_error = TRUE;
-        return FALSE;
+        *io_error = true;
+        return false;
     }
 
     SHA1_Init (&ctx);
@@ -242,8 +242,8 @@ seaf_block_manager_verify_block (SeafBlockManager *mgr,
         n = seaf_block_manager_read_block (mgr, h, buf, sizeof(buf));
         if (n < 0) {
             seaf_warning ("Failed to read block %s:%.8s.\n", store_id, block_id);
-            *io_error = TRUE;
-            return FALSE;
+            *io_error = true;
+            return false;
         }
         if (n == 0)
             break;
@@ -258,9 +258,9 @@ seaf_block_manager_verify_block (SeafBlockManager *mgr,
     rawdata_to_hex (sha1, check_id, 20);
 
     if (strcmp (check_id, block_id) == 0)
-        return TRUE;
+        return true;
     else
-        return FALSE;
+        return false;
 }
 
 int

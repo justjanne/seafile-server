@@ -28,7 +28,7 @@ gboolean
 is_repo_id_valid (const char *id)
 {
     if (!id)
-        return FALSE;
+        return false;
 
     return is_uuid_valid (id);
 }
@@ -165,7 +165,7 @@ collect_commit (SeafCommit *commit, void *vlist, gboolean *stop)
      */
     seaf_commit_ref (commit);
     *commits = g_list_prepend (*commits, commit);
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -235,7 +235,7 @@ static gboolean
 repo_exists_in_db (SeafDB *db, const char *id)
 {
     char sql[256];
-    gboolean db_err = FALSE;
+    gboolean db_err = false;
 
     snprintf (sql, sizeof(sql), "SELECT repo_id FROM Repo WHERE repo_id = '%s'",
               id);
@@ -288,12 +288,12 @@ seaf_repo_manager_get_repo_ex (SeafRepoManager *manager, const gchar *id)
 
     if (db_err) {
         ret = seaf_repo_new(id, nullptr, nullptr);
-        ret->is_corrupted = TRUE;
+        ret->is_corrupted = true;
         return ret;
     }
 
     if (exists) {
-        ret = load_repo (manager, id, TRUE);
+        ret = load_repo (manager, id, true);
         return ret;
     }
 
@@ -321,7 +321,7 @@ load_repo_commit (SeafRepoManager *manager,
                                                         branch->commit_id);
     if (!commit) {
         seaf_warning ("Commit %s is missing\n", branch->commit_id);
-        repo->is_corrupted = TRUE;
+        repo->is_corrupted = true;
         return;
     }
 
@@ -349,7 +349,7 @@ load_repo (SeafRepoManager *manager, const char *repo_id, gboolean ret_corrupt)
     branch = seaf_branch_manager_get_branch (seaf->branch_mgr, repo_id, "master");
     if (!branch) {
         seaf_warning ("Failed to get master branch of repo %.8s.\n", repo_id);
-        repo->is_corrupted = TRUE;
+        repo->is_corrupted = true;
     } else {
         load_repo_commit (manager, repo, branch);
         seaf_branch_unref (branch);
@@ -365,10 +365,10 @@ load_repo (SeafRepoManager *manager, const char *repo_id, gboolean ret_corrupt)
 
     vinfo = seaf_repo_manager_get_virtual_repo_info (manager, repo_id);
     if (vinfo) {
-        repo->is_virtual = TRUE;
+        repo->is_virtual = true;
         memcpy (repo->store_id, vinfo->origin_repo_id, 36);
     } else {
-        repo->is_virtual = FALSE;
+        repo->is_virtual = false;
         memcpy (repo->store_id, repo->id, 36);
     }
     seaf_virtual_repo_info_free (vinfo);
@@ -385,7 +385,7 @@ collect_repo_id (SeafDBRow *row, void *data)
     repo_id = seaf_db_row_get_column_text (row, 0);
     *p_ids = g_list_prepend (*p_ids, g_strdup(repo_id));
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -430,7 +430,7 @@ seaf_repo_manager_get_repo_list (SeafRepoManager *mgr,
     GList *ret = nullptr;
     SeafRepo *repo;
 
-    *error = FALSE;
+    *error = false;
 
     if (start == -1 && limit == -1)
         snprintf (sql, 256, "SELECT repo_id FROM Repo");
@@ -452,7 +452,7 @@ seaf_repo_manager_get_repo_list (SeafRepoManager *mgr,
     return ret;
 
 error:
-    *error = TRUE;
+    *error = true;
     string_list_free (id_list);
     return nullptr;
 }
@@ -497,7 +497,7 @@ get_limit (SeafDBRow *row, void *vdays)
 
     *days = seaf_db_row_get_column_int (row, 0);
 
-    return FALSE;
+    return false;
 }
 
 int
@@ -615,7 +615,7 @@ load_virtual_info (SeafDBRow *row, void *p_vinfo)
 
     *((SeafVirtRepo **)p_vinfo) = vinfo;
 
-    return FALSE;
+    return false;
 }
 
 SeafVirtRepo *
@@ -651,7 +651,7 @@ collect_virtual_repo_ids (SeafDBRow *row, void *data)
     repo_id = seaf_db_row_get_column_text (row, 0);
     *p_ids = g_list_prepend (*p_ids, g_strdup(repo_id));
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -681,7 +681,7 @@ get_garbage_repo_id (SeafDBRow *row, void *vid_list)
     repo_id = g_strdup(seaf_db_row_get_column_text (row, 0));
     *ret = g_list_prepend (*ret, repo_id);
 
-    return TRUE;
+    return true;
 }
 
 GList *

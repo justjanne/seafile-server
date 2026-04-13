@@ -24,14 +24,14 @@ check_repo_share_perm_cb (SeafDBRow *row, void *data)
     if (g_strcmp0(perm, "rw") == 0) {
         g_free (*orig_perm);
         *orig_perm = perm;
-        return FALSE;
+        return false;
     } else if (g_strcmp0(perm, "r") == 0 && !(*orig_perm)) {
         *orig_perm = perm;
-        return TRUE;
+        return true;
     }
 
     g_free (perm);
-    return TRUE;
+    return true;
 }
 
 static char *
@@ -70,7 +70,7 @@ check_group_permission_by_user (SeafRepoManager *mgr,
         seaf_warning ("DB error when get repo share permission for repo %s.\n", repo_id);
     }
 
-    g_string_free (sql, TRUE);
+    g_string_free (sql, true);
 
 out:
     for (p1 = groups; p1 != nullptr; p1 = p1->next)
@@ -360,7 +360,7 @@ seaf_repo_manager_list_dir_with_perm (SeafRepoManager *mgr,
             } else {
                 cur_path = g_strconcat (dir_path, "/", dent->name, nullptr);
             }
-            is_shared = g_hash_table_lookup (shared_sub_dirs, cur_path) ? TRUE : FALSE;
+            is_shared = (bool) g_hash_table_lookup (shared_sub_dirs, cur_path);
             g_free (cur_path);
             g_object_set (d, "is_shared", is_shared, nullptr);
         }

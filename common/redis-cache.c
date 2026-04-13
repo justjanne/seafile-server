@@ -131,14 +131,14 @@ redis_connection_pool_get_connection (RedisConnectionPool *pool, const char *pas
         if (!conn->is_available) {
             continue;
         }
-        conn->is_available = FALSE;
+        conn->is_available = false;
         goto out;
     }
     conn = nullptr;
     if (size < pool->max_connections) {
         conn = redis_connection_new (pool->host, passwd, pool->port);
         if (conn) {
-            conn->is_available = FALSE;
+            conn->is_available = false;
             g_ptr_array_add (pool->connections, conn);
         }
     } else {
@@ -170,7 +170,7 @@ redis_connection_pool_return_connection (RedisConnectionPool *pool, RedisConnect
     }
 
     pthread_mutex_lock (&pool->lock);
-    conn->is_available = TRUE;
+    conn->is_available = true;
     pthread_mutex_unlock (&pool->lock);
 }
 
@@ -192,12 +192,12 @@ redis_cache_get_object (ObjCache *cache, const char *obj_id, size_t *len)
     reply = redisCommand(conn->ac, "GET %s", obj_id);
     if (!reply) {
         seaf_warning ("Failed to get object %s from redis cache.\n", obj_id);
-        conn->release = TRUE;
+        conn->release = true;
         goto out;
     }
     if (reply->type != REDIS_REPLY_STRING) {
         if (reply->type == REDIS_REPLY_ERROR) {
-            conn->release = TRUE;
+            conn->release = true;
             seaf_warning ("Failed to get %s from redis cache: %s.\n",
                       obj_id, reply->str);
         }
@@ -239,13 +239,13 @@ redis_cache_set_object (ObjCache *cache,
     if (!reply) {
         seaf_warning ("Failed to set object %s to redis cache.\n", obj_id);
         ret = -1;
-        conn->release = TRUE;
+        conn->release = true;
         goto out;
     }
     if (reply->type != REDIS_REPLY_STATUS ||
         g_strcmp0 (reply->str, "OK") != 0) {
         if (reply->type == REDIS_REPLY_ERROR) {
-            conn->release = TRUE;
+            conn->release = true;
             seaf_warning ("Failed to set %s to redis: %s.\n",
                           obj_id, reply->str);
         }
@@ -264,7 +264,7 @@ redis_cache_test_object (ObjCache *cache, const char *obj_id)
 {
     RedisConnection *conn;
     redisReply *reply;
-    gboolean ret = FALSE;
+    gboolean ret = false;
     RedisPriv *priv = cache->priv;
     RedisConnectionPool *pool = priv->redis_pool;
 
@@ -277,20 +277,20 @@ redis_cache_test_object (ObjCache *cache, const char *obj_id)
     reply = redisCommand(conn->ac, "EXISTS %s", obj_id);
     if (!reply) {
         seaf_warning ("Failed to test object %s from redis cache.\n", obj_id);
-        conn->release = TRUE;
+        conn->release = true;
         goto out;
     }
     if (reply->type != REDIS_REPLY_INTEGER ||
         reply->integer != 1) {
         if (reply->type == REDIS_REPLY_ERROR) {
-            conn->release = TRUE;
+            conn->release = true;
             seaf_warning ("Failed to test %s from redis: %s.\n",
                           obj_id, reply->str);
         }
         goto out;
     }
 
-    ret = TRUE;
+    ret = true;
 
 out:
     freeReplyObject(reply);
@@ -318,13 +318,13 @@ redis_cache_delete_object (ObjCache *cache, const char *obj_id)
     if (!reply) {
         seaf_warning ("Failed to delete object %s from redis cache.\n", obj_id);
         ret = -1;
-        conn->release = TRUE;
+        conn->release = true;
         goto out;
     }
     if (reply->type != REDIS_REPLY_INTEGER ||
         reply->integer != 1) {
         if (reply->type == REDIS_REPLY_ERROR) {
-            conn->release = TRUE;
+            conn->release = true;
             seaf_warning ("Failed to del %s from redis: %s.\n",
                           obj_id, reply->str);
         }
@@ -357,13 +357,13 @@ redis_cache_publish (ObjCache *cache, const char *channel, const char *msg)
     if (!reply) {
         seaf_warning ("Failed to publish message to redis channel %s.\n", channel);
         ret = -1;
-        conn->release = TRUE;
+        conn->release = true;
         goto out;
     }
     if (reply->type != REDIS_REPLY_INTEGER ||
         reply->integer < 0) {
         if (reply->type == REDIS_REPLY_ERROR) {
-            conn->release = TRUE;
+            conn->release = true;
             seaf_warning ("Failed to publish message to redis channel %s.\n", channel);
         }
         ret = -1;
@@ -395,13 +395,13 @@ redis_cache_push (ObjCache *cache, const char *list, const char *msg)
     if (!reply) {
         seaf_warning ("Failed to push message to redis list %s.\n", list);
         ret = -1;
-        conn->release = TRUE;
+        conn->release = true;
         goto out;
     }
     if (reply->type != REDIS_REPLY_INTEGER ||
         reply->integer < 0) {
         if (reply->type == REDIS_REPLY_ERROR) {
-            conn->release = TRUE;
+            conn->release = true;
             seaf_warning ("Failed to push message to redis list %s.\n", list);
         }
         ret = -1;

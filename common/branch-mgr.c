@@ -172,7 +172,7 @@ get_commit_id (SeafDBRow *row, void *data)
     memcpy (out_commit_id, commit_id, 41);
     out_commit_id[40] = '\0';
 
-    return FALSE;
+    return false;
 }
 
 static void
@@ -240,7 +240,7 @@ get_gc_id (SeafDBRow *row, void *data)
 
     *out_gc_id = g_strdup(seaf_db_row_get_column_text (row, 0));
 
-    return FALSE;
+    return false;
 }
 
 int
@@ -258,7 +258,7 @@ seaf_branch_manager_test_and_update_branch (SeafBranchManager *mgr,
     char *gc_id = nullptr;
 
     if (check_gc)
-        *gc_conflict = FALSE;
+        *gc_conflict = false;
 
     trans = seaf_db_begin_transaction (mgr->seaf->db);
     if (!trans)
@@ -290,7 +290,7 @@ seaf_branch_manager_test_and_update_branch (SeafBranchManager *mgr,
                           branch->repo_id);
             seaf_db_rollback (trans);
             seaf_db_trans_close (trans);
-            *gc_conflict = TRUE;
+            *gc_conflict = true;
             g_free (gc_id);
             return -1;
         }
@@ -343,7 +343,7 @@ get_branch (SeafDBRow *row, void *vid)
     commit_id = seaf_db_row_get_column_text (row, 0);
     memcpy (ret, commit_id, 41);
 
-    return FALSE;
+    return false;
 }
 
 static SeafBranch *
@@ -391,7 +391,7 @@ seaf_branch_manager_branch_exists (SeafBranchManager *mgr,
                                    const char *repo_id,
                                    const char *name)
 {
-    gboolean db_err = FALSE;
+    gboolean db_err = false;
 
     SeafDB *db = mgr->seaf->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
@@ -416,7 +416,7 @@ get_branches (SeafDBRow *row, void *vplist)
     branch = seaf_branch_new (name, repo_id, commit_id);
     *plist = g_list_prepend (*plist, branch);
 
-    return TRUE;
+    return true;
 }
 
 GList *

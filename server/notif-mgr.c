@@ -115,7 +115,7 @@ send_event (void *data)
     int ret;
 
     ret = http_post (conn, req_url, jwt_token, event->msg, strlen (event->msg),
-                     &rsp_status, nullptr, nullptr, TRUE, NOTIF_TIMEOUT_SEC);
+                     &rsp_status, nullptr, nullptr, true, NOTIF_TIMEOUT_SEC);
     if (ret < 0) {
         goto out;
     }

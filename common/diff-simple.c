@@ -114,7 +114,7 @@ diff_directories (int n, SeafDirent *dents[], const char *basedir, DiffOptions *
     if (n_dirs == 0)
         return 0;
 
-    gboolean recurse = TRUE;
+    gboolean recurse = true;
     ret = opt->dir_cb (n, basedir, dirs, opt->data, &recurse);
     if (ret < 0)
         return ret;
@@ -175,12 +175,12 @@ diff_trees_recursive (int n, SeafDir *trees[],
     while (1) {
         first_name = nullptr;
         memset (dents, 0, sizeof(dents[0])*n);
-        done = TRUE;
+        done = true;
 
         /* Find the "largest" name, assuming dirents are sorted. */
         for (i = 0; i < n; ++i) {
             if (ptrs[i] != nullptr) {
-                done = FALSE;
+                done = false;
                 dent = ptrs[i]->data;
                 if (!first_name)
                     first_name = dent->name;
@@ -310,9 +310,9 @@ twoway_diff_dirs (int n, const char *basedir, SeafDirent *dirs[], void *vdata,
             de = diff_entry_new_from_dirent (DIFF_TYPE_COMMITS, DIFF_STATUS_DIR_ADDED,
                                              tree2, basedir);
             *results = g_list_prepend (*results, de);
-            *recurse = FALSE;
+            *recurse = false;
         } else
-            *recurse = TRUE;
+            *recurse = true;
         return 0;
     }
 
@@ -323,9 +323,9 @@ twoway_diff_dirs (int n, const char *basedir, SeafDirent *dirs[], void *vdata,
         *results = g_list_prepend (*results, de);
 
         if (data->fold_dir_diff) {
-            *recurse = FALSE;
+            *recurse = false;
         } else
-            *recurse = TRUE;
+            *recurse = true;
         return 0;
     }
 
@@ -449,7 +449,7 @@ static int
 threeway_diff_dirs (int n, const char *basedir, SeafDirent *dirs[], void *vdata,
                     gboolean *recurse)
 {
-    *recurse = TRUE;
+    *recurse = true;
     return 0;
 }
 
@@ -691,7 +691,7 @@ is_redundant_empty_dir (DiffEntry *de_dir, DiffEntry *de_file)
         dir_len = strlen (de_dir->name);
         if (strlen (de_file->name) > dir_len &&
             strncmp (de_dir->name, de_file->name, dir_len) == 0)
-            return TRUE;
+            return true;
     }
 
     if (de_dir->status == DIFF_STATUS_DIR_DELETED &&
@@ -700,10 +700,10 @@ is_redundant_empty_dir (DiffEntry *de_dir, DiffEntry *de_file)
         dir_len = strlen (de_dir->name);
         if (strlen (de_file->name) > dir_len &&
             strncmp (de_dir->name, de_file->name, dir_len) == 0)
-            return TRUE;
+            return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 /*

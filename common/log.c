@@ -17,7 +17,7 @@ static int ccnet_log_level;
 static int seafile_log_level;
 static char *logfile;
 static FILE *logfp;
-static gboolean log_to_stdout = FALSE;
+static gboolean log_to_stdout = false;
 static char *app_name;
 
 #ifndef WIN32
@@ -154,7 +154,7 @@ seafile_log_init (const char *_logfile, const char *ccnet_debug_level_str,
     if (g_strcmp0(log_to_stdout_env, "true") == 0) {
         logfp = stdout;
         logfile = g_strdup (_logfile);
-        log_to_stdout = TRUE;
+        log_to_stdout = true;
     } else if (g_strcmp0(_logfile, "-") == 0) {
         logfp = stdout;
         logfile = g_strdup (_logfile);

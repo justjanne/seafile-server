@@ -156,7 +156,7 @@ int twoway_merge(const char *store_id, int version, const char *basedir,
             *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(head));
             *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(remote));
 
-            opt->conflict = TRUE;
+            opt->conflict = true;
         }
     } else if (!head && remote) {
         // file not in head, but in remote
@@ -233,7 +233,7 @@ threeway_merge (const char *store_id, int version,
             *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(head));
             *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(remote));
 
-            opt->conflict = TRUE;
+            opt->conflict = true;
         }
     } else if (base && !head && remote) {
         if (strcmp (base->id, remote->id) != 0) {
@@ -259,7 +259,7 @@ threeway_merge (const char *store_id, int version,
 
                 *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(remote));
 
-                opt->conflict = TRUE;
+                opt->conflict = true;
             } else {
                 /* Deleted in head and changed in remote. */
 
@@ -301,7 +301,7 @@ threeway_merge (const char *store_id, int version,
 
                 *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(head));
 
-                opt->conflict = TRUE;
+                opt->conflict = true;
             } else {
                 /* Deleted in remote and changed in head. */
 
@@ -356,7 +356,7 @@ threeway_merge (const char *store_id, int version,
 
             *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(remote));
 
-            opt->conflict = TRUE;
+            opt->conflict = true;
         }
     } else if (!base && head && !remote) {
         if (!dents[2]) {
@@ -395,7 +395,7 @@ threeway_merge (const char *store_id, int version,
 
             *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(head));
 
-            opt->conflict = TRUE;
+            opt->conflict = true;
         }
     } else if (base && !head && !remote) {
         /* Don't need to add anything to dents_out. */
@@ -620,12 +620,12 @@ merge_trees_recursive (const char *store_id, int version,
     while (1) {
         first_name = nullptr;
         memset (dents, 0, sizeof(dents[0])*n);
-        done = TRUE;
+        done = true;
 
         /* Find the "largest" name, assuming dirents are sorted. */
         for (i = 0; i < n; ++i) {
             if (ptrs[i] != nullptr) {
-                done = FALSE;
+                done = false;
                 dent = ptrs[i]->data;
                 if (!first_name)
                     first_name = dent->name;

@@ -318,7 +318,7 @@ load_database_config (SeafileSession *session)
     char *type;
     GError *error = nullptr;
     int ret = 0;
-    gboolean create_tables = FALSE;
+    gboolean create_tables = false;
 
     type = seaf_key_file_get_string (session->config, "database", "type", &error);
     /* Default to use mysql if not set. */
@@ -420,7 +420,7 @@ load_ccnet_database_config (SeafileSession *session)
 {
     int ret;
     char *engine;
-    gboolean create_tables = FALSE;
+    gboolean create_tables = false;
 
     engine = ccnet_key_file_get_string (session->config, "database", "type");
     if (engine && strcasecmp (engine, "sqlite") == 0) {
@@ -549,7 +549,7 @@ collect_token_list (SeafDBRow *row, void *data)
     token = seaf_db_row_get_column_text (row, 0);
     *p_tokens = g_list_prepend (*p_tokens, g_strdup(token));
 
-    return TRUE;
+    return true;
 }
 
 int
@@ -600,8 +600,8 @@ seaf_delete_repo_tokens (SeafRepo *repo)
     }
 
 out:
-    g_string_free (token_list_str, TRUE);
-    g_string_free (sql, TRUE);
+    g_string_free (token_list_str, true);
+    g_string_free (sql, true);
     g_list_free_full (token_list, (GDestroyNotify)g_free);
 
     if (rc < 0) {

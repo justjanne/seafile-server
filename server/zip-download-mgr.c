@@ -148,7 +148,7 @@ scan_progress (void *data)
 
     pthread_mutex_unlock (&priv->progress_lock);
 
-    return TRUE;
+    return true;
 }
 
 static SeafileCrypt *
@@ -199,7 +199,7 @@ start_zip_task (gpointer data, gpointer user_data)
 
     if (!validate_download_size (obj, nullptr)) {
         ret = -1;
-        obj->progress->size_too_large = TRUE;
+        obj->progress->size_too_large = true;
         goto out;
     }
 
@@ -219,7 +219,7 @@ out:
     }
     if (ret == -1 && !obj->progress->canceled &&
         !obj->progress->size_too_large) {
-        obj->progress->internal_error = TRUE;
+        obj->progress->internal_error = true;
     }
     free_download_obj (obj);
 }
@@ -479,17 +479,17 @@ validate_download_size (DownloadObj *obj, GError **error)
         seaf_warning ("Failed to get download size.\n");
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                      "Failed to get download size.");
-        return FALSE;
+        return false;
     } else if (download_size > max_download_dir_size) {
         seaf_warning ("Total download size %"G_GINT64_FORMAT
                       ", exceed max download dir size %"G_GINT64_FORMAT".\n",
                       download_size, max_download_dir_size);
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                      "Download size exceed max download dir size.");
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 static int
@@ -772,7 +772,7 @@ zip_download_mgr_cancel_zip_task (ZipDownloadMgr *mgr,
 {
     Progress *progress = get_progress_obj (mgr->priv, token);
     if (progress)
-        progress->canceled = TRUE;
+        progress->canceled = true;
 
     return 0;
 }

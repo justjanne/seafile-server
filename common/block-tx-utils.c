@@ -250,7 +250,7 @@ handle_frame_fragment_content (struct evbuffer *buf, FrameParser *parser)
             goto out;
 
         EVP_CIPHER_CTX_free (parser->ctx);
-        parser->enc_init = FALSE;
+        parser->enc_init = false;
         parser->enc_frame_len = 0;
     }
 
@@ -259,7 +259,7 @@ out:
     g_free (out);
     if (ret < 0) {
         EVP_CIPHER_CTX_free (parser->ctx);
-        parser->enc_init = FALSE;
+        parser->enc_init = false;
         parser->enc_frame_len = 0;
     }
     return ret;
@@ -284,7 +284,7 @@ handle_frame_fragments (struct evbuffer *buf, FrameParser *parser)
             blocktx_decrypt_init (&parser->ctx, parser->key, parser->iv);
         else if (parser->version == 2)
             blocktx_decrypt_init (&parser->ctx, parser->key_v2, parser->iv_v2);
-        parser->enc_init = TRUE;
+        parser->enc_init = true;
 
         if (evbuffer_get_length (input) > 0)
             return handle_frame_fragment_content (buf, parser);

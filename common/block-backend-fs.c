@@ -203,9 +203,9 @@ block_backend_fs_block_exists (BlockBackend *bend,
 
     get_block_path (bend, block_sha1, block_path, store_id, version);
     if (g_access (block_path, F_OK) == 0)
-        return TRUE;
+        return true;
     else
-        return FALSE;
+        return false;
 }
 
 static int

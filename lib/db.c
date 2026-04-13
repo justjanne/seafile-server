@@ -91,7 +91,7 @@ sqlite_check_for_existence (sqlite3 *db, const char *sql)
 
     stmt = sqlite_query_prepare (db, sql);
     if (!stmt)
-        return FALSE;
+        return false;
 
     result = sqlite3_step (stmt);
     if (result == SQLITE_ERROR) {
@@ -100,13 +100,13 @@ sqlite_check_for_existence (sqlite3 *db, const char *sql)
         g_warning ("Couldn't execute query, error: %d->'%s'\n", 
                    result, str ? str : "no error given");
         sqlite3_finalize (stmt);
-        return FALSE;
+        return false;
     }
     sqlite3_finalize (stmt);
 
     if (result == SQLITE_ROW)
-        return TRUE;
-    return FALSE;
+        return true;
+    return false;
 }
 
 int

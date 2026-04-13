@@ -36,7 +36,7 @@ add_to_commit_hash (SeafCommit *commit, void *vhash, gboolean *stop)
     char *key = g_strdup (commit->commit_id);
     g_hash_table_replace (hash, key, key);
 
-    return TRUE;
+    return true;
 }
 
 static GHashTable *
@@ -135,10 +135,10 @@ get_merge_bases (SeafCommit *commit, void *vdata, gboolean *stop)
                                                      nullptr);
             seaf_commit_ref (commit);
         }
-        *stop = TRUE;
+        *stop = true;
     }
 
-    return TRUE;
+    return true;
 }
 
 /*

@@ -33,7 +33,7 @@ static char *controller_pidfile = nullptr;
 char *bin_dir = nullptr;
 char *installpath = nullptr;
 char *topdir = nullptr;
-gboolean enabled_go_fileserver = FALSE;
+gboolean enabled_go_fileserver = false;
 
 char *seafile_ld_library_path = nullptr;
 
@@ -80,7 +80,7 @@ spawn_process (char *argv[], bool is_python_process)
         g_string_append_printf (buf, " %s", *ptr);
     }
     seaf_message ("spawn_process: %s\n", buf->str);
-    g_string_free (buf, TRUE);
+    g_string_free (buf, true);
 
     int pipefd[2] = {0, 0};
     if (is_python_process) {
@@ -336,7 +336,7 @@ setup_python_path()
         g_string_append (new_pypath, path);
     }
 
-    g_setenv ("PYTHONPATH", g_string_free (new_pypath, FALSE), TRUE);
+    g_setenv ("PYTHONPATH", g_string_free (new_pypath, FALSE), true);
 
     /* seaf_message ("PYTHONPATH is:\n\n%s\n", g_getenv ("PYTHONPATH")); */
 }
@@ -344,15 +344,15 @@ setup_python_path()
 static void
 setup_env ()
 {
-    g_setenv ("CCNET_CONF_DIR", ctl->config_dir, TRUE);
-    g_setenv ("SEAFILE_CONF_DIR", ctl->seafile_dir, TRUE);
-    g_setenv ("SEAFILE_CENTRAL_CONF_DIR", ctl->central_config_dir, TRUE);
-    g_setenv ("SEAFILE_RPC_PIPE_PATH", ctl->rpc_pipe_path, TRUE);
+    g_setenv ("CCNET_CONF_DIR", ctl->config_dir, true);
+    g_setenv ("SEAFILE_CONF_DIR", ctl->seafile_dir, true);
+    g_setenv ("SEAFILE_CENTRAL_CONF_DIR", ctl->central_config_dir, true);
+    g_setenv ("SEAFILE_RPC_PIPE_PATH", ctl->rpc_pipe_path, true);
 
     char *seahub_dir = g_build_filename (installpath, "seahub", nullptr);
     char *seafdav_conf = g_build_filename (ctl->central_config_dir, "seafdav.conf", nullptr);
-    g_setenv ("SEAHUB_DIR", seahub_dir, TRUE);
-    g_setenv ("SEAFDAV_CONF", seafdav_conf, TRUE);
+    g_setenv ("SEAHUB_DIR", seahub_dir, true);
+    g_setenv ("SEAFDAV_CONF", seafdav_conf, true);
 
     setup_python_path();
 }
@@ -419,23 +419,23 @@ static gboolean
 need_restart (int which)
 {
     if (which < 0 || which >= N_PID)
-        return FALSE;
+        return false;
 
     int pid = read_pid_from_pidfile (ctl->pidfile[which]);
     if (pid == PID_ERROR_ENOENT) {
         seaf_warning ("pid file %s does not exist\n", ctl->pidfile[which]);
-        return TRUE;
+        return true;
     } else if (pid == PID_ERROR_OTHER) {
         seaf_warning ("failed to read pidfile %s: %s\n", ctl->pidfile[which], strerror(errno));
-        return FALSE;
+        return false;
     } else {
         char buf[256];
         snprintf (buf, sizeof(buf), "/proc/%d", pid);
         if (g_file_test (buf, G_FILE_TEST_IS_DIR)) {
-            return FALSE;
+            return false;
         } else {
             seaf_warning ("path /proc/%d doesn't exist, restart progress [%d]\n", pid, which);
-            return TRUE;
+            return true;
         }
     }
 }
@@ -450,7 +450,7 @@ should_start_go_fileserver()
     if (!g_key_file_load_from_file (key_file, seafile_conf,
                                     G_KEY_FILE_KEEP_COMMENTS, nullptr)) {
         seaf_warning("Failed to load seafile.conf.\n");
-        ret = FALSE;
+        ret = false;
         goto out;
     }
     GError *err = nullptr;
@@ -458,13 +458,13 @@ should_start_go_fileserver()
     enabled = g_key_file_get_boolean(key_file, "fileserver", "use_go_fileserver", &err);
     if (err) {
         seaf_warning("Config [fileserver, use_go_fileserver] not set, default is FALSE.\n");
-        ret = FALSE;
+        ret = false;
         g_clear_error(&err);
     } else {
         if (enabled) {
-            ret = TRUE;
+            ret = true;
         } else {
-            ret = FALSE;
+            ret = false;
         }
     }
 
@@ -473,7 +473,7 @@ should_start_go_fileserver()
         type = g_key_file_get_string (key_file, "database", "type", nullptr);
         if (type && strcasecmp (type, "sqlite") == 0) {
             seaf_message ("Use C fileserver because go fileserver does not support sqlite.");
-            ret = FALSE;
+            ret = false;
         }
         g_free (type);
     }
@@ -507,7 +507,7 @@ check_process (void *data)
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 static void
@@ -764,7 +764,7 @@ read_seafdav_config()
         if (error->code != G_KEY_FILE_ERROR_KEY_NOT_FOUND) {
             seaf_message ("Error when reading WEBDAV.enabled, use default value 'false'\n");
         }
-        ctl->seafdav_config.enabled = FALSE;
+        ctl->seafdav_config.enabled = false;
         g_clear_error (&error);
         goto out;
     }
@@ -797,7 +797,7 @@ read_seafdav_config()
         if (error->code != G_KEY_FILE_ERROR_KEY_NOT_FOUND) {
             seaf_message ("Error when reading WEBDAV.debug, use deafult value FALSE\n");
         }
-        ctl->seafdav_config.debug_mode = FALSE;
+        ctl->seafdav_config.debug_mode = false;
         g_clear_error (&error);
     }
 
@@ -854,7 +854,7 @@ int main (int argc, char **argv)
     char *ccnet_debug_level_str = "info";
     char *seafile_debug_level_str = "debug";
     int daemon_mode = 1;
-    gboolean test_conf = FALSE;
+    gboolean test_conf = false;
 
     int c;
     while ((c = getopt_long (argc, argv, short_opts,
@@ -870,7 +870,7 @@ int main (int argc, char **argv)
             exit(1);
             break;
         case 't':
-            test_conf = TRUE;
+            test_conf = true;
             break;
         case 'c':
             config_dir = optarg;

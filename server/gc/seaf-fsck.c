@@ -74,7 +74,7 @@ check_user (const char *seafile_dir, uid_t *current_user, uid_t *seafile_user)
     if (stat (seafile_dir, &st) < 0) {
         seaf_warning ("Failed to stat seafile data dir %s: %s\n",
                       seafile_dir, strerror(errno));
-        return FALSE;
+        return false;
     }
 
     euid = geteuid();
@@ -91,10 +91,10 @@ int
 main(int argc, char *argv[])
 {
     int c;
-    gboolean repair = FALSE;
-    gboolean force = FALSE;
-    gboolean check_integrity = TRUE;
-    gboolean check_file_size = FALSE;
+    gboolean repair = false;
+    gboolean force = false;
+    gboolean check_integrity = true;
+    gboolean check_file_size = false;
     char *export_path = nullptr;
     int max_thread_num = 0;
 
@@ -114,13 +114,13 @@ main(int argc, char *argv[])
             exit(-1);
             break;
         case 'f':
-            force = TRUE;
+            force = true;
             break;
         case 't':
             max_thread_num = atoi(strdup(optarg));
             break;
         case 'r':
-            repair = TRUE;
+            repair = true;
             break;
         case 'E':
             export_path = strdup(optarg);
@@ -135,10 +135,10 @@ main(int argc, char *argv[])
             central_config_dir = strdup(optarg);
             break;
         case 'S':
-            check_file_size = TRUE;
+            check_file_size = true;
             break;
         case 's':
-            check_integrity = FALSE;
+            check_integrity = false;
             break;
         default:
             usage();

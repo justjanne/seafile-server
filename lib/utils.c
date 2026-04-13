@@ -703,7 +703,7 @@ traverse_directory_win32 (wchar_t *path_w,
 
         ++ret;
 
-        stop = FALSE;
+        stop = false;
         if (callback (path_w, &fdata, user_data, &stop) < 0) {
             ret = -1;
             FindClose (handle);
@@ -1082,11 +1082,11 @@ is_uuid_valid (const char *uuid_str)
     uuid_t uuid;
 
     if (!uuid_str)
-        return FALSE;
+        return false;
 
     if (uuid_parse (uuid_str, uuid) < 0)
-        return FALSE;
-    return TRUE;
+        return false;
+    return true;
 }
 
 #else
@@ -1118,12 +1118,12 @@ gboolean
 is_uuid_valid (const char *uuid_str)
 {
     if (!uuid_str)
-        return FALSE;
+        return false;
 
     UUID uuid;
     if (UuidFromString((unsigned char *)uuid_str, &uuid) != RPC_S_OK)
-        return FALSE;
-    return TRUE;
+        return false;
+    return true;
 }
 
 #endif
@@ -1132,23 +1132,23 @@ gboolean
 is_object_id_valid (const char *obj_id)
 {
     if (!obj_id)
-        return FALSE;
+        return false;
 
     int len = strlen(obj_id);
     int i;
     char c;
 
     if (len != 40)
-        return FALSE;
+        return false;
 
     for (i = 0; i < len; ++i) {
         c = obj_id[i];
         if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))
             continue;
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 char* strjoin_n (const char *seperator, int argc, char **argv)
@@ -1177,12 +1177,12 @@ gboolean is_ipaddr_valid (const char *ip)
     unsigned char buf[sizeof(struct in6_addr)];
 
     if (evutil_inet_pton(AF_INET, ip, buf) == 1)
-        return TRUE;
+        return true;
 
     if (evutil_inet_pton(AF_INET6, ip, buf) == 1)
-        return TRUE;
+        return true;
     
-    return FALSE;
+    return false;
 }
 
 void parse_key_value_pairs (char *string, KeyValueFunc func, void *data)
@@ -1261,9 +1261,9 @@ string_list_is_exists (GList *str_list, const char *string)
     GList *ptr;
     for (ptr = str_list; ptr; ptr = ptr->next) {
         if (g_strcmp0(string, ptr->data) == 0)
-            return TRUE;
+            return true;
     }
-    return FALSE;
+    return false;
 }
 
 /**
@@ -1389,8 +1389,8 @@ string_list_sorted_is_equal (GList *list1, GList *list2)
     }
 
     if (!ptr1 && !ptr2)
-        return TRUE;
-    return FALSE;
+        return true;
+    return false;
 }
 
 char **
@@ -1896,9 +1896,9 @@ process_is_running (const char *process_name)
 
     if (proc_handle) {
         CloseHandle(proc_handle);
-        return TRUE;
+        return true;
     } else {
-        return FALSE;
+        return false;
     }
 }
 
@@ -1956,7 +1956,7 @@ win32_spawn_process (char *cmdline_in, char *working_directory_in)
     
     memset(&pi, 0, sizeof(pi));
 
-    success = CreateProcessW (nullptr, cmdline_w, nullptr, nullptr, TRUE, flags,
+    success = CreateProcessW (nullptr, cmdline_w, nullptr, nullptr, true, flags,
                               nullptr, working_directory_w, &si, &pi);
     free (cmdline_w);
     if (working_directory_w) free (working_directory_w);
@@ -2098,7 +2098,7 @@ gboolean process_is_running (const char *process_name)
     DIR *proc_dir = opendir("/proc");
     if (!proc_dir) {
         fprintf (stderr, "failed to open /proc/ dir\n");
-        return FALSE;
+        return false;
     }
 
     struct dirent *subdir = nullptr;
@@ -2110,12 +2110,12 @@ gboolean process_is_running (const char *process_name)
         int pid = find_process_in_dirent(subdir, process_name);
         if (pid > 0) {
             closedir(proc_dir);
-            return TRUE;
+            return true;
         }
     }
 
     closedir(proc_dir);
-    return FALSE;
+    return false;
 }
 
 int count_process(const char *process_name)
@@ -2124,7 +2124,7 @@ int count_process(const char *process_name)
     DIR *proc_dir = opendir("/proc");
     if (!proc_dir) {
         g_warning ("failed to open /proc/ :%s\n", strerror(errno));
-        return FALSE;
+        return false;
     }
 
     struct dirent *subdir = nullptr;
@@ -2148,7 +2148,7 @@ int count_process(const char *process_name)
 gboolean process_is_running (const char *process_name)
 {
     //TODO
-    return FALSE;
+    return false;
 }
 #endif
 
@@ -2437,7 +2437,7 @@ out:
         *output = g_byte_array_free (barray, FALSE);
         return 0;
     } else {
-        g_byte_array_free (barray, TRUE);
+        g_byte_array_free (barray, true);
         return -1;
     }
 }
@@ -2471,7 +2471,7 @@ gboolean
 is_permission_valid (const char *perm)
 {
     if (is_empty_string (perm)) {
-        return FALSE;
+        return false;
     }
 
     return strcmp (perm, "r") == 0 || strcmp (perm, "rw") == 0;

@@ -188,7 +188,7 @@ seaf_passwd_manager_unset_passwd (SeafPasswdManager *mgr,
     hash_key = g_string_new (nullptr);
     g_string_printf (hash_key, "%s.%s", repo_id, user);
     g_hash_table_remove (mgr->priv->decrypt_keys, hash_key->str);
-    g_string_free (hash_key, TRUE);
+    g_string_free (hash_key, true);
 
     return 0;
 }     
@@ -199,13 +199,13 @@ seaf_passwd_manager_is_passwd_set (SeafPasswdManager *mgr,
                                    const char *user)
 {
     GString *key = g_string_new (nullptr);
-    gboolean ret = FALSE;
+    gboolean ret = false;
 
     g_string_printf (key, "%s.%s", repo_id, user);
     /* g_debug ("[passwd mgr] check passwd for %s\n", key->str); */
     if (g_hash_table_lookup (mgr->priv->decrypt_keys, key->str) != nullptr)
-        ret = TRUE;
-    g_string_free (key, TRUE);
+        ret = true;
+    g_string_free (key, true);
 
     return ret;
 }
@@ -227,7 +227,7 @@ seaf_passwd_manager_get_decrypt_key (SeafPasswdManager *mgr,
 
     crypt_key = g_hash_table_lookup (mgr->priv->decrypt_keys, hash_key->str);
     if (!crypt_key) {
-        g_string_free (hash_key, TRUE);
+        g_string_free (hash_key, true);
         return nullptr;
     }
 
@@ -242,7 +242,7 @@ seaf_passwd_manager_get_decrypt_key (SeafPasswdManager *mgr,
     ret = seafile_crypt_key_new ();
     g_object_set (ret, "key", key_hex, "iv", iv_hex, nullptr);
 
-    g_string_free (hash_key, TRUE);
+    g_string_free (hash_key, true);
     return ret;
 }
 
@@ -261,10 +261,10 @@ seaf_passwd_manager_get_decrypt_key_raw (SeafPasswdManager *mgr,
 
     crypt_key = g_hash_table_lookup (mgr->priv->decrypt_keys, hash_key->str);
     if (!crypt_key) {
-        g_string_free (hash_key, TRUE);
+        g_string_free (hash_key, true);
         return -1;
     }
-    g_string_free (hash_key, TRUE);
+    g_string_free (hash_key, true);
 
     if (crypt_key->enc_version == 1) {
         memcpy (key_out, crypt_key->key, 16);

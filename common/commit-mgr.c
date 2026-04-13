@@ -370,7 +370,7 @@ seaf_commit_manager_traverse_commit_tree_with_limit (SeafCommitManager *mgr,
     SeafCommit *commit;
     GList *list = nullptr;
     GHashTable *commit_hash;
-    gboolean ret = TRUE;
+    gboolean ret = true;
 
     /* A hash table for recording id of traversed commits. */
     commit_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
@@ -379,7 +379,7 @@ seaf_commit_manager_traverse_commit_tree_with_limit (SeafCommitManager *mgr,
     if (!commit) {
         seaf_warning ("Failed to find commit %s.\n", head);
         g_hash_table_destroy (commit_hash);
-        return FALSE;
+        return false;
     }
 
     list = g_list_insert_sorted_with_data (list, commit,
@@ -391,14 +391,14 @@ seaf_commit_manager_traverse_commit_tree_with_limit (SeafCommitManager *mgr,
 
     int count = 0;
     while (list) {
-        gboolean stop = FALSE;
+        gboolean stop = false;
         commit = list->data;
         list = g_list_delete_link (list, list);
 
         if (!func (commit, data, &stop)) {
             if (!skip_errors) {
                 seaf_commit_unref (commit);
-                ret = FALSE;
+                ret = false;
                 goto out;
             }
         }
@@ -416,7 +416,7 @@ seaf_commit_manager_traverse_commit_tree_with_limit (SeafCommitManager *mgr,
                                       commit->parent_id, FALSE) < 0) {
                 if (!skip_errors) {
                     seaf_commit_unref (commit);
-                    ret = FALSE;
+                    ret = false;
                     goto out;
                 }
             }
@@ -426,7 +426,7 @@ seaf_commit_manager_traverse_commit_tree_with_limit (SeafCommitManager *mgr,
                                       commit->second_parent_id, FALSE) < 0) {
                 if (!skip_errors) {
                     seaf_commit_unref (commit);
-                    ret = FALSE;
+                    ret = false;
                     goto out;
                 }
             }
@@ -477,14 +477,14 @@ traverse_commit_tree_common (SeafCommitManager *mgr,
     SeafCommit *commit;
     GList *list = nullptr;
     GHashTable *commit_hash;
-    gboolean ret = TRUE;
+    gboolean ret = true;
 
     commit = seaf_commit_manager_get_commit (mgr, repo_id, version, head);
     if (!commit) {
         seaf_warning ("Failed to find commit %s.\n", head);
         // For head commit damaged, directly return FALSE
         // user can repair head by fsck then retraverse the tree
-        return FALSE;
+        return false;
     }
 
     /* A hash table for recording id of traversed commits. */
@@ -498,7 +498,7 @@ traverse_commit_tree_common (SeafCommitManager *mgr,
     g_hash_table_replace (commit_hash, key, key);
 
     while (list) {
-        gboolean stop = FALSE;
+        gboolean stop = false;
         commit = list->data;
         list = g_list_delete_link (list, list);
 
@@ -508,7 +508,7 @@ traverse_commit_tree_common (SeafCommitManager *mgr,
             /* If skip errors, continue to traverse parents. */
             if (!skip_errors) {
                 seaf_commit_unref (commit);
-                ret = FALSE;
+                ret = false;
                 goto out;
             }
         }
@@ -528,7 +528,7 @@ traverse_commit_tree_common (SeafCommitManager *mgr,
                 /* If skip errors, try insert second parent. */
                 if (!skip_errors) {
                     seaf_commit_unref (commit);
-                    ret = FALSE;
+                    ret = false;
                     goto out;
                 }
             }
@@ -540,7 +540,7 @@ traverse_commit_tree_common (SeafCommitManager *mgr,
 
                 if (!skip_errors) {
                     seaf_commit_unref (commit);
-                    ret = FALSE;
+                    ret = false;
                     goto out;
                 }
             }
@@ -581,7 +581,7 @@ seaf_commit_manager_traverse_commit_tree_truncated (SeafCommitManager *mgr,
                                                     gboolean skip_errors)
 {
     return traverse_commit_tree_common (mgr, repo_id, version, head,
-                                        func, data, skip_errors, TRUE);
+                                        func, data, skip_errors, true);
 }
 
 gboolean
@@ -593,7 +593,7 @@ seaf_commit_manager_commit_exists (SeafCommitManager *mgr,
 #if 0
     commit = g_hash_table_lookup (mgr->priv->commit_cache, id);
     if (commit != nullptr)
-        return TRUE;
+        return true;
 #endif
 
     return seaf_obj_store_obj_exists (mgr->obj_store, repo_id, version, id);
@@ -803,9 +803,9 @@ commit_from_json_object (const char *commit_id, json_t *object)
     commit->repo_name = g_strdup(repo_name);
     commit->repo_desc = g_strdup(repo_desc);
     if (encrypted && strcmp(encrypted, "true") == 0)
-        commit->encrypted = TRUE;
+        commit->encrypted = true;
     else
-        commit->encrypted = FALSE;
+        commit->encrypted = false;
     if (repo_category)
         commit->repo_category = g_strdup(repo_category);
     commit->device_name = g_strdup(device_name);
@@ -826,14 +826,14 @@ commit_from_json_object (const char *commit_id, json_t *object)
         }
     }
     if (no_local_history)
-        commit->no_local_history = TRUE;
+        commit->no_local_history = true;
     commit->version = version;
     if (new_merge)
-        commit->new_merge = TRUE;
+        commit->new_merge = true;
     if (conflict)
-        commit->conflict = TRUE;
+        commit->conflict = true;
     if (repaired)
-        commit->repaired = TRUE;
+        commit->repaired = true;
 
     return commit;
 }
@@ -911,7 +911,7 @@ save_commit (SeafCommitManager *manager,
     if (seaf_obj_store_write_obj (manager->obj_store,
                                   repo_id, version,
                                   commit->commit_id,
-                                  data, (int)len, TRUE) < 0) {
+                                  data, (int)len, true) < 0) {
         g_free (data);
         return -1;
     }

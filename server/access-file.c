@@ -318,7 +318,7 @@ next:
                 seaf_warning ("Failed to init decrypt.\n");
                 goto err;
             }
-            data->enc_init = TRUE;
+            data->enc_init = true;
         }
     }
     handle = data->handle;
@@ -335,7 +335,7 @@ next:
         data->handle = nullptr;
         if (data->crypt != nullptr) {
             EVP_CIPHER_CTX_free (data->ctx);
-            data->enc_init = FALSE;
+            data->enc_init = false;
         }
 
         if (data->idx == data->file->n_blocks - 1) {
@@ -539,16 +539,16 @@ test_firefox (evhtp_request_t *req)
 {
     const char *user_agent = evhtp_header_find (req->headers_in, "User-Agent");
     if (!user_agent)
-        return FALSE;
+        return false;
 
     GString *s = g_string_new (user_agent);
     if (g_strrstr (g_string_ascii_down (s)->str, "firefox")) {
-        g_string_free (s, TRUE);
-        return TRUE;
+        g_string_free (s, true);
+        return true;
     }
     else {
-        g_string_free (s, TRUE);
-        return FALSE;
+        g_string_free (s, true);
+        return false;
     }
 }
 
@@ -844,12 +844,12 @@ parse_range_val (const char *byte_ranges, guint64 *pstart, guint64 *pend,
 {
     char *ranges = strchr(byte_ranges, '=');
     if (!ranges) {
-        return FALSE;
+        return false;
     }
 
     char *minus;
     char *end_ptr;
-    gboolean error = FALSE;
+    gboolean error = false;
     char *ranges_dup = g_strdup (ranges + 1);
     char *tmp = ranges_dup;
     guint64 start;
@@ -857,19 +857,19 @@ parse_range_val (const char *byte_ranges, guint64 *pstart, guint64 *pend,
 
     minus = strchr(tmp, '-');
     if (!minus)
-        return FALSE;
+        return false;
 
     if (minus == tmp) {
         // -num mode
         start = strtoll(tmp, &end_ptr, 10);
         if (start == 0) {
             // range format is invalid
-            error = TRUE;
+            error = true;
         } else if (*end_ptr == '\0') {
             end = fsize - 1;
             start += fsize;
         } else {
-            error = TRUE;
+            error = true;
         }
     } else if (*(minus + 1) == '\0') {
         // num- mode
@@ -877,7 +877,7 @@ parse_range_val (const char *byte_ranges, guint64 *pstart, guint64 *pend,
         if (end_ptr == minus) {
             end = fsize - 1;
         } else {
-            error = TRUE;
+            error = true;
         }
     } else {
         // num-num mode
@@ -885,30 +885,30 @@ parse_range_val (const char *byte_ranges, guint64 *pstart, guint64 *pend,
         if (end_ptr == minus) {
             end = strtoll(minus + 1, &end_ptr, 10);
             if (*end_ptr != '\0') {
-                error = TRUE;
+                error = true;
             }
         } else {
-            error = TRUE;
+            error = true;
         }
     }
 
     g_free (ranges_dup);
 
     if (error)
-        return FALSE;
+        return false;
 
     if (end > fsize - 1) {
         end = fsize - 1;
     }
     if (start > end) {
         // Range format is valid, but range number is invalid
-        return FALSE;
+        return false;
     }
 
     *pstart = start;
     *pend = end;
 
-    return TRUE;
+    return true;
 }
 
 static void
@@ -1158,7 +1158,7 @@ can_use_cached_content (evhtp_request_t *req)
 {
     if (evhtp_kv_find (req->headers_in, "If-Modified-Since") != nullptr) {
         evhtp_send_reply (req, EVHTP_RES_NOTMOD);
-        return TRUE;
+        return true;
     }
 
     char http_date[256];
@@ -1183,7 +1183,7 @@ can_use_cached_content (evhtp_request_t *req)
     kv = evhtp_kv_new ("Cache-Control", "max-age=3600", 1, 1);
     evhtp_kvs_add_kv (req->headers_out, kv);
 
-    return FALSE;
+    return false;
 }
 
 static void
@@ -1599,7 +1599,7 @@ access_v2_cb(evhtp_request_t *req, void *arg)
         goto out;
     }
     set_etag (req, file_id);
-    set_no_cache (req, TRUE);
+    set_no_cache (req, true);
 
     byte_ranges = evhtp_kv_find (req->headers_in, "Range");
 
@@ -1659,7 +1659,7 @@ do_block(evhtp_request_t *req, SeafRepo *repo, const char *user, const char *fil
 {
     Seafile *file;
     uint32_t bsize;
-    gboolean found = FALSE;
+    gboolean found = false;
     int i;
     char blk_size[255];
     char cont_filename[SEAF_PATH_MAX];
@@ -1678,7 +1678,7 @@ do_block(evhtp_request_t *req, SeafRepo *repo, const char *user, const char *fil
                                                                blk_id);
             if (bm && bm->size >= 0) {
                 bsize = bm->size;
-                found = TRUE;
+                found = true;
             }
             g_free (bm);
             break;

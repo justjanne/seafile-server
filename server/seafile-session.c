@@ -173,7 +173,7 @@ load_config (SeafileSession *session, const char *config_file_path)
     session->seahub_conn_pool = connection_pool_new ();
 
     if (g_strcmp0 (log_to_stdout, "true") == 0) {
-        session->log_to_stdout = TRUE;
+        session->log_to_stdout = true;
     }
 
     if (!node_name || g_strcmp0 (node_name, "") == 0) {
@@ -182,7 +182,7 @@ load_config (SeafileSession *session, const char *config_file_path)
     session->node_name = g_strdup (node_name);
 
     if (use_go_fileserver && g_strcmp0 (use_go_fileserver, "true") == 0) {
-        session->go_fileserver = TRUE; 
+        session->go_fileserver = true;
     }
 
 out:
@@ -362,7 +362,7 @@ seafile_repair_session_new(const char *central_config_dir,
     char *config_file_path;
     GKeyFile *config;
     SeafileSession *session = nullptr;
-    gboolean notif_enabled = FALSE;
+    gboolean notif_enabled = false;
     int notif_port = 8083;
     gboolean cluster_mode;
     gboolean use_block_cache;
@@ -397,7 +397,7 @@ seafile_repair_session_new(const char *central_config_dir,
     session->ccnet_dir = abs_ccnet_dir;
     session->tmp_file_dir = tmp_file_dir;
     session->config = config;
-    session->is_repair = TRUE;
+    session->is_repair = true;
 
     if (load_database_config (session) < 0) {
         seaf_warning ("Failed to load database config.\n");

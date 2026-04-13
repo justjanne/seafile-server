@@ -330,9 +330,9 @@ obj_backend_fs_exists (ObjBackend *bend,
     id_to_path (bend->priv, obj_id, path, repo_id, version);
 
     if (seaf_stat (path, &st) == 0)
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 static void

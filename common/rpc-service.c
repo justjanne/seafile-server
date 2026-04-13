@@ -51,7 +51,7 @@ convert_repo (SeafRepo *r)
 
     if (r->virtual_info) {
         g_object_set (repo,
-                      "is_virtual", TRUE,
+                      "is_virtual", true,
                       "origin_repo_id", r->virtual_info->origin_repo_id,
                       "origin_path", r->virtual_info->path,
                       nullptr);
@@ -344,7 +344,7 @@ get_commit (SeafCommit *c, void *data, gboolean *stop)
 
     if (cp->truncate_time == 0)
     {
-        *stop = TRUE;
+        *stop = true;
         /* Stop after traversing the head commit. */
     }
     /* We use <= here. This is for handling clean trash and history.
@@ -361,17 +361,17 @@ get_commit (SeafCommit *c, void *data, gboolean *stop)
          * we need to access this commit in order to restore it
          * from trash.
          */
-        *stop = TRUE;
+        *stop = true;
     }
 
     /* Always traverse the head commit. */
     if (!cp->traversed_head)
-        cp->traversed_head = TRUE;
+        cp->traversed_head = true;
 
     /* if offset = 1, limit = 1, we should stop when the count = 2 */
     if (cp->limit > 0 && cp->count >= cp->offset + cp->limit) {
-        *stop = TRUE;
-        return TRUE;  /* TRUE to indicate no error */
+        *stop = true;
+        return true;  /* TRUE to indicate no error */
     }
 
     if (cp->count >= cp->offset) {
@@ -380,7 +380,7 @@ get_commit (SeafCommit *c, void *data, gboolean *stop)
     }
 
     ++cp->count;
-    return TRUE;                /* TRUE to indicate no error */
+    return true;                /* TRUE to indicate no error */
 }
 
 
@@ -446,7 +446,7 @@ seafile_get_commit_list (const char *repo_id,
     ret =
         seaf_commit_manager_traverse_commit_tree (seaf->commit_mgr,
                                                   repo->id, repo->version,
-                                                  commit_id, get_commit, &cp, TRUE);
+                                                  commit_id, get_commit, &cp, true);
     g_free (commit_id);
     seaf_repo_unref (repo);
 
@@ -3252,7 +3252,7 @@ char *seafile_get_dir_id_by_path (const char *repo_id,
     }
 
     char *rpath = format_dir_path (path);
-    char *ret = get_obj_id_by_path (repo_id, rpath, TRUE, error);
+    char *ret = get_obj_id_by_path (repo_id, rpath, true, error);
 
     g_free (rpath);
 
@@ -4063,9 +4063,9 @@ seafile_get_virtual_repos_by_owner (const char *owner, GError **error)
         char *orig_owner = seaf_repo_manager_get_repo_owner (seaf->repo_mgr,
                                                              orig_repo_id);
         if (g_strcmp0 (orig_owner, owner) == 0)
-            is_original_owner = TRUE;
+            is_original_owner = true;
         else
-            is_original_owner = FALSE;
+            is_original_owner = false;
         g_free (orig_owner);
 
         char *perm = seaf_repo_manager_check_permission (seaf->repo_mgr,
@@ -4421,7 +4421,7 @@ seafile_get_group_shared_repo_by_path (const char *repo_id,
     }
     SeafRepoManager *mgr = seaf->repo_mgr;
 
-    return seaf_get_group_shared_repo_by_path (mgr, repo_id, path, group_id, is_org ? TRUE:FALSE, error);
+    return seaf_get_group_shared_repo_by_path (mgr, repo_id, path, group_id, (bool) is_org, error);
 }
 
 GObject *
@@ -4437,7 +4437,7 @@ seafile_get_shared_repo_by_path (const char *repo_id,
     }
     SeafRepoManager *mgr = seaf->repo_mgr;
 
-    return seaf_get_shared_repo_by_path (mgr, repo_id, path, shared_to, is_org ? TRUE:FALSE, error);
+    return seaf_get_shared_repo_by_path (mgr, repo_id, path, shared_to, (bool) is_org, error);
 }
 
 GList *
@@ -4469,11 +4469,11 @@ seafile_repo_has_been_shared (const char *repo_id, int including_groups, GError 
 {
     if (!repo_id) {
         g_set_error (error, 0, SEAF_ERR_BAD_ARGS, "Arguments error");
-        return FALSE;
+        return false;
     }
 
     gboolean exists = seaf_share_manager_repo_has_been_shared (seaf->share_mgr, repo_id,
-                                                               including_groups ? TRUE : FALSE);
+                                                               (bool) including_groups);
     return exists ? 1 : 0;
 }
 
@@ -4543,7 +4543,7 @@ seafile_convert_repo_path (const char *repo_id,
     }
 
     char *rpath = format_dir_path (path);
-    char *ret = seaf_repo_manager_convert_repo_path(seaf->repo_mgr, repo_id, rpath, user, is_org ? TRUE : FALSE, error);
+    char *ret = seaf_repo_manager_convert_repo_path(seaf->repo_mgr, repo_id, rpath, user, (bool) is_org, error);
     g_free(rpath);
 
     return ret;
@@ -4766,7 +4766,7 @@ ccnet_rpc_get_top_groups (int including_org, GError **error)
     CcnetGroupManager *group_mgr = seaf->group_mgr;
     GList *groups = nullptr;
 
-    groups = ccnet_group_manager_get_top_groups (group_mgr, including_org ? TRUE : FALSE, error);
+    groups = ccnet_group_manager_get_top_groups (group_mgr, (bool) including_org, error);
 
     return groups;
 }
@@ -5050,7 +5050,7 @@ ccnet_rpc_get_groups (const char *username, int return_ancestors, GError **error
     }
 
     ret = ccnet_group_manager_get_groups_by_user (group_mgr, username,
-                                                  return_ancestors ? TRUE : FALSE, error);
+                                                  (bool) return_ancestors, error);
     return ret;
 }
 
@@ -5171,7 +5171,7 @@ ccnet_rpc_check_group_staff (int group_id, const char *user_name, int in_structu
 
     return ccnet_group_manager_check_group_staff (group_mgr,
                                                   group_id, user_name,
-                                                  in_structure ? TRUE : FALSE);
+                                                  (bool) in_structure);
 }
 
 int
@@ -5195,7 +5195,7 @@ ccnet_rpc_is_group_user (int group_id, const char *user, int in_structure, GErro
         return 0;
     }
 
-    return ccnet_group_manager_is_group_user (group_mgr, group_id, user, in_structure ? TRUE : FALSE);
+    return ccnet_group_manager_is_group_user (group_mgr, group_id, user, (bool) in_structure);
 }
 
 int
@@ -5267,7 +5267,7 @@ ccnet_rpc_remove_org (int org_id, GError **error)
     group_ids = ccnet_org_manager_get_org_group_ids (org_mgr, org_id, 0, INT_MAX);
     ptr = group_ids;
     while (ptr) {
-        ccnet_group_manager_remove_group (group_mgr, (int)(long)ptr->data, TRUE, error);
+        ccnet_group_manager_remove_group (group_mgr, (int)(long)ptr->data, true, error);
         ptr = ptr->next;
     }
     g_list_free (group_ids);

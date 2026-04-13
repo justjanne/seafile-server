@@ -87,7 +87,7 @@ seaf_cfg_manager_set_config (SeafCfgManager *mgr, const char *group, const char 
 {
     SeafDB *db = mgr->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
-    gboolean exists, err = FALSE;
+    gboolean exists, err = false;
 
     const char *sql = queries->get_seafile_conf_exists;
     exists = seaf_db_statement_exists(db, sql, &err,
@@ -173,14 +173,14 @@ seaf_cfg_manager_get_config_boolean (SeafCfgManager *mgr, const char *group, con
         ret = g_key_file_get_boolean(mgr->config, group, key, &err);
         if (err) {
             seaf_warning ("Config [%s:%s] not set, default is false.\n", group, key);
-            ret = FALSE;
+            ret = false;
             g_clear_error(&err);
         }
     } else {
         if (strcmp ("true", value) == 0)
-            ret = TRUE;
+            ret = true;
         else
-            ret = FALSE;
+            ret = false;
         g_free (value);
     }
 

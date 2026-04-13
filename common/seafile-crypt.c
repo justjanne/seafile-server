@@ -153,7 +153,7 @@ seafile_generate_magic (int version, const char *repo_id,
 
     seafile_derive_key (buf->str, buf->len, version, repo_salt, key, iv);
 
-    g_string_free (buf, TRUE);
+    g_string_free (buf, true);
     rawdata_to_hex (key, magic, 32);
 }
 
@@ -184,7 +184,7 @@ seafile_generate_pwd_hash (int version,
         pwd_hash_derive_key (buf->str, buf->len, repo_salt, algo, params_str, key);
     }
 
-    g_string_free (buf, TRUE);
+    g_string_free (buf, true);
     rawdata_to_hex (key, pwd_hash, 32);
 }
 
@@ -209,7 +209,7 @@ seafile_verify_repo_passwd (const char *repo_id,
 
     seafile_derive_key (buf->str, buf->len, version, repo_salt, key, iv);
 
-    g_string_free (buf, TRUE);
+    g_string_free (buf, true);
     if (version >= 2)
         rawdata_to_hex (key, hex, 32);
     else
@@ -245,7 +245,7 @@ seafile_pwd_hash_verify_repo_passwd (int version,
         pwd_hash_derive_key (buf->str, buf->len, repo_salt, algo, params_str, key);
     }
 
-    g_string_free (buf, TRUE);
+    g_string_free (buf, true);
     rawdata_to_hex (key, hex, 32);
 
     if (g_strcmp0 (hex, pwd_hash) == 0)

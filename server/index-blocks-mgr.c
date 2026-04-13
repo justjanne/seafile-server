@@ -119,7 +119,7 @@ scan_progress (void *data)
 
     pthread_mutex_unlock (&priv->progress_lock);
 
-    return TRUE;
+    return true;
 }
 
 static void
@@ -160,7 +160,7 @@ start_index_task (gpointer data, gpointer user_data)
         size = g_new (gint64, 1);
         if (seaf_fs_manager_index_blocks (seaf->fs_mgr,
                     repo->store_id, repo->version,
-                    path, sha1, size, crypt, TRUE, FALSE, &(progress->indexed)) < 0) {
+                    path, sha1, size, crypt, true, FALSE, &(progress->indexed)) < 0) {
             seaf_warning ("failed to index blocks");
             progress->status = -1;
             goto out;

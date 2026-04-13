@@ -199,7 +199,7 @@ get_all_orgs_cb (CcnetDBRow *row, void *data)
 
     *p_list = g_list_prepend (*p_list, org);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -265,7 +265,7 @@ get_org_cb (CcnetDBRow *row, void *data)
                            "creator", creator,
                            "ctime", ctime,
                            nullptr);
-    return FALSE;
+    return false;
 }
 
 CcnetOrganization *
@@ -365,7 +365,7 @@ get_orgs_by_user_cb (CcnetDBRow *row, void *data)
                         nullptr);
     *p_list = g_list_prepend (*p_list, org);
         
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -395,7 +395,7 @@ get_org_emailusers (CcnetDBRow *row, void *data)
     const char *email = (char *) seaf_db_row_get_column_text (row, 0);
 
     *list = g_list_prepend (*list, g_strdup (email));
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -492,7 +492,7 @@ get_org_group_ids (CcnetDBRow *row, void *data)
 
     *plist = g_list_prepend (*plist, (gpointer)(long)group_id);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -548,7 +548,7 @@ get_org_groups (CcnetDBRow *row, void *data)
 
     *plist = g_list_prepend (*plist, group);
 
-    return TRUE;
+    return true;
 }
 
 GList *

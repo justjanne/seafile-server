@@ -74,10 +74,10 @@ remove_expire_info (gpointer key, gpointer value, gpointer user_data)
     long now = *((long*)user_data);
 
     if (info && now >= info->expire_time) {
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 static int
@@ -93,7 +93,7 @@ clean_pulse (void *vmanager)
 
     pthread_mutex_unlock (&manager->priv->lock);
     
-    return TRUE;
+    return true;
 }
 
 int
@@ -169,7 +169,7 @@ seaf_web_at_manager_get_access_token (SeafWebAccessTokenManager *mgr,
     info->username = g_strdup (username);
     info->expire_time = expire;
     if (use_onetime) {
-        info->use_onetime = TRUE;
+        info->use_onetime = true;
     }
 
     g_hash_table_insert (mgr->priv->access_token_hash, g_strdup(t), info);

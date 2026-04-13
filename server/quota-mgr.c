@@ -452,18 +452,18 @@ collect_user_and_usage (SeafDBRow *row, void *data)
     usage = seaf_db_row_get_column_int64 (row, 1);
 
     if (!user)
-        return TRUE;
+        return true;
 
     SeafileUserQuotaUsage *user_usage= g_object_new (SEAFILE_TYPE_USER_QUOTA_USAGE,
                                                      "user", user,
                                                      "usage", usage,
                                                      nullptr);
     if (!user_usage)
-        return FALSE;
+        return false;
 
     *p = g_list_prepend (*p, user_usage);
 
-    return TRUE;
+    return true;
 }
 
 GList *

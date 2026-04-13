@@ -37,7 +37,7 @@ fsck_verify_seafobj (const char *store_id,
                      VerifyType type,
                      gboolean repair)
 {
-    gboolean valid = TRUE;
+    gboolean valid = true;
 
     valid = seaf_fs_manager_object_exists (seaf->fs_mgr, store_id,
                                            version, obj_id);
@@ -52,13 +52,13 @@ fsck_verify_seafobj (const char *store_id,
 
     if (type == VERIFY_FILE) {
         valid = seaf_fs_manager_verify_seafile (seaf->fs_mgr, store_id, version,
-                                                obj_id, TRUE, io_error);
+                                                obj_id, true, io_error);
         if (!valid && !*io_error && repair) {
             seaf_message ("File %s is damaged.\n", obj_id);
         }
     } else if (type == VERIFY_DIR) {
         valid = seaf_fs_manager_verify_seafdir (seaf->fs_mgr, store_id, version,
-                                                obj_id, TRUE, io_error);
+                                                obj_id, true, io_error);
         if (!valid && !*io_error && repair) {
             seaf_message ("Dir %s is damaged.\n", obj_id);
         }
@@ -76,7 +76,7 @@ check_blocks (const char *file_id, FsckData *fsck_data, gboolean *io_error)
     int ret = 0;
     int dummy;
 
-    gboolean ok = TRUE;
+    gboolean ok = true;
     SeafRepo *repo = fsck_data->repo;
     const char *store_id = repo->store_id;
     int version = repo->version;
@@ -110,7 +110,7 @@ check_blocks (const char *file_id, FsckData *fsck_data, gboolean *io_error)
             if (!ok) {
                 if (*io_error) {
                     if (ret < 0) {
-                        *io_error = FALSE;
+                        *io_error = false;
                     }
                     ret = -1;
                     break;
@@ -155,13 +155,13 @@ get_file_updated_commit (SeafCommit *commit, void *vdata, gboolean *stop)
     int ret;
 
     if (data->found) {
-        *stop = TRUE;
-        return TRUE;
+        *stop = true;
+        return true;
     }
 
     if (g_hash_table_lookup (data->visited_commits, commit->commit_id)) {
-        *stop = TRUE;
-        return TRUE;
+        *stop = true;
+        return true;
     }
 
     int dummy;
@@ -170,16 +170,16 @@ get_file_updated_commit (SeafCommit *commit, void *vdata, gboolean *stop)
 
     if (data->truncate_time == 0)
     {
-        *stop = TRUE;
+        *stop = true;
     } else if (data->truncate_time > 0 &&
              (gint64)(commit->ctime) < data->truncate_time &&
              data->traversed_head)
     {
-        *stop = TRUE;
+        *stop = true;
     }
 
     if (!data->traversed_head)
-        data->traversed_head = TRUE;
+        data->traversed_head = true;
 
     char *file_id;
     guint32 mode;
@@ -194,15 +194,15 @@ get_file_updated_commit (SeafCommit *commit, void *vdata, gboolean *stop)
     // Compare the file_id with the current file.
     // If the file_id has changed, then the previous commit is the commit where the file was modified.
     if (g_strcmp0 (data->file_id, file_id) != 0) {
-        data->found = TRUE;
-        *stop = TRUE;
+        data->found = true;
+        *stop = true;
     } else {
         g_free (data->commit_id);
         data->commit_id = g_strdup(commit->commit_id);
     }
     g_free (file_id);
 
-    return TRUE;
+    return true;
 }
 
 static int
@@ -278,12 +278,12 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
     SeafDirent *seaf_dent;
     char *dir_id = nullptr;
     char *path = nullptr;
-    gboolean io_error = FALSE;
+    gboolean io_error = false;
 
     SeafFSManager *mgr = seaf->fs_mgr;
     char *store_id = fsck_data->repo->store_id;
     int version = fsck_data->repo->version;
-    gboolean is_corrupted = FALSE;
+    gboolean is_corrupted = false;
 
     dir = seaf_fs_manager_get_seafdir (mgr, store_id, version, id);
     if (!dir) {
@@ -292,7 +292,7 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
 
     for (p = dir->entries; p; p = p->next) {
         seaf_dent = p->data;
-        io_error = FALSE;
+        io_error = false;
 
         if (S_ISREG(seaf_dent->mode)) {
             path = g_strdup_printf ("%s%s", parent_dir, seaf_dent->name);
@@ -308,7 +308,7 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
                     g_free (path);
                     goto out;
                 }
-                is_corrupted = TRUE;
+                is_corrupted = true;
                 if (fsck_data->options->repair) {
                     seaf_message ("Repo[%.8s] file %s(%.8s) is damaged, recreate an empty file.\n",
                                   fsck_data->repo->id, path, seaf_dent->id);
@@ -331,7 +331,7 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
                         g_free (path);
                         goto out;
                     }
-                    is_corrupted = TRUE;
+                    is_corrupted = true;
                     if (fsck_data->options->repair) {
                         seaf_message ("Repo[%.8s] file %s(%.8s) is damaged, recreate an empty file.\n",
                                       fsck_data->repo->id, path, seaf_dent->id);
@@ -373,7 +373,7 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
                     seaf_message ("Repo[%.8s] dir %s(%.8s) is damaged.\n",
                                   fsck_data->repo->id, path, seaf_dent->id);
                 }
-                is_corrupted = TRUE;
+                is_corrupted = true;
                 // dir damaged, set it empty
                 memcpy (seaf_dent->id, EMPTY_SHA1, 40);
 
@@ -387,7 +387,7 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
                     goto out;
                 }
                 if (strcmp (sub_dir_id, seaf_dent->id) != 0) {
-                    is_corrupted = TRUE;
+                    is_corrupted = true;
                     // dir damaged, set it to new dir_id
                     memcpy (seaf_dent->id, sub_dir_id, 41);
                 }
@@ -565,7 +565,7 @@ fsck_get_repo_commit (const char *repo_id, int version,
     int ret = seaf_obj_store_read_obj (seaf->commit_mgr->obj_store, repo_id,
                                        version, obj_id, &data, &data_len);
     if (ret < 0 || data == nullptr)
-        return TRUE;
+        return true;
 
     SeafCommit *cur_commit = seaf_commit_from_data (obj_id, data, data_len);
     if (cur_commit != nullptr) {
@@ -573,7 +573,7 @@ fsck_get_repo_commit (const char *repo_id, int version,
     }
 
     g_free(data);
-    return TRUE;
+    return true;
 }
 
 static SeafRepo*
@@ -609,17 +609,17 @@ get_available_repo (char *repo_id, gboolean repair)
 
     vinfo = seaf_repo_manager_get_virtual_repo_info (seaf->repo_mgr, repo_id);
     if (vinfo) {
-        repo->is_virtual = TRUE;
+        repo->is_virtual = true;
         memcpy (repo->store_id, vinfo->origin_repo_id, 36);
         seaf_virtual_repo_info_free (vinfo);
     } else {
-        repo->is_virtual = FALSE;
+        repo->is_virtual = false;
         memcpy (repo->store_id, repo->id, 36);
     }
 
     for (temp_list = commit_list; temp_list; temp_list = temp_list->next) {
         temp_commit = temp_list->data;
-        io_error = FALSE;
+        io_error = false;
 
         if (!fsck_verify_seafobj (repo->store_id, 1, temp_commit->root_id,
                                   &io_error, VERIFY_DIR, repair)) {
@@ -672,7 +672,7 @@ static void
 repair_repo(char *repo_id, FsckOptions *options)
 {
     gboolean exists;
-    gboolean reset = FALSE;
+    gboolean reset = false;
     SeafRepo *repo;
     gboolean io_error;
 
@@ -698,7 +698,7 @@ repair_repo(char *repo_id, FsckOptions *options)
             if (!repo) {
                 goto next;
             }
-            reset = TRUE;
+            reset = true;
         } else {
             SeafCommit *commit = seaf_commit_manager_get_commit (seaf->commit_mgr, repo->id,
                                                                  repo->version,
@@ -710,7 +710,7 @@ repair_repo(char *repo_id, FsckOptions *options)
                 goto next;
             }
 
-            io_error = FALSE;
+            io_error = false;
             if (!fsck_verify_seafobj (repo->store_id, repo->version,
                                       commit->root_id,  &io_error,
                                       VERIFY_DIR, options->repair)) {
@@ -728,7 +728,7 @@ repair_repo(char *repo_id, FsckOptions *options)
                     if (!repo) {
                         goto next;
                     }
-                    reset = TRUE;
+                    reset = true;
                 }
             } else {
                 // head commit is available
@@ -783,7 +783,7 @@ repair_repos (GList *repo_id_list, FsckOptions *options)
      }
 
     if (options->max_thread_num) {
-        g_thread_pool_free(pool, FALSE, TRUE);
+        g_thread_pool_free(pool, FALSE, true);
     }
 }
 
@@ -821,14 +821,14 @@ write_enc_block_to_file (const char *repo_id,
     EVP_CIPHER_CTX ctx;
     char *dec_out;
     int dec_out_len;
-    gboolean ret = TRUE;
+    gboolean ret = true;
 
     bmd = seaf_block_manager_stat_block (seaf->block_mgr,
                                          repo_id, version,
                                          block_id);
     if (!bmd) {
         seaf_warning ("Failed to stat block %s.\n", block_id);
-        return FALSE;
+        return false;
     }
 
     handle = seaf_block_manager_open_block (seaf->block_mgr,
@@ -837,13 +837,13 @@ write_enc_block_to_file (const char *repo_id,
     if (!handle) {
         seaf_warning ("Failed to open block %s.\n", block_id);
         g_free (bmd);
-        return FALSE;
+        return false;
     }
 
     if (seafile_decrypt_init (&ctx, crypt->version,
                               crypt->key, crypt->iv) < 0) {
         seaf_warning ("Failed to init decrypt.\n");
-        ret = FALSE;
+        ret = false;
         goto out;
     }
 
@@ -852,7 +852,7 @@ write_enc_block_to_file (const char *repo_id,
         n = seaf_block_manager_read_block (seaf->block_mgr, handle, buf, sizeof(buf));
         if (n < 0) {
             seaf_warning ("Failed to read block %s.\n", block_id);
-            ret = FALSE;
+            ret = false;
             break;
         } else if (n == 0) {
             break;
@@ -862,7 +862,7 @@ write_enc_block_to_file (const char *repo_id,
         dec_out = g_new0 (char, n + 16);
         if (!dec_out) {
             seaf_warning ("Failed to alloc memory.\n");
-            ret = FALSE;
+            ret = false;
             break;
         }
 
@@ -873,7 +873,7 @@ write_enc_block_to_file (const char *repo_id,
                                n) == 0) {
             seaf_warning ("Failed to decrypt block %s .\n", block_id);
             g_free (dec_out);
-            ret = FALSE;
+            ret = false;
             break;
         }
 
@@ -881,7 +881,7 @@ write_enc_block_to_file (const char *repo_id,
             seaf_warning ("Failed to write block %s to file %s.\n",
                           block_id, path);
             g_free (dec_out);
-            ret = FALSE;
+            ret = false;
             break;
         }
 
@@ -891,7 +891,7 @@ write_enc_block_to_file (const char *repo_id,
                                      &dec_out_len) == 0) {
                 seaf_warning ("Failed to decrypt block %s .\n", block_id);
                 g_free (dec_out);
-                ret = FALSE;
+                ret = false;
                 break;
             }
             if (dec_out_len > 0) {
@@ -899,7 +899,7 @@ write_enc_block_to_file (const char *repo_id,
                     seaf_warning ("Failed to write block %s to file %s.\n",
                                   block_id, path);
                     g_free (dec_out);
-                    ret = FALSE;
+                    ret = false;
                     break;
                 }
             }
@@ -928,21 +928,21 @@ write_nonenc_block_to_file (const char *repo_id,
 {
     BlockHandle *handle;
     char buf[64 * 1024];
-    gboolean ret = TRUE;
+    gboolean ret = true;
     int n;
 
     handle = seaf_block_manager_open_block (seaf->block_mgr,
                                             repo_id, version,
                                             block_id, BLOCK_READ);
     if (!handle) {
-        return FALSE;
+        return false;
     }
 
     while (1) {
         n = seaf_block_manager_read_block (seaf->block_mgr, handle, buf, sizeof(buf));
         if (n < 0) {
             seaf_warning ("Failed to read block %s.\n", block_id);
-            ret = FALSE;
+            ret = false;
             break;
         } else if (n == 0) {
             break;
@@ -951,7 +951,7 @@ write_nonenc_block_to_file (const char *repo_id,
         if (writen (fd, buf, n) != n) {
             seaf_warning ("Failed to write block %s to file %s.\n",
                           block_id, path);
-            ret = FALSE;
+            ret = false;
             break;
         }
     }
@@ -981,7 +981,7 @@ create_file (const char *repo_id,
     char *block_id;
     int fd;
     Seafile *seafile;
-    gboolean ret = TRUE;
+    gboolean ret = true;
     int version = 1;
 
     fd = g_open (path, O_CREAT | O_WRONLY | O_BINARY, 0666);
@@ -993,7 +993,7 @@ create_file (const char *repo_id,
     seafile = seaf_fs_manager_get_seafile (seaf->fs_mgr, repo_id,
                                            version, file_id);
     if (!seafile) {
-        ret = FALSE;
+        ret = false;
         goto out;
     }
 
@@ -1088,7 +1088,7 @@ get_available_commit (const char *repo_id)
     while (temp_list) {
         next_list = temp_list->next;
         temp_commit = temp_list->data;
-        io_error = FALSE;
+        io_error = false;
 
         if (memcmp (temp_commit->root_id, EMPTY_SHA1, 40) == 0) {
             seaf_commit_unref (temp_commit);

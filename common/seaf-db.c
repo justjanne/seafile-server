@@ -149,18 +149,18 @@ mysql_conn_pool_get_connection (SeafDB *db)
             continue;
         }
         if (mysql_db_connection_ping (conn)) {
-            conn->is_available = FALSE;
+            conn->is_available = false;
             goto out;
         }
-        conn->is_available = FALSE;
-        conn->delete_pending = TRUE;
+        conn->is_available = false;
+        conn->delete_pending = true;
     }
     conn = nullptr;
     if (size < pool->max_connections) {
         conn = mysql_db_get_connection (db);
         if (conn) {
             conn->pool = pool;
-            conn->is_available = FALSE;
+            conn->is_available = false;
             g_ptr_array_add (pool->connections, conn);
         }
     }
@@ -201,7 +201,7 @@ mysql_conn_pool_release_connection (DBConnection *conn, gboolean need_close)
     }
 
     pthread_mutex_lock (&conn->pool->lock);
-    conn->is_available = TRUE;
+    conn->is_available = true;
     pthread_mutex_unlock (&conn->pool->lock);
 }
 
@@ -225,8 +225,8 @@ mysql_conn_keepalive (void *arg)
             if (conn->is_available) {
                 rc = db_ops.execute_sql (conn, sql, 0, args, nullptr);
                 if (rc < 0) {
-                    conn->is_available = FALSE;
-                    conn->delete_pending = TRUE;
+                    conn->is_available = false;
+                    conn->delete_pending = true;
                 }
             }
         }
@@ -356,18 +356,18 @@ pgsql_conn_pool_get_connection (SeafDB *db)
             continue;
         }
         if (pgsql_db_connection_ping (conn)) {
-            conn->is_available = FALSE;
+            conn->is_available = false;
             goto out;
         }
-        conn->is_available = FALSE;
-        conn->delete_pending = TRUE;
+        conn->is_available = false;
+        conn->delete_pending = true;
     }
     conn = nullptr;
     if (size < pool->max_connections) {
         conn = pgsql_db_get_connection (db);
         if (conn) {
             conn->pool = pool;
-            conn->is_available = FALSE;
+            conn->is_available = false;
             g_ptr_array_add (pool->connections, conn);
         }
     }
@@ -408,7 +408,7 @@ pgsql_conn_pool_release_connection (DBConnection *conn, gboolean need_close)
     }
 
     pthread_mutex_lock (&conn->pool->lock);
-    conn->is_available = TRUE;
+    conn->is_available = true;
     pthread_mutex_unlock (&conn->pool->lock);
 }
 
@@ -509,7 +509,7 @@ seaf_db_query (SeafDB *db, const char *sql)
     int retry_count = 0;
 
     while (ret < 0) {
-        gboolean retry = FALSE;
+        gboolean retry = false;
         DBConnection *conn = db_ops.get_connection (db);
         if (!conn)
             return -1;
@@ -590,7 +590,7 @@ seaf_db_statement_query (SeafDB *db, const char *sql, int n, ...)
     int retry_count = 0;
 
     while (ret < 0) {
-        gboolean retry = FALSE;
+        gboolean retry = false;
         DBConnection *conn = db_ops.get_connection (db);
         if (!conn)
             return -1;
@@ -619,11 +619,11 @@ seaf_db_statement_exists (SeafDB *db, const char *sql, gboolean *db_err, int n, 
     int retry_count = 0;
 
     while (n_rows < 0) {
-        gboolean retry = FALSE;
+        gboolean retry = false;
         DBConnection *conn = db_ops.get_connection(db);
         if (!conn) {
-            *db_err = TRUE;
-            return FALSE;
+            *db_err = true;
+            return false;
         }
 
         va_list args;
@@ -641,10 +641,10 @@ seaf_db_statement_exists (SeafDB *db, const char *sql, gboolean *db_err, int n, 
     }
 
     if (n_rows < 0) {
-        *db_err = TRUE;
-        return FALSE;
+        *db_err = true;
+        return false;
     } else {
-        *db_err = FALSE;
+        *db_err = false;
         return (n_rows != 0);
     }
 }
@@ -658,7 +658,7 @@ seaf_db_statement_foreach_row (SeafDB *db, const char *sql,
     int retry_count = 0;
 
     while (ret < 0) {
-        gboolean retry = FALSE;
+        gboolean retry = false;
         DBConnection *conn = db_ops.get_connection (db);
         if (!conn)
             return -1;
@@ -687,7 +687,7 @@ get_int_cb (SeafDBRow *row, void *data)
 
     *pret = seaf_db_row_get_column_int (row, 0);
 
-    return FALSE;
+    return false;
 }
 
 int
@@ -698,7 +698,7 @@ seaf_db_statement_get_int (SeafDB *db, const char *sql, int n, ...)
     int retry_count = 0;
 
     while (rc < 0) {
-        gboolean retry = FALSE;
+        gboolean retry = false;
         DBConnection *conn = db_ops.get_connection (db);
         if (!conn)
             return -1;
@@ -727,7 +727,7 @@ get_int64_cb (SeafDBRow *row, void *data)
 
     *pret = seaf_db_row_get_column_int64 (row, 0);
 
-    return FALSE;
+    return false;
 }
 
 gint64
@@ -738,7 +738,7 @@ seaf_db_statement_get_int64 (SeafDB *db, const char *sql, int n, ...)
     int retry_count = 0;
 
     while (rc < 0) {
-        gboolean retry = FALSE;
+        gboolean retry = false;
         DBConnection *conn = db_ops.get_connection (db);
         if (!conn)
             return -1;
@@ -767,7 +767,7 @@ get_string_cb (SeafDBRow *row, void *data)
 
     *pret = g_strdup(seaf_db_row_get_column_text (row, 0));
 
-    return FALSE;
+    return false;
 }
 
 char *
@@ -778,7 +778,7 @@ seaf_db_statement_get_string (SeafDB *db, const char *sql, int n, ...)
     int retry_count = 0;
 
     while (rc < 0) {
-        gboolean retry = FALSE;
+        gboolean retry = false;
         DBConnection *conn = db_ops.get_connection (db);
         if (!conn)
             return nullptr;
@@ -812,7 +812,7 @@ seaf_db_begin_transaction (SeafDB *db)
     }
 
     if (db_ops.execute_sql_no_stmt (conn, "BEGIN", nullptr) < 0) {
-        db_ops.release_connection (conn, TRUE);
+        db_ops.release_connection (conn, true);
         return trans;
     }
 
@@ -835,7 +835,7 @@ seaf_db_commit (SeafDBTrans *trans)
     DBConnection *conn = trans->conn;
 
     if (db_ops.execute_sql_no_stmt (conn, "COMMIT", nullptr) < 0) {
-        trans->need_close = TRUE;
+        trans->need_close = true;
         return -1;
     }
 
@@ -848,7 +848,7 @@ seaf_db_rollback (SeafDBTrans *trans)
     DBConnection *conn = trans->conn;
 
     if (db_ops.execute_sql_no_stmt (conn, "ROLLBACK", nullptr) < 0) {
-        trans->need_close = TRUE;
+        trans->need_close = true;
         return -1;
     }
 
@@ -866,7 +866,7 @@ seaf_db_trans_query (SeafDBTrans *trans, const char *sql, int n, ...)
     va_end (args);
 
     if (ret < 0)
-        trans->need_close = TRUE;
+        trans->need_close = true;
 
     return ret;
 }
@@ -885,11 +885,11 @@ seaf_db_trans_check_for_existence (SeafDBTrans *trans,
     va_end (args);
 
     if (n_rows < 0) {
-        trans->need_close = TRUE;
-        *db_err = TRUE;
-        return FALSE;
+        trans->need_close = true;
+        *db_err = true;
+        return false;
     } else {
-        *db_err = FALSE;
+        *db_err = false;
         return (n_rows != 0);
     }
 }
@@ -907,7 +907,7 @@ seaf_db_trans_foreach_selected_row (SeafDBTrans *trans, const char *sql,
     va_end (args);
 
     if (ret < 0)
-        trans->need_close = TRUE;
+        trans->need_close = true;
 
     return ret;
 }
@@ -1083,7 +1083,7 @@ mysql_db_execute_sql_no_stmt (DBConnection *vconn, const char *sql, gboolean *re
 
     if (rc == CR_SERVER_GONE_ERROR || rc == CR_SERVER_LOST) {
         if (retry)
-            *retry = TRUE;
+            *retry = true;
     }
 
     seaf_warning ("Failed to execute sql %s: %s\n", sql, mysql_error(conn->db_conn));
@@ -1105,7 +1105,7 @@ _prepare_stmt_mysql (MYSQL *db, const char *sql, gboolean *retry)
         int err_code = mysql_stmt_errno (stmt);
         if (err_code == CR_SERVER_GONE_ERROR || err_code == CR_SERVER_LOST) {
             if (retry)
-                *retry = TRUE;
+                *retry = true;
         }
         seaf_warning ("Failed to prepare sql %s: %s\n", sql, mysql_stmt_error(stmt));
         mysql_stmt_close (stmt);
@@ -1139,7 +1139,7 @@ _bind_params_mysql (MYSQL_STMT *stmt, MYSQL_BIND *params, int n, va_list args)
             params[i].is_null = 0;
         } else if (strcmp (type, "string") == 0) {
             const char *s = va_arg (args, const char *);
-            static my_bool yes = TRUE;
+            static my_bool yes = true;
             params[i].buffer_type = MYSQL_TYPE_STRING;
             params[i].buffer = g_strdup(s);
             unsigned long *plen = g_new (unsigned long, 1);
@@ -1201,7 +1201,7 @@ out:
         int err_code = mysql_stmt_errno (stmt);
         if (err_code == CR_SERVER_GONE_ERROR || err_code == CR_SERVER_LOST) {
             if (retry)
-                *retry = TRUE;
+                *retry = true;
         }
     }
     if (stmt)
@@ -1256,7 +1256,7 @@ mysql_db_query_foreach_row (DBConnection *vconn, const char *sql,
             err_code = mysql_stmt_errno (stmt);
             if (err_code == CR_SERVER_GONE_ERROR || err_code == CR_SERVER_LOST) {
                 if (retry)
-                    *retry = TRUE;
+                    *retry = true;
             }
             goto out;
         }
@@ -1268,7 +1268,7 @@ mysql_db_query_foreach_row (DBConnection *vconn, const char *sql,
         err_code = mysql_stmt_errno (stmt);
         if (err_code == CR_SERVER_GONE_ERROR || err_code == CR_SERVER_LOST) {
             if (retry)
-                *retry = TRUE;
+                *retry = true;
         }
         goto out;
     }
@@ -1294,13 +1294,13 @@ mysql_db_query_foreach_row (DBConnection *vconn, const char *sql,
         err_code = mysql_stmt_errno (stmt);
         if (err_code == CR_SERVER_GONE_ERROR || err_code == CR_SERVER_LOST) {
             if (retry)
-                *retry = TRUE;
+                *retry = true;
         }
         goto out;
     }
 
     int rc;
-    gboolean next_row = TRUE;
+    gboolean next_row = true;
     while (1) {
         rc = mysql_stmt_fetch (stmt);
         if (rc == 1) {
@@ -1567,7 +1567,7 @@ _replace_question_marks (const char *sql)
     GString *res = g_string_new (nullptr);
     const char *p = sql;
     int count = 1;
-    gboolean in_quote = FALSE;
+    gboolean in_quote = false;
 
     while (*p) {
         if (*p == '\'') {

@@ -79,9 +79,9 @@ do_create_virtual_repo (SeafRepoManager *mgr,
 
     repo = seaf_repo_new (repo_id, repo_name, repo_desc);
 
-    repo->no_local_history = TRUE;
+    repo->no_local_history = true;
     if (passwd != nullptr && passwd[0] != '\0') {
-        repo->encrypted = TRUE;
+        repo->encrypted = true;
         repo->enc_version = origin_repo->enc_version;
         if (repo->enc_version >= 3)
             memcpy (repo->salt, origin_repo->salt, 64);
@@ -424,7 +424,7 @@ load_virtual_info (SeafDBRow *row, void *p_vinfo)
 
     *((SeafVirtRepo **)p_vinfo) = vinfo;
 
-    return FALSE;
+    return false;
 }
 
 SeafVirtRepo *
@@ -496,7 +496,7 @@ collect_virtual_repo_ids (SeafDBRow *row, void *data)
     repo_id = seaf_db_row_get_column_text (row, 0);
     *p_ids = g_list_prepend (*p_ids, g_strdup(repo_id));
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -569,7 +569,7 @@ collect_virtual_info (SeafDBRow *row, void *plist)
 
     *pret = g_list_prepend (*pret, vinfo);
 
-    return TRUE;
+    return true;
 }
 
 GList *
@@ -650,7 +650,7 @@ handle_missing_virtual_repo (SeafRepoManager *mgr,
         return;
     }
 
-    int rc = diff_commits (parent, head, &diff_res, TRUE);
+    int rc = diff_commits (parent, head, &diff_res, true);
     if (rc < 0) {
         seaf_warning ("Failed to diff commit %s to %s.\n",
                       parent->commit_id, head->commit_id);
@@ -659,7 +659,7 @@ handle_missing_virtual_repo (SeafRepoManager *mgr,
     }
 
     char *path = vinfo->path, *sub_path, *p, *par_path;
-    gboolean is_renamed = FALSE;
+    gboolean is_renamed = false;
     p = &path[strlen(path)];
     par_path = g_strdup(path);
     sub_path = nullptr;
@@ -716,7 +716,7 @@ handle_missing_virtual_repo (SeafRepoManager *mgr,
                         }
                         g_free(new_name);
                     }
-                    is_renamed = TRUE;
+                    is_renamed = true;
                     g_free (new_path);
                     break;
                 }
@@ -976,7 +976,7 @@ static void *merge_virtual_repo (void *vtask)
         opt.n_ways = 3;
         memcpy (opt.remote_repo_id, repo_id, 36);
         memcpy (opt.remote_head, head->commit_id, 40);
-        opt.do_merge = TRUE;
+        opt.do_merge = true;
 
         roots[0] = base_root; /* base */
         roots[1] = orig_root; /* head */
@@ -1063,7 +1063,7 @@ schedule_merge_tasks (void *vscheduler)
     /*             g_queue_get_length (scheduler->queue), n_running); */
 
     if (n_running >= MAX_RUNNING_TASKS)
-        return TRUE;
+        return true;
 
     pthread_mutex_lock (&scheduler->q_lock);
 
@@ -1098,7 +1098,7 @@ schedule_merge_tasks (void *vscheduler)
 
     pthread_mutex_unlock (&scheduler->q_lock);
 
-    return TRUE;
+    return true;
 }
 
 static gint task_cmp (gconstpointer a, gconstpointer b)

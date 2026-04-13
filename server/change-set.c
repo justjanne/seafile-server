@@ -217,7 +217,7 @@ delete_from_tree (ChangeSet *changeset,
     ChangeSetDirent *parent_dent = nullptr;
     SeafDir *seaf_dir;
 
-    *parent_empty = FALSE;
+    *parent_empty = false;
 
     parts = g_strsplit (path, "/", 0);
     n = g_strv_length(parts);
@@ -234,7 +234,7 @@ delete_from_tree (ChangeSet *changeset,
                 /* Remove from hash table without freeing dent. */
                 remove_dent_from_dir (dir, dname);
                 if (g_hash_table_size (dir->dents) == 0)
-                    *parent_empty = TRUE;
+                    *parent_empty = true;
                 ret = dent;
                 // update parent dir mtime when delete dirs locally.
                 if (parent_dent) {
@@ -263,7 +263,7 @@ delete_from_tree (ChangeSet *changeset,
                 /* Remove from hash table without freeing dent. */
                 remove_dent_from_dir (dir, dname);
                 if (g_hash_table_size (dir->dents) == 0)
-                    *parent_empty = TRUE;
+                    *parent_empty = true;
                 ret = dent;
                 // update parent dir mtime when delete files locally.
                 if (parent_dent) {
@@ -286,7 +286,7 @@ remove_from_changeset_recursive (ChangeSet *changeset,
                                  int *mode)
 {
     ChangeSetDirent *dent;
-    gboolean parent_empty = FALSE;
+    gboolean parent_empty = false;
 
     dent = delete_from_tree (changeset, path, &parent_empty);
     if (mode && dent)

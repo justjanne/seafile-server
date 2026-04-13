@@ -375,7 +375,7 @@ http_post (Connection *conn, const char *url, const char *token,
     ret = http_post_common (curl, url, &headers, token, req_content, req_size,
                             rsp_status, rsp_content, rsp_size, timeout, timeout_sec);
     if (ret < 0) {
-        conn->release = TRUE;
+        conn->release = true;
     }
     curl_slist_free_all (headers);
     return ret;
@@ -435,7 +435,7 @@ gen_jwt_token ()
         goto out;
     }
 
-    ret = jwt_add_grant_bool (jwt, "is_internal", TRUE);
+    ret = jwt_add_grant_bool (jwt, "is_internal", true);
     if (ret != 0) {
         seaf_warning ("Failed to add is_internal to jwt\n");
         goto out;
@@ -504,9 +504,9 @@ http_tx_manager_get_nickname (const char *modifier)
 
     url = g_strdup_printf("%s/user-list/", seaf->seahub_url);
     ret = http_post_common (curl, url, &headers, jwt_token, req_content, strlen(req_content),
-                            &rsp_status, &rsp_content, &rsp_size, TRUE, 45);
+                            &rsp_status, &rsp_content, &rsp_size, true, 45);
     if (ret < 0) {
-        conn->release = TRUE;
+        conn->release = true;
         goto out;
     }
 
@@ -649,9 +649,9 @@ http_tx_manager_query_share_link_info (const char *token, const char *cookie, co
 
     url = g_strdup_printf("%s/check-share-link-access/?type=%s", seaf->seahub_url, type);
     ret = http_post_common (curl, url, &headers, jwt_token, req_content, strlen(req_content),
-                            &rsp_status, &rsp_content, &rsp_size, TRUE, 45);
+                            &rsp_status, &rsp_content, &rsp_size, true, 45);
     if (ret < 0) {
-        conn->release = TRUE;
+        conn->release = true;
         goto out;
     }
 
@@ -760,9 +760,9 @@ http_tx_manager_check_file_access (const char *repo_id, const char *token, const
 
     url = g_strdup_printf("%s/repos/%s/check-access/", seaf->seahub_url, repo_id);
     ret = http_post_common (curl, url, &headers, jwt_token, req_content, strlen(req_content),
-                            &rsp_status, &rsp_content, &rsp_size, TRUE, 45);
+                            &rsp_status, &rsp_content, &rsp_size, true, 45);
     if (ret < 0) {
-        conn->release = TRUE;
+        conn->release = true;
         goto out;
     }
 

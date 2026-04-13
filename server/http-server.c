@@ -199,7 +199,7 @@ load_http_config (HttpServerStruct *htp_server, SeafileSession *session)
                                                            "verify_client_blocks_after_sync",
                                                            &error);
     if (error) {
-        htp_server->verify_client_blocks = TRUE;
+        htp_server->verify_client_blocks = true;
         g_clear_error(&error);
     } else {
         htp_server->verify_client_blocks = verify_client_blocks;
@@ -417,21 +417,21 @@ get_vir_repo_info (SeafDBRow *row, void *data)
 {
     const char *repo_id = seaf_db_row_get_column_text (row, 0);
     if (!repo_id)
-        return FALSE;
+        return false;
     const char *origin_id = seaf_db_row_get_column_text (row, 1);
     if (!origin_id)
-        return FALSE;
+        return false;
 
     VirRepoInfo **vinfo = data;
     *vinfo = g_new0 (VirRepoInfo, 1);
     if (!*vinfo)
-        return FALSE;
+        return false;
     (*vinfo)->store_id = g_strdup (origin_id);
     if (!(*vinfo)->store_id)
-        return FALSE;
+        return false;
     (*vinfo)->expire_time = time (nullptr) + VIRINFO_EXPIRE_TIME;
 
-    return TRUE;
+    return true;
 }
 
 static char *
@@ -754,7 +754,7 @@ get_check_permission_cb (evhtp_request_t *req, void *arg)
         goto out;
     }
 
-    int token_status = validate_token (htp_server, req, repo_id, &username, TRUE);
+    int token_status = validate_token (htp_server, req, repo_id, &username, true);
     if (token_status != EVHTP_RES_OK) {
         evhtp_send_reply (req, token_status);
         goto out;
@@ -763,7 +763,7 @@ get_check_permission_cb (evhtp_request_t *req, void *arg)
     /* We shall actually check the permission from database, don't rely on
      * the cache here.
      */
-    int perm_status = check_permission (htp_server, repo_id, username, op, TRUE);
+    int perm_status = check_permission (htp_server, repo_id, username, op, true);
     if (perm_status == EVHTP_RES_FORBIDDEN) {
         evhtp_send_reply (req, EVHTP_RES_FORBIDDEN);
         goto out;
@@ -880,7 +880,7 @@ get_branch (SeafDBRow *row, void *vid)
     commit_id = seaf_db_row_get_column_text (row, 0);
     memcpy (ret, commit_id, 41);
 
-    return FALSE;
+    return false;
 }
 
 static void
@@ -889,7 +889,7 @@ get_head_commit_cb (evhtp_request_t *req, void *arg)
     HttpServer *htp_server = seaf->http_server->priv;
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     char *repo_id = parts[1];
-    gboolean db_err = FALSE, exists = TRUE;
+    gboolean db_err = FALSE, exists = true;
     int token_status;
     char commit_id[41];
     char *sql;
@@ -952,7 +952,7 @@ gen_merge_description (SeafRepo *repo,
     char *desc;
 
     diff_merge_roots (repo->store_id, repo->version,
-                      merged_root, p1_root, p2_root, &results, TRUE);
+                      merged_root, p1_root, p2_root, &results, true);
 
     desc = diff_results_to_description (results);
 
@@ -980,7 +980,7 @@ fast_forward_or_merge (const char *repo_id,
     int ret = 0;
     char *last_gc_id = nullptr;
     gboolean check_gc;
-    gboolean gc_conflict = FALSE;
+    gboolean gc_conflict = false;
 
     repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
     if (!repo) {
@@ -1000,7 +1000,7 @@ fast_forward_or_merge (const char *repo_id,
      * being referenced by this new commit.
      */
     if (seaf_db_type(seaf->db) == SEAF_DB_TYPE_SQLITE)
-        check_gc = FALSE;
+        check_gc = false;
     else
         check_gc = seaf_repo_has_last_gc_id (repo, token);
 
@@ -1029,7 +1029,7 @@ retry:
         opt.n_ways = 3;
         memcpy (opt.remote_repo_id, repo_id, 36);
         memcpy (opt.remote_head, new_commit->commit_id, 40);
-        opt.do_merge = TRUE;
+        opt.do_merge = true;
 
         roots[0] = base->root_id; /* base */
         roots[1] = current_head->root_id; /* head */
@@ -1060,9 +1060,9 @@ retry:
 
         merged_commit->parent_id = g_strdup (current_head->commit_id);
         merged_commit->second_parent_id = g_strdup (new_commit->commit_id);
-        merged_commit->new_merge = TRUE;
+        merged_commit->new_merge = true;
         if (opt.conflict)
-            merged_commit->conflict = TRUE;
+            merged_commit->conflict = true;
         seaf_repo_to_commit (repo, merged_commit);
 
         if (seaf_commit_manager_add_commit (seaf->commit_mgr, merged_commit) < 0) {
@@ -1077,7 +1077,7 @@ retry:
 
     seaf_branch_set_commit(repo->head, merged_commit->commit_id);
 
-    gc_conflict = FALSE;
+    gc_conflict = false;
 
     if (seaf_branch_manager_test_and_update_branch(seaf->branch_mgr,
                                                    repo->head,
@@ -1088,7 +1088,7 @@ retry:
     {
         if (gc_conflict) {
             if (is_gc_conflict) {
-                *is_gc_conflict = TRUE;
+                *is_gc_conflict = true;
             }
             seaf_warning ("Head branch update for repo %s conflicts with GC.\n",
                           repo_id);
@@ -1177,22 +1177,22 @@ check_dir_cb (int n, const char *basedir, SeafDirent *dirs[], void *data,
     if (!dir1) {
         // if dir2 is empty, stop diff.
         if (g_strcmp0 (dir2->id, EMPTY_SHA1) == 0) {
-            *recurse = FALSE;
+            *recurse = false;
         } else {
-            *recurse = TRUE;
+            *recurse = true;
         }
         return 0;
     }
 
     // if dir2 is not exist, stop diff.
     if (!dir2) {
-        *recurse = FALSE;
+        *recurse = false;
         return 0;
     }
 
     // if dir1 and dir2 are the same or dir2 is empty, stop diff.
     if (g_strcmp0 (dir1->id, dir2->id) == 0 || g_strcmp0 (dir2->id, EMPTY_SHA1) == 0) {
-        *recurse = FALSE;
+        *recurse = false;
         return 0;
     }
 
@@ -1255,23 +1255,23 @@ should_ignore (const char *filename)
         file_name = components[j];
         if (g_strcmp0(file_name, "..") == 0) {
             g_strfreev (components);
-            return TRUE;
+            return true;
         }
     }
     g_strfreev (components);
 
-    return FALSE;
+    return false;
 }
 
 static gboolean
 include_invalid_path (SeafCommit *base_commit, SeafCommit *new_commit) {
     GList *diff_entries = nullptr;
-    gboolean ret = FALSE;
+    gboolean ret = false;
 
-    int rc = diff_commits (base_commit, new_commit, &diff_entries, TRUE);
+    int rc = diff_commits (base_commit, new_commit, &diff_entries, true);
     if (rc < 0) {
         seaf_warning ("Failed to check invalid path.\n");
-        return FALSE;
+        return false;
     }
 
     GList *ptr;
@@ -1280,12 +1280,12 @@ include_invalid_path (SeafCommit *base_commit, SeafCommit *new_commit) {
         diff_entry = ptr->data;
         if (diff_entry->new_name) {
             if (should_ignore(diff_entry->new_name)) {
-                ret = TRUE;
+                ret = true;
                 break;
             }
         } else {
             if (should_ignore(diff_entry->name)) {
-                ret = TRUE;
+                ret = true;
                 break;
             }
         }
@@ -1376,7 +1376,7 @@ put_update_branch_cb (evhtp_request_t *req, void *arg)
         }
     }
 
-    gboolean gc_conflict = FALSE;
+    gboolean gc_conflict = false;
     if (fast_forward_or_merge (repo_id, base, new_commit, token, &gc_conflict) < 0) {
         if (gc_conflict) {
             char *msg = "GC Conflict.\n";
@@ -1425,7 +1425,7 @@ collect_head_commit_ids (SeafDBRow *row, void *data)
 
     json_object_set_new (map, repo_id, json_string(commit_id));
 
-    return TRUE;
+    return true;
 }
 
 static void
@@ -1518,7 +1518,7 @@ out:
     if (repo_id_array)
         json_decref (repo_id_array);
     if (id_list_str)
-        g_string_free (id_list_str, TRUE);
+        g_string_free (id_list_str, true);
     g_free (sql);
     if (commit_id_map)
         json_decref (commit_id_map);
@@ -1785,7 +1785,7 @@ get_fs_obj_id_cb (evhtp_request_t *req, void *arg)
     char **parts;
     char *repo_id;
     SeafRepo *repo = nullptr;
-    gboolean dir_only = FALSE;
+    gboolean dir_only = false;
     char *username = nullptr;
 
     const char *server_head = evhtp_kv_find (req->uri->query, "server-head");
@@ -1808,7 +1808,7 @@ get_fs_obj_id_cb (evhtp_request_t *req, void *arg)
 
     const char *dir_only_arg = evhtp_kv_find (req->uri->query, "dir-only");
     if (dir_only_arg)
-        dir_only = TRUE;
+        dir_only = true;
 
     parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     repo_id = parts[1];
@@ -1937,7 +1937,7 @@ compute_fs_obj_id (gpointer ptask, gpointer ppara)
         goto out;
     }
 
-    result->done = TRUE;
+    result->done = true;
 out:
     seaf_repo_unref (repo);
     free_compute_obj_task(task);
@@ -1949,7 +1949,7 @@ start_fs_obj_id_cb (evhtp_request_t *req, void *arg)
     HttpServer *htp_server = seaf->http_server->priv;
     char **parts;
     char *repo_id;
-    gboolean dir_only = FALSE;
+    gboolean dir_only = false;
     json_t *obj;
 
     const char *server_head = evhtp_kv_find (req->uri->query, "server-head");
@@ -1970,7 +1970,7 @@ start_fs_obj_id_cb (evhtp_request_t *req, void *arg)
 
     const char *dir_only_arg = evhtp_kv_find (req->uri->query, "dir-only");
     if (dir_only_arg)
-        dir_only = TRUE;
+        dir_only = true;
 
     parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     repo_id = parts[1];
@@ -1991,7 +1991,7 @@ start_fs_obj_id_cb (evhtp_request_t *req, void *arg)
         evhtp_send_reply (req, EVHTP_RES_SERVERR);
         goto out;
     }
-    result->done = FALSE;
+    result->done = false;
 
     ComputeObjTask *task = g_new0 (ComputeObjTask, 1);
     if (!task) {
@@ -2388,7 +2388,7 @@ post_check_exist_cb (evhtp_request_t *req, void *arg, CheckExistType type)
     }
 
     json_t *obj = nullptr;
-    gboolean ret = TRUE;
+    gboolean ret = true;
     const char *obj_id = nullptr;
     int index = 0;
 
@@ -2919,7 +2919,7 @@ get_accessible_repo_list_cb (evhtp_request_t *req, void *arg)
     json_t *obj;
     json_t *repo_array = json_array ();
 
-    gboolean db_err = FALSE;
+    gboolean db_err = false;
     GHashTable *obtained_repos = nullptr;
     char *repo_id_tmp = nullptr;
     obtained_repos = g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -3183,10 +3183,10 @@ is_token_expire (gpointer key, gpointer value, gpointer arg)
     TokenInfo *token_info = (TokenInfo *)value;
 
     if(token_info && token_info->expire_time <= (gint64)time(nullptr)) {
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 static void
@@ -3202,10 +3202,10 @@ is_perm_expire (gpointer key, gpointer value, gpointer arg)
     PermInfo *perm_info = (PermInfo *)value;
 
     if(perm_info && perm_info->expire_time <= (gint64)time(nullptr)) {
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 static gboolean
@@ -3214,10 +3214,10 @@ is_vir_repo_info_expire (gpointer key, gpointer value, gpointer arg)
     VirRepoInfo *vinfo = (VirRepoInfo *)value;
 
     if(vinfo && vinfo->expire_time <= (gint64)time(nullptr)) {
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 static void
@@ -3403,7 +3403,7 @@ cleanup_expired_httptemp_file (void *arg)
         g_clear_error (&error);
     }
 
-    while (TRUE) {
+    while (true) {
         sleep (scan_interval);
         file_num = scan_httptemp_dir (server->http_temp_dir, ttl);
         if (file_num) {

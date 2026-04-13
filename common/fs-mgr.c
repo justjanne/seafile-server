@@ -500,7 +500,7 @@ split_file_to_block (const char *repo_id,
 
 out:
     if (tpool)
-        g_thread_pool_free (tpool, TRUE, TRUE);
+        g_thread_pool_free (tpool, true, true);
     if (finished_tasks)
         g_async_queue_unref (finished_tasks);
     g_list_free_full (pending_tasks, g_free);
@@ -1662,7 +1662,7 @@ is_dirents_sorted (GList *dirents)
 {
     GList *ptr;
     SeafDirent *dent, *dent_n;
-    gboolean ret = TRUE;
+    gboolean ret = true;
 
     for (ptr = dirents; ptr != nullptr; ptr = ptr->next) {
         dent = ptr->data;
@@ -1672,7 +1672,7 @@ is_dirents_sorted (GList *dirents)
 
         /* If dirents are not sorted in descending order, return FALSE. */
         if (strcmp (dent->name, dent_n->name) < 0) {
-            ret = FALSE;
+            ret = false;
             break;
         }
     }
@@ -1872,7 +1872,7 @@ block_list_free (BlockList *bl)
 {
     if (bl->block_hash)
         g_hash_table_destroy (bl->block_hash);
-    g_ptr_array_free (bl->block_ids, TRUE);
+    g_ptr_array_free (bl->block_ids, true);
     g_free (bl);
 }
 
@@ -1920,7 +1920,7 @@ traverse_file (SeafFSManager *mgr,
                void *user_data,
                gboolean skip_errors)
 {
-    gboolean stop = FALSE;
+    gboolean stop = false;
 
     if (memcmp (id, EMPTY_SHA1, 40) == 0)
         return 0;
@@ -1944,7 +1944,7 @@ traverse_dir (SeafFSManager *mgr,
     SeafDir *dir;
     GList *p;
     SeafDirent *seaf_dent;
-    gboolean stop = FALSE;
+    gboolean stop = false;
 
     if (!callback (mgr, repo_id, version,
                    id, SEAF_METADATA_TYPE_DIR, user_data, &stop) &&
@@ -2014,7 +2014,7 @@ traverse_dir_path (SeafFSManager *mgr,
     SeafDir *dir;
     GList *p;
     SeafDirent *seaf_dent;
-    gboolean stop = FALSE;
+    gboolean stop = false;
     char *sub_path;
     int ret = 0;
 
@@ -2095,7 +2095,7 @@ fill_blocklist (SeafFSManager *mgr,
         seafile = seaf_fs_manager_get_seafile (mgr, repo_id, version, obj_id);
         if (!seafile) {
             seaf_warning ("[fs mgr] Failed to find file %s.\n", obj_id);
-            return FALSE;
+            return false;
         }
 
         for (i = 0; i < seafile->n_blocks; ++i)
@@ -2104,7 +2104,7 @@ fill_blocklist (SeafFSManager *mgr,
         seafile_unref (seafile);
     }
 
-    return TRUE;
+    return true;
 }
 
 int
@@ -2127,7 +2127,7 @@ seaf_fs_manager_object_exists (SeafFSManager *mgr,
 {
     /* Empty file and dir always exists. */
     if (memcmp (id, EMPTY_SHA1, 40) == 0)
-        return TRUE;
+        return true;
 
     return seaf_obj_store_obj_exists (mgr->obj_store, repo_id, version, id);
 }
@@ -2555,7 +2555,7 @@ verify_seafdir_v0 (const char *dir_id, const uint8_t *data, int len,
 
     if (len < sizeof(SeafdirOndisk)) {
         seaf_warning ("[fs mgr] Corrupt seafdir object %s.\n", dir_id);
-        return FALSE;
+        return false;
     }
 
     ptr = data;
@@ -2565,7 +2565,7 @@ verify_seafdir_v0 (const char *dir_id, const uint8_t *data, int len,
     remain -= 4;
     if (meta_type != SEAF_METADATA_TYPE_DIR) {
         seaf_warning ("Data does not contain a directory.\n");
-        return FALSE;
+        return false;
     }
 
     if (verify_id)
@@ -2586,7 +2586,7 @@ verify_seafdir_v0 (const char *dir_id, const uint8_t *data, int len,
             remain -= name_len;
         } else {
             seaf_warning ("Bad data format for dir objcet %s.\n", dir_id);
-            return FALSE;
+            return false;
         }
 
         if (verify_id) {
@@ -2601,15 +2601,15 @@ verify_seafdir_v0 (const char *dir_id, const uint8_t *data, int len,
     }
 
     if (!verify_id)
-        return TRUE;
+        return true;
 
     SHA1_Final (sha1, &ctx);
     rawdata_to_hex (sha1, check_id, 20);
 
     if (strcmp (check_id, dir_id) == 0)
-        return TRUE;
+        return true;
     else
-        return FALSE;
+        return false;
 }
 
 static gboolean
@@ -2622,7 +2622,7 @@ verify_fs_object_json (const char *obj_id, uint8_t *data, int len)
 
     if (seaf_decompress (data, len, &decompressed, &outlen) < 0) {
         seaf_warning ("Failed to decompress fs object %s.\n", obj_id);
-        return FALSE;
+        return false;
     }
 
     calculate_sha1 (sha1, (const char *)decompressed, outlen);
@@ -2654,14 +2654,14 @@ seaf_fs_manager_verify_seafdir (SeafFSManager *mgr,
     int len;
 
     if (memcmp (dir_id, EMPTY_SHA1, 40) == 0) {
-        return TRUE;
+        return true;
     }
 
     if (seaf_obj_store_read_obj (mgr->obj_store, repo_id, version,
                                  dir_id, &data, &len) < 0) {
         seaf_warning ("[fs mgr] Failed to read dir %s:%s.\n", repo_id, dir_id);
-        *io_error = TRUE;
-        return FALSE;
+        *io_error = true;
+        return false;
     }
 
     gboolean ret = verify_seafdir (dir_id, data, len, verify_id, (version > 0));
@@ -2680,22 +2680,22 @@ verify_seafile_v0 (const char *id, const void *data, int len, gboolean verify_id
 
     if (len < sizeof(SeafileOndisk)) {
         seaf_warning ("[fs mgr] Corrupt seafile object %s.\n", id);
-        return FALSE;
+        return false;
     }
 
     if (ntohl(ondisk->type) != SEAF_METADATA_TYPE_FILE) {
         seaf_warning ("[fd mgr] %s is not a file.\n", id);
-        return FALSE;
+        return false;
     }
 
     int id_list_length = len - sizeof(SeafileOndisk);
     if (id_list_length % 20 != 0) {
         seaf_warning ("[fs mgr] Bad seafile id list length %d.\n", id_list_length);
-        return FALSE;
+        return false;
     }
 
     if (!verify_id)
-        return TRUE;
+        return true;
 
     SHA1_Init (&ctx);
     SHA1_Update (&ctx, ondisk->block_ids, len - sizeof(SeafileOndisk));
@@ -2704,9 +2704,9 @@ verify_seafile_v0 (const char *id, const void *data, int len, gboolean verify_id
     rawdata_to_hex (sha1, check_id, 20);
 
     if (strcmp (check_id, id) == 0)
-        return TRUE;
+        return true;
     else
-        return FALSE;
+        return false;
 }
 
 static gboolean
@@ -2731,14 +2731,14 @@ seaf_fs_manager_verify_seafile (SeafFSManager *mgr,
     int len;
 
     if (memcmp (file_id, EMPTY_SHA1, 40) == 0) {
-        return TRUE;
+        return true;
     }
 
     if (seaf_obj_store_read_obj (mgr->obj_store, repo_id, version,
                                  file_id, &data, &len) < 0) {
         seaf_warning ("[fs mgr] Failed to read file %s:%s.\n", repo_id, file_id);
-        *io_error = TRUE;
-        return FALSE;
+        *io_error = true;
+        return false;
     }
 
     gboolean ret = verify_seafile (file_id, data, len, verify_id, (version > 0));
@@ -2753,7 +2753,7 @@ verify_fs_object_v0 (const char *obj_id,
                      int len,
                      gboolean verify_id)
 {
-    gboolean ret = TRUE;
+    gboolean ret = true;
 
     int type = seaf_metadata_type_from_data (obj_id, data, len, FALSE);
     switch (type) {
@@ -2765,7 +2765,7 @@ verify_fs_object_v0 (const char *obj_id,
         break;
     default:
         seaf_warning ("Invalid meta data type: %d.\n", type);
-        return FALSE;
+        return false;
     }
 
     return ret;
@@ -2781,17 +2781,17 @@ seaf_fs_manager_verify_object (SeafFSManager *mgr,
 {
     void *data;
     int len;
-    gboolean ret = TRUE;
+    gboolean ret = true;
 
     if (memcmp (obj_id, EMPTY_SHA1, 40) == 0) {
-        return TRUE;
+        return true;
     }
 
     if (seaf_obj_store_read_obj (mgr->obj_store, repo_id, version,
                                  obj_id, &data, &len) < 0) {
         seaf_warning ("[fs mgr] Failed to read object %s:%s.\n", repo_id, obj_id);
-        *io_error = TRUE;
-        return FALSE;
+        *io_error = true;
+        return false;
     }
 
     if (version == 0)
@@ -2899,7 +2899,7 @@ search_files_recursive (SeafFSManager *mgr,
             sr->mtime = seaf_dent->mtime;
             *file_list = g_list_prepend (*file_list, sr);
             if (S_ISDIR(seaf_dent->mode)) {
-                sr->is_dir = TRUE;
+                sr->is_dir = true;
             }
         }
 
