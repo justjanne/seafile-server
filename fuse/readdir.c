@@ -30,14 +30,14 @@ static char *replace_slash (const char *repo_name)
 static GList *get_users_from_ccnet (SearpcClient *client, const char *source)
 {
     return searpc_client_call__objlist (client,
-                                        "get_emailusers", CCNET_TYPE_EMAIL_USER, NULL,
+                                        "get_emailusers", CCNET_TYPE_EMAIL_USER, nullptr,
                                         3, "string", source, "int", -1, "int", -1);
 }
 
 static CcnetEmailUser *get_user_from_ccnet (SearpcClient *client, const char *user)
 {
     return (CcnetEmailUser *)searpc_client_call__object (client,
-                                       "get_emailuser", CCNET_TYPE_EMAIL_USER, NULL,
+                                       "get_emailuser", CCNET_TYPE_EMAIL_USER, nullptr,
                                        1, "string", user);
 }
 
@@ -51,9 +51,9 @@ static int readdir_root(SeafileSession *seaf,
     GHashTable *user_hash;
     int dummy;
 
-    user_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+    user_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
 
-    users = ccnet_user_manager_get_emailusers (seaf->user_mgr, "DB", -1, -1, NULL);
+    users = ccnet_user_manager_get_emailusers (seaf->user_mgr, "DB", -1, -1, nullptr);
     for (p = users; p; p = p->next) {
         user = p->data;
         email = ccnet_email_user_get_email (user);
@@ -62,7 +62,7 @@ static int readdir_root(SeafileSession *seaf,
     }
     g_list_free (users);
 
-    users = ccnet_user_manager_get_emailusers (seaf->user_mgr, "LDAPImport", -1, -1, NULL);
+    users = ccnet_user_manager_get_emailusers (seaf->user_mgr, "LDAPImport", -1, -1, nullptr);
     for (p = users; p; p = p->next) {
         user = p->data;
         email = ccnet_email_user_get_email (user);
@@ -77,7 +77,7 @@ static int readdir_root(SeafileSession *seaf,
         char *exclude = g_hash_table_lookup (seaf->excluded_users, email);
         if (exclude)
             continue;
-        filler (buf, email, NULL, 0);
+        filler (buf, email, nullptr, 0);
     }
     g_list_free (users);
 
@@ -91,10 +91,10 @@ static int readdir_user(SeafileSession *seaf, const char *user,
                         struct fuse_file_info *info)
 {
     CcnetEmailUser *emailuser;
-    GList *list = NULL, *p;
+    GList *list = nullptr, *p;
     GString *name;
 
-    emailuser = ccnet_user_manager_get_emailuser (seaf->user_mgr, user, NULL);
+    emailuser = ccnet_user_manager_get_emailuser (seaf->user_mgr, user, nullptr);
     if (!emailuser) {
         return -ENOENT;
     }
@@ -123,7 +123,7 @@ static int readdir_user(SeafileSession *seaf, const char *user,
 
         name = g_string_new ("");
         g_string_printf (name, "%s_%s", repo->id, clean_repo_name);
-        filler(buf, name->str, NULL, 0);
+        filler(buf, name->str, nullptr, 0);
         g_string_free (name, TRUE);
         g_free (clean_repo_name);
 
@@ -140,10 +140,10 @@ static int readdir_repo(SeafileSession *seaf,
                         void *buf, fuse_fill_dir_t filler, off_t offset,
                         struct fuse_file_info *info)
 {
-    SeafRepo *repo = NULL;
+    SeafRepo *repo = nullptr;
     SeafBranch *branch;
-    SeafCommit *commit = NULL;
-    SeafDir *dir = NULL;
+    SeafCommit *commit = nullptr;
+    SeafDir *dir = nullptr;
     GList *l;
     int ret = 0;
 
@@ -167,7 +167,7 @@ static int readdir_repo(SeafileSession *seaf,
     dir = seaf_fs_manager_get_seafdir_by_path(seaf->fs_mgr,
                                               repo->store_id, repo->version,
                                               commit->root_id,
-                                              repo_path, NULL);
+                                              repo_path, nullptr);
     if (!dir) {
         seaf_warning ("Path %s doesn't exist in repo %s.\n", repo_path, repo_id);
         ret = -ENOENT;
@@ -177,7 +177,7 @@ static int readdir_repo(SeafileSession *seaf,
     for (l = dir->entries; l; l = l->next) {
         SeafDirent *seaf_dent = (SeafDirent *) l->data;
         /* FIXME: maybe we need to return stbuf */
-        filler(buf, seaf_dent->name, NULL, 0);
+        filler(buf, seaf_dent->name, nullptr, 0);
     }
 
 out:

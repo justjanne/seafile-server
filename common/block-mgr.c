@@ -46,7 +46,7 @@ seaf_block_manager_new (struct _SeafileSession *seaf,
 onerror:
     g_free (mgr);
 
-    return NULL;
+    return nullptr;
 }
 
 int
@@ -65,7 +65,7 @@ seaf_block_manager_open_block (SeafBlockManager *mgr,
 {
     if (!store_id || !is_uuid_valid(store_id) ||
         !block_id || !is_object_id_valid(block_id))
-        return NULL;
+        return nullptr;
 
     return mgr->backend->open_block (mgr->backend,
                                      store_id, version,
@@ -142,7 +142,7 @@ seaf_block_manager_stat_block (SeafBlockManager *mgr,
 {
     if (!store_id || !is_uuid_valid(store_id) ||
         !block_id || !is_object_id_valid(block_id))
-        return NULL;
+        return nullptr;
 
     return mgr->backend->stat_block (mgr->backend, store_id, version, block_id);
 }

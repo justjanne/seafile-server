@@ -67,7 +67,7 @@ seaf_fs_manager_new (SeafileSession *seaf,
     mgr->obj_store = seaf_obj_store_new (seaf, "fs");
     if (!mgr->obj_store) {
         g_free (mgr);
-        return NULL;
+        return nullptr;
     }
 
     mgr->priv = g_new0(SeafFSManagerPriv, 1);
@@ -312,8 +312,8 @@ seafile_write_chunk (const char *repo_id,
 
     /* Encrypt before write to disk if needed, and we don't encrypt
      * empty files. */
-    if (crypt != NULL && chunk->len) {
-        char *encrypted_buf = NULL;         /* encrypted output */
+    if (crypt != nullptr && chunk->len) {
+        char *encrypted_buf = nullptr;         /* encrypted output */
         int enc_len = -1;                /* encrypted length */
 
         ret = seafile_encrypt (&encrypted_buf, /* output */
@@ -427,10 +427,10 @@ split_file_to_block (const char *repo_id,
                      gint64 *indexed)
 {
     int n_blocks;
-    uint8_t *block_sha1s = NULL;
-    GThreadPool *tpool = NULL;
-    GAsyncQueue *finished_tasks = NULL;
-    GList *pending_tasks = NULL;
+    uint8_t *block_sha1s = nullptr;
+    GThreadPool *tpool = nullptr;
+    GAsyncQueue *finished_tasks = nullptr;
+    GList *pending_tasks = nullptr;
     int n_pending = 0;
     CDCDescriptor *chunk;
     int ret = 0;
@@ -455,7 +455,7 @@ split_file_to_block (const char *repo_id,
     data.finished_tasks = finished_tasks;
 
     tpool = g_thread_pool_new (chunking_worker, &data,
-                               seaf->max_indexing_threads, FALSE, NULL);
+                               seaf->max_indexing_threads, FALSE, nullptr);
     if (!tpool) {
         seaf_warning ("Failed to allocate thread pool\n");
         ret = -1;
@@ -472,7 +472,7 @@ split_file_to_block (const char *repo_id,
         chunk->offset = offset;
         chunk->len = (guint32)len;
 
-        g_thread_pool_push (tpool, chunk, NULL);
+        g_thread_pool_push (tpool, chunk, nullptr);
         pending_tasks = g_list_prepend (pending_tasks, chunk);
         n_pending++;
 
@@ -480,7 +480,7 @@ split_file_to_block (const char *repo_id,
         offset += len;
     }
 
-    while ((chunk = g_async_queue_pop (finished_tasks)) != NULL) {
+    while ((chunk = g_async_queue_pop (finished_tasks)) != nullptr) {
         if (chunk->result < 0) {
             ret = -1;
             goto out;
@@ -599,7 +599,7 @@ check_and_write_block (const char *repo_id, int version,
 {
     char *content;
     gsize len;
-    GError *error = NULL;
+    GError *error = nullptr;
     int ret = 0;
 
     if (!g_file_get_contents (path, &content, &len, &error)) {
@@ -870,18 +870,18 @@ seafile_from_v0_data (const char *id, const void *data, int len)
 
     if (len < sizeof(SeafileOndisk)) {
         seaf_warning ("[fs mgr] Corrupt seafile object %s.\n", id);
-        return NULL;
+        return nullptr;
     }
 
     if (ntohl(ondisk->type) != SEAF_METADATA_TYPE_FILE) {
         seaf_warning ("[fd mgr] %s is not a file.\n", id);
-        return NULL;
+        return nullptr;
     }
 
     id_list_len = len - sizeof(SeafileOndisk);
     if (id_list_len % 20 != 0) {
         seaf_warning ("[fs mgr] Corrupt seafile object %s.\n", id);
-        return NULL;
+        return nullptr;
     }
     n_blocks = id_list_len / 20;
 
@@ -910,24 +910,24 @@ seafile_from_v0_data (const char *id, const void *data, int len)
 static Seafile *
 seafile_from_json_object (const char *id, json_t *object)
 {
-    json_t *block_id_array = NULL;
+    json_t *block_id_array = nullptr;
     int type;
     int version;
     guint64 file_size;
-    Seafile *seafile = NULL;
+    Seafile *seafile = nullptr;
 
     /* Sanity checks. */
     type = json_object_get_int_member (object, "type");
     if (type != SEAF_METADATA_TYPE_FILE) {
         seaf_debug ("Object %s is not a file.\n", id);
-        return NULL;
+        return nullptr;
     }
 
     version = (int) json_object_get_int_member (object, "version");
     if (version < 1) {
         seaf_debug ("Seafile object %s version should be > 0, version is %d.\n",
                     id, version);
-        return NULL;
+        return nullptr;
     }
 
     file_size = (guint64) json_object_get_int_member (object, "size");
@@ -935,7 +935,7 @@ seafile_from_json_object (const char *id, json_t *object)
     block_id_array = json_object_get (object, "block_ids");
     if (!block_id_array) {
         seaf_debug ("No block id array in seafile object %s.\n", id);
-        return NULL;
+        return nullptr;
     }
 
     seafile = g_new0 (Seafile, 1);
@@ -956,7 +956,7 @@ seafile_from_json_object (const char *id, json_t *object)
         block_id = json_string_value (block_id_obj);
         if (!block_id || !is_object_id_valid(block_id)) {
             seafile_free (seafile);
-            return NULL;
+            return nullptr;
         }
         seafile->blk_sha1s[i] = g_strdup(block_id);
     }
@@ -971,13 +971,13 @@ seafile_from_json (const char *id, void *data, int len)
 {
     guint8 *decompressed;
     int outlen;
-    json_t *object = NULL;
+    json_t *object = nullptr;
     json_error_t error;
     Seafile *seafile;
 
     if (seaf_decompress (data, len, &decompressed, &outlen) < 0) {
         seaf_warning ("Failed to decompress seafile object %s.\n", id);
-        return NULL;
+        return nullptr;
     }
 
     object = json_loadb ((const char *)decompressed, outlen, 0, &error);
@@ -987,7 +987,7 @@ seafile_from_json (const char *id, void *data, int len)
             seaf_warning ("Failed to load seafile json object: %s.\n", error.text);
         else
             seaf_warning ("Failed to load seafile json object.\n");
-        return NULL;
+        return nullptr;
     }
 
     seafile = seafile_from_json_object (id, object);
@@ -1033,7 +1033,7 @@ seaf_fs_manager_get_seafile (SeafFSManager *mgr,
     if (seaf_obj_store_read_obj (mgr->obj_store, repo_id, version,
                                  file_id, &data, &len) < 0) {
         seaf_warning ("[fs mgr] Failed to read file %s.\n", file_id);
-        return NULL;
+        return nullptr;
     }
 
     seafile = seafile_from_data (file_id, data, len, (version > 0));
@@ -1111,12 +1111,12 @@ seafile_to_data (Seafile *file, int *len)
 
         data = seafile_to_json (file, &orig_len);
         if (!data)
-            return NULL;
+            return nullptr;
 
         if (seaf_compress (data, orig_len, &compressed, len) < 0) {
             seaf_warning ("Failed to compress file object %s.\n", file->file_id);
             g_free (data);
-            return NULL;
+            return nullptr;
         }
         g_free (data);
         return compressed;
@@ -1158,7 +1158,7 @@ static void compute_dir_id_v0 (SeafDir *dir, GList *entries)
     guint32 mode_le;
 
     /* ID for empty dirs is EMPTY_SHA1. */
-    if (entries == NULL) {
+    if (entries == nullptr) {
         memset (dir->dir_id, '0', 40);
         return;
     }
@@ -1188,7 +1188,7 @@ seaf_dir_new (const char *id, GList *entries, int version)
     dir = g_new0(SeafDir, 1);
 
     dir->version = version;
-    if (id != NULL) {
+    if (id != nullptr) {
         memcpy(dir->dir_id, id, 40);
         dir->dir_id[40] = '\0';
     } else if (version == 0) {
@@ -1196,7 +1196,7 @@ seaf_dir_new (const char *id, GList *entries, int version)
     }
     dir->entries = entries;
 
-    if (dir->entries != NULL)
+    if (dir->entries != nullptr)
         dir->ondisk = seaf_dir_to_data (dir, &dir->ondisk_size);
     else
         memcpy (dir->dir_id, EMPTY_SHA1, 40);
@@ -1207,7 +1207,7 @@ seaf_dir_new (const char *id, GList *entries, int version)
 void
 seaf_dir_free (SeafDir *dir)
 {
-    if (dir == NULL)
+    if (dir == nullptr)
         return;
 
     GList *ptr = dir->entries;
@@ -1292,7 +1292,7 @@ seaf_dir_from_v0_data (const char *dir_id, const uint8_t *data, int len)
     remain -= 4;
     if (meta_type != SEAF_METADATA_TYPE_DIR) {
         seaf_warning ("Data does not contain a directory.\n");
-        return NULL;
+        return nullptr;
     }
 
     root = g_new0(SeafDir, 1);
@@ -1332,7 +1332,7 @@ seaf_dir_from_v0_data (const char *dir_id, const uint8_t *data, int len)
 
 bad:
     seaf_dir_free (root);
-    return NULL;
+    return nullptr;
 }
 
 static SeafDirent *
@@ -1350,17 +1350,17 @@ parse_dirent (const char *dir_id, int version, json_t *object)
     id = json_object_get_string_member (object, "id");
     if (!id) {
         seaf_debug ("Dirent id not set for dir object %s.\n", dir_id);
-        return NULL;
+        return nullptr;
     }
     if (!is_object_id_valid (id)) {
         seaf_debug ("Dirent id is invalid for dir object %s.\n", dir_id);
-        return NULL;
+        return nullptr;
     }
 
     name = json_object_get_string_member (object, "name");
     if (!name) {
         seaf_debug ("Dirent name not set for dir object %s.\n", dir_id);
-        return NULL;
+        return nullptr;
     }
 
     mtime = json_object_get_int_member (object, "mtime");
@@ -1368,7 +1368,7 @@ parse_dirent (const char *dir_id, int version, json_t *object)
         modifier = json_object_get_string_member (object, "modifier");
         if (!modifier) {
             seaf_debug ("Dirent modifier not set for dir object %s.\n", dir_id);
-            return NULL;
+            return nullptr;
         }
         size = json_object_get_int_member (object, "size");
     }
@@ -1391,29 +1391,29 @@ parse_dirent (const char *dir_id, int version, json_t *object)
 static SeafDir *
 seaf_dir_from_json_object (const char *dir_id, json_t *object)
 {
-    json_t *dirent_array = NULL;
+    json_t *dirent_array = nullptr;
     int type;
     int version;
-    SeafDir *dir = NULL;
+    SeafDir *dir = nullptr;
 
     /* Sanity checks. */
     type = json_object_get_int_member (object, "type");
     if (type != SEAF_METADATA_TYPE_DIR) {
         seaf_debug ("Object %s is not a dir.\n", dir_id);
-        return NULL;
+        return nullptr;
     }
 
     version = (int) json_object_get_int_member (object, "version");
     if (version < 1) {
         seaf_debug ("Dir object %s version should be > 0, version is %d.\n",
                     dir_id, version);
-        return NULL;
+        return nullptr;
     }
 
     dirent_array = json_object_get (object, "dirents");
     if (!dirent_array) {
         seaf_debug ("No dirents in dir object %s.\n", dir_id);
-        return NULL;
+        return nullptr;
     }
 
     dir = g_new0 (SeafDir, 1);
@@ -1432,7 +1432,7 @@ seaf_dir_from_json_object (const char *dir_id, json_t *object)
         dirent = parse_dirent (dir_id, version, dirent_obj);
         if (!dirent) {
             seaf_dir_free (dir);
-            return NULL;
+            return nullptr;
         }
         dir->entries = g_list_prepend (dir->entries, dirent);
     }
@@ -1446,13 +1446,13 @@ seaf_dir_from_json (const char *dir_id, uint8_t *data, int len)
 {
     guint8 *decompressed;
     int outlen;
-    json_t *object = NULL;
+    json_t *object = nullptr;
     json_error_t error;
     SeafDir *dir;
 
     if (seaf_decompress (data, len, &decompressed, &outlen) < 0) {
         seaf_warning ("Failed to decompress dir object %s.\n", dir_id);
-        return NULL;
+        return nullptr;
     }
 
     object = json_loadb ((const char *)decompressed, outlen, 0, &error);
@@ -1462,7 +1462,7 @@ seaf_dir_from_json (const char *dir_id, uint8_t *data, int len)
             seaf_warning ("Failed to load seafdir json object: %s.\n", error.text);
         else
             seaf_warning ("Failed to load seafdir json object.\n");
-        return NULL;
+        return nullptr;
     }
 
     dir = seaf_dir_from_json_object (dir_id, object);
@@ -1582,12 +1582,12 @@ seaf_dir_to_data (SeafDir *dir, int *len)
 
         data = seaf_dir_to_json (dir, &orig_len);
         if (!data)
-            return NULL;
+            return nullptr;
 
         if (seaf_compress (data, orig_len, &compressed, len) < 0) {
             seaf_warning ("Failed to compress dir object %s.\n", dir->dir_id);
             g_free (data);
-            return NULL;
+            return nullptr;
         }
 
         g_free (data);
@@ -1640,7 +1640,7 @@ seaf_fs_manager_get_seafdir (SeafFSManager *mgr,
     if (seaf_obj_store_read_obj (mgr->obj_store, repo_id, version,
                                  dir_id, &data, &len) < 0) {
         seaf_warning ("[fs mgr] Failed to read dir %s.\n", dir_id);
-        return NULL;
+        return nullptr;
     }
 
     dir = seaf_dir_from_data (dir_id, data, len, (version > 0));
@@ -1664,7 +1664,7 @@ is_dirents_sorted (GList *dirents)
     SeafDirent *dent, *dent_n;
     gboolean ret = TRUE;
 
-    for (ptr = dirents; ptr != NULL; ptr = ptr->next) {
+    for (ptr = dirents; ptr != nullptr; ptr = ptr->next) {
         dent = ptr->data;
         if (!ptr->next)
             break;
@@ -1689,7 +1689,7 @@ seaf_fs_manager_get_seafdir_sorted (SeafFSManager *mgr,
     SeafDir *dir = seaf_fs_manager_get_seafdir(mgr, repo_id, version, dir_id);
 
     if (!dir)
-        return NULL;
+        return nullptr;
 
     /* Only some very old dir objects are not sorted. */
     if (version > 0)
@@ -1710,10 +1710,10 @@ seaf_fs_manager_get_seafdir_sorted_by_path (SeafFSManager *mgr,
 {
     SeafDir *dir = seaf_fs_manager_get_seafdir_by_path (mgr, repo_id,
                                                         version, root_id,
-                                                        path, NULL);
+                                                        path, nullptr);
 
     if (!dir)
-        return NULL;
+        return nullptr;
 
     /* Only some very old dir objects are not sorted. */
     if (version > 0)
@@ -1787,7 +1787,7 @@ fs_object_from_v0_data (const char *obj_id, const uint8_t *data, int len)
         return (SeafFSObject *)seaf_dir_from_v0_data (obj_id, data, len);
     else {
         seaf_warning ("Invalid object type %d.\n", type);
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -1803,7 +1803,7 @@ fs_object_from_json (const char *obj_id, uint8_t *data, int len)
 
     if (seaf_decompress (data, len, &decompressed, &outlen) < 0) {
         seaf_warning ("Failed to decompress fs object %s.\n", obj_id);
-        return NULL;
+        return nullptr;
     }
 
     object = json_loadb ((const char *)decompressed, outlen, 0, &error);
@@ -1813,7 +1813,7 @@ fs_object_from_json (const char *obj_id, uint8_t *data, int len)
             seaf_warning ("Failed to load fs json object: %s.\n", error.text);
         else
             seaf_warning ("Failed to load fs json object.\n");
-        return NULL;
+        return nullptr;
     }
 
     type = json_object_get_int_member (object, "type");
@@ -1825,7 +1825,7 @@ fs_object_from_json (const char *obj_id, uint8_t *data, int len)
     else {
         seaf_warning ("Invalid fs type %d.\n", type);
         json_decref (object);
-        return NULL;
+        return nullptr;
     }
 
     json_decref (object);
@@ -1861,7 +1861,7 @@ block_list_new ()
 {
     BlockList *bl = g_new0 (BlockList, 1);
 
-    bl->block_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+    bl->block_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
     bl->block_ids = g_ptr_array_new_with_free_func (g_free);
 
     return bl;
@@ -1900,7 +1900,7 @@ block_list_difference (BlockList *bl1, BlockList *bl2)
 
     for (i = 0; i < bl1->block_ids->len; ++i) {
         block_id = g_ptr_array_index (bl1->block_ids, i);
-        if (g_hash_table_lookup (bl2->block_hash, block_id) == NULL) {
+        if (g_hash_table_lookup (bl2->block_hash, block_id) == nullptr) {
             key = g_strdup(block_id);
             g_hash_table_replace (bl->block_hash, key, key);
             g_ptr_array_add (bl->block_ids, g_strdup(block_id));
@@ -2032,7 +2032,7 @@ traverse_dir_path (SeafFSManager *mgr,
 
     for (p = dir->entries; p; p = p->next) {
         seaf_dent = (SeafDirent *)p->data;
-        sub_path = g_strconcat (dir_path, "/", seaf_dent->name, NULL);
+        sub_path = g_strconcat (dir_path, "/", seaf_dent->name, nullptr);
 
         if (S_ISREG(seaf_dent->mode)) {
             if (!callback (mgr, sub_path, seaf_dent, user_data, &stop)) {
@@ -2068,7 +2068,7 @@ seaf_fs_manager_traverse_path (SeafFSManager *mgr,
     int ret = 0;
 
     dent = seaf_fs_manager_get_dirent_by_path (mgr, repo_id, version,
-                                               root_id, dir_path, NULL);
+                                               root_id, dir_path, nullptr);
     if (!dent) {
         seaf_warning ("Failed to get dirent for %.8s:%s.\n", repo_id, dir_path);
         return -1;
@@ -2314,13 +2314,13 @@ seaf_fs_manager_get_seafdir_by_path (SeafFSManager *mgr,
     if (!dir) {
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_DIR_MISSING, "directory is missing");
         g_free (tmp_path);
-        return NULL;
+        return nullptr;
     }
 
     name = strtok_r (tmp_path, "/", &saveptr);
-    while (name != NULL) {
+    while (name != nullptr) {
         GList *l;
-        for (l = dir->entries; l != NULL; l = l->next) {
+        for (l = dir->entries; l != nullptr; l = l->next) {
             dent = l->data;
 
             if (strcmp(dent->name, name) == 0 && S_ISDIR(dent->mode)) {
@@ -2333,7 +2333,7 @@ seaf_fs_manager_get_seafdir_by_path (SeafFSManager *mgr,
             g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_PATH_NO_EXIST,
                          "Path does not exists %s", path);
             seaf_dir_free (dir);
-            dir = NULL;
+            dir = nullptr;
             break;
         }
 
@@ -2347,7 +2347,7 @@ seaf_fs_manager_get_seafdir_by_path (SeafFSManager *mgr,
             break;
         }
 
-        name = strtok_r (NULL, "/", &saveptr);
+        name = strtok_r (nullptr, "/", &saveptr);
     }
 
     g_free (tmp_path);
@@ -2366,10 +2366,10 @@ seaf_fs_manager_path_to_obj_id (SeafFSManager *mgr,
     char *copy = g_strdup (path);
     int off = strlen(copy) - 1;
     char *slash, *name;
-    SeafDir *base_dir = NULL;
+    SeafDir *base_dir = nullptr;
     SeafDirent *dent;
     GList *p;
-    char *obj_id = NULL;
+    char *obj_id = nullptr;
 
     while (off >= 0 && copy[off] == '/')
         copy[off--] = 0;
@@ -2395,7 +2395,7 @@ seaf_fs_manager_path_to_obj_id (SeafFSManager *mgr,
     } else {
         *slash = 0;
         name = slash + 1;
-        GError *tmp_error = NULL;
+        GError *tmp_error = nullptr;
         base_dir = seaf_fs_manager_get_seafdir_by_path (mgr,
                                                         repo_id,
                                                         version,
@@ -2418,7 +2418,7 @@ seaf_fs_manager_path_to_obj_id (SeafFSManager *mgr,
         }
     }
 
-    for (p = base_dir->entries; p != NULL; p = p->next) {
+    for (p = base_dir->entries; p != nullptr; p = p->next) {
         dent = p->data;
 
         if (!is_object_id_valid (dent->id))
@@ -2455,11 +2455,11 @@ seaf_fs_manager_get_seafile_id_by_path (SeafFSManager *mgr,
                                               root_id, path, &mode, error);
 
     if (!file_id)
-        return NULL;
+        return nullptr;
 
     if (file_id && S_ISDIR(mode)) {
         g_free (file_id);
-        return NULL;
+        return nullptr;
     }
 
     return file_id;
@@ -2480,11 +2480,11 @@ seaf_fs_manager_get_seafdir_id_by_path (SeafFSManager *mgr,
                                              root_id, path, &mode, error);
 
     if (!dir_id)
-        return NULL;
+        return nullptr;
 
     if (dir_id && !S_ISDIR(mode)) {
         g_free (dir_id);
-        return NULL;
+        return nullptr;
     }
 
     return dir_id;
@@ -2498,10 +2498,10 @@ seaf_fs_manager_get_dirent_by_path (SeafFSManager *mgr,
                                     const char *path,
                                     GError **error)
 {
-    SeafDirent *dent = NULL;
-    SeafDir *dir = NULL;
-    char *parent_dir = NULL;
-    char *file_name = NULL;
+    SeafDirent *dent = nullptr;
+    SeafDir *dir = nullptr;
+    char *parent_dir = nullptr;
+    char *file_name = nullptr;
 
     parent_dir  = g_path_get_dirname(path);
     file_name = g_path_get_basename(path);
@@ -2836,15 +2836,15 @@ seaf_fs_manager_get_file_count_info_by_path (SeafFSManager *mgr,
                                              const char *path,
                                              GError **error)
 {
-    char *dir_id = NULL;
+    char *dir_id = nullptr;
     gint64 file_count = 0, dir_count = 0, size = 0;
-    SeafileFileCountInfo *info = NULL;
+    SeafileFileCountInfo *info = nullptr;
 
     dir_id = seaf_fs_manager_get_seafdir_id_by_path (mgr,
                                                      repo_id,
                                                      version,
                                                      root_id,
-                                                     path, NULL);
+                                                     path, nullptr);
     if (!dir_id) {
         seaf_warning ("Path %s doesn't exist or is not a dir in repo %.10s.\n",
                       path, repo_id);
@@ -2860,7 +2860,7 @@ seaf_fs_manager_get_file_count_info_by_path (SeafFSManager *mgr,
     info = g_object_new (SEAFILE_TYPE_FILE_COUNT_INFO,
                          "file_count", file_count,
                          "dir_count", dir_count,
-                         "size", size, NULL);
+                         "size", size, nullptr);
 out:
     g_free (dir_id);
 
@@ -2880,7 +2880,7 @@ search_files_recursive (SeafFSManager *mgr,
     GList *p;
     SeafDirent *seaf_dent;
     int ret = 0;
-    char *full_path = NULL;
+    char *full_path = nullptr;
 
     dir = seaf_fs_manager_get_seafdir (mgr, repo_id, version, id);
     if (!dir) {
@@ -2890,9 +2890,9 @@ search_files_recursive (SeafFSManager *mgr,
 
     for (p = dir->entries; p; p = p->next) {
         seaf_dent = (SeafDirent *)p->data;
-        full_path = g_strconcat (path, "/", seaf_dent->name, NULL);
+        full_path = g_strconcat (path, "/", seaf_dent->name, nullptr);
 
-        if (seaf_dent->name && strcasestr (seaf_dent->name, str) != NULL) {
+        if (seaf_dent->name && strcasestr (seaf_dent->name, str) != nullptr) {
             SearchResult *sr = g_new0(SearchResult, 1);
             sr->path = g_strdup (full_path);
             sr->size = seaf_dent->size;
@@ -2926,8 +2926,8 @@ seaf_fs_manager_search_files_by_path  (SeafFSManager *mgr,
                                        const char *path,
                                        const char *str)
 {
-    GList *file_list = NULL;
-    SeafCommit *head = NULL;
+    GList *file_list = nullptr;
+    SeafCommit *head = nullptr;
 
     SeafRepo *repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
     if (!repo) {
@@ -2946,7 +2946,7 @@ seaf_fs_manager_search_files_by_path  (SeafFSManager *mgr,
                                 str, repo->version, &file_list);
     } else {
         char *dir_id = seaf_fs_manager_get_seafdir_id_by_path (mgr, repo->store_id, repo->version,
-                                                               head->root_id, path, NULL);
+                                                               head->root_id, path, nullptr);
         if (!dir_id) {
             seaf_warning ("Path %s doesn't exist or is not a dir in repo %.10s.\n", path, repo->store_id);
             goto out;

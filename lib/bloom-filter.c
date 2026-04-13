@@ -17,20 +17,20 @@ Bloom* bloom_create(size_t size, int k, int counting)
     Bloom *bloom;
     size_t csize = 0;
 
-    if (k <=0 || k > 4) return NULL;
+    if (k <=0 || k > 4) return nullptr;
     
-    if ( !(bloom = malloc(sizeof(Bloom))) ) return NULL;
+    if ( !(bloom = malloc(sizeof(Bloom))) ) return nullptr;
     if ( !(bloom->a = calloc((size+CHAR_BIT-1)/CHAR_BIT, sizeof(char))) )
     {
         free (bloom);
-        return NULL;
+        return nullptr;
     }
     if (counting) {
         csize = size*4;
         bloom->counters = calloc((csize+CHAR_BIT-1)/CHAR_BIT, sizeof(char));
         if (!bloom->counters) {
             free (bloom);
-            return NULL;
+            return nullptr;
         }
     }
 

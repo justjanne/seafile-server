@@ -19,7 +19,7 @@ int read_file(SeafileSession *seaf,
               char *buf, size_t size,
               off_t offset, struct fuse_file_info *info)
 {
-    BlockHandle *handle = NULL;;
+    BlockHandle *handle = nullptr;;
     BlockMetadata *bmd;
     char *blkid;
     char *ptr;

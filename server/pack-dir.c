@@ -47,7 +47,7 @@ do_iconv (char *fromcode, char *tocode, char *in)
     
     conv = iconv_open (tocode, fromcode);
     if (conv == (iconv_t)-1) {
-        return NULL;
+        return nullptr;
     }
 
     inlen = strlen (in);
@@ -57,7 +57,7 @@ do_iconv (char *fromcode, char *tocode, char *in)
     iconv_close (conv);
 
     if (len == -1) {
-        return NULL;
+        return nullptr;
     }
 
     outlen = sizeof(out) - outlen;
@@ -76,24 +76,24 @@ add_file_to_archive (PackDirData *data,
     gboolean is_windows = data->is_windows;
     const char *top_dir_name = data->top_dir_name;
     
-    struct archive_entry *entry = NULL;
-    Seafile *file = NULL;
-    char *pathname = NULL;
+    struct archive_entry *entry = nullptr;
+    Seafile *file = nullptr;
+    char *pathname = nullptr;
     char buf[64 * 1024];
     int len = 0;
     int n = 0;
     int idx = 0;
-    BlockHandle *handle = NULL;
-    BlockMetadata *bmd = NULL;
-    char *blk_id = NULL;
+    BlockHandle *handle = nullptr;
+    BlockMetadata *bmd = nullptr;
+    char *blk_id = nullptr;
     uint32_t remain = 0;
     EVP_CIPHER_CTX *ctx;
     gboolean enc_init = FALSE;
-    char *dec_out = NULL;
+    char *dec_out = nullptr;
     int dec_out_len = -1;
     int ret = 0;
 
-    pathname = g_build_filename (top_dir_name, parent_dir, base_name, NULL);
+    pathname = g_build_filename (top_dir_name, parent_dir, base_name, nullptr);
 
     file = seaf_fs_manager_get_seafile (seaf->fs_mgr,
                                         data->store_id, data->repo_version,
@@ -179,7 +179,7 @@ add_file_to_archive (PackDirData *data,
             remain -= n;
 
             /* OK, We're read some data of this block  */
-            if (crypt == NULL) {
+            if (crypt == nullptr) {
                 /* not encrypted */
                 len = archive_write_data (a, buf, n);
                 if (len <= 0) {
@@ -242,13 +242,13 @@ add_file_to_archive (PackDirData *data,
                 }
 
                 g_free (dec_out);
-                dec_out = NULL;
+                dec_out = nullptr;
             }
         }
 
         seaf_block_manager_close_block (seaf->block_mgr, handle);
         seaf_block_manager_block_handle_free (seaf->block_mgr, handle);
-        handle = NULL;
+        handle = nullptr;
 
         /* turn to next block */
         idx++;
@@ -264,7 +264,7 @@ out:
         seaf_block_manager_close_block (seaf->block_mgr, handle);
         seaf_block_manager_block_handle_free(seaf->block_mgr, handle);
     }
-    if (crypt != NULL && enc_init)
+    if (crypt != nullptr && enc_init)
         EVP_CIPHER_CTX_free (ctx);
     g_free (dec_out);
 
@@ -277,10 +277,10 @@ archive_dir (PackDirData *data,
              const char *dirpath,
              Progress *progress)
 {
-    SeafDir *dir = NULL;
+    SeafDir *dir = nullptr;
     SeafDirent *dent;
     GList *ptr;
-    char *subpath = NULL;
+    char *subpath = nullptr;
     int ret = 0;
 
     dir = seaf_fs_manager_get_seafdir (seaf->fs_mgr,
@@ -291,7 +291,7 @@ archive_dir (PackDirData *data,
         goto out;
     }
     if (!dir->entries) {
-        char *pathname = g_build_filename (data->top_dir_name, dirpath, NULL);
+        char *pathname = g_build_filename (data->top_dir_name, dirpath, nullptr);
         struct archive_entry *entry = archive_entry_new ();
         gboolean is_windows = data->is_windows;
 
@@ -346,7 +346,7 @@ archive_dir (PackDirData *data,
             }
 
         } else if (S_ISDIR(dent->mode)) {
-            subpath = g_build_filename (dirpath, dent->name, NULL);
+            subpath = g_build_filename (dirpath, dent->name, nullptr);
             ret = archive_dir (data, dent->id, subpath, progress);
             g_free (subpath);
         }
@@ -370,10 +370,10 @@ pack_dir_data_new (const char *store_id,
                    SeafileCrypt *crypt,
                    gboolean is_windows)
 {
-    struct archive *a = NULL;
-    char *tmpfile_name = NULL ;
+    struct archive *a = nullptr;
+    char *tmpfile_name = nullptr ;
     int fd = -1;
-    PackDirData *data = NULL;
+    PackDirData *data = nullptr;
 
     tmpfile_name = g_strdup_printf ("%s/seafile-XXXXXX.zip",
                                     seaf->http_server->http_temp_dir);
@@ -381,7 +381,7 @@ pack_dir_data_new (const char *store_id,
     if (fd < 0) {
         seaf_warning ("Failed to open temp file: %s.\n", strerror (errno));
         g_free (tmpfile_name);
-        return NULL;
+        return nullptr;
     }
 
     a = archive_write_new ();
@@ -394,7 +394,7 @@ pack_dir_data_new (const char *store_id,
     data->is_windows = is_windows;
     data->a = a;
     data->top_dir_name = dirname;
-    data->mtime = time(NULL);
+    data->mtime = time(nullptr);
     memcpy (data->store_id, store_id, 36);
     data->repo_version = repo_version;
     data->tmp_fd = fd;
@@ -409,7 +409,7 @@ name_exists (GList *file_list, const char *filename)
     GList *ptr;
     char *name;
 
-    for (ptr = file_list; ptr != NULL; ptr = ptr->next) {
+    for (ptr = file_list; ptr != nullptr; ptr = ptr->next) {
         name = ptr->data;
         if (strcmp (name, filename) == 0)
             return TRUE;
@@ -447,10 +447,10 @@ archive_multi (PackDirData *data, GList *dirent_list,
 {
     GList *iter;
     SeafDirent *dirent;
-    GList *file_list = NULL;
+    GList *file_list = nullptr;
 
     for (iter = dirent_list; iter; iter = iter->next) {
-        char *unique_name = NULL;
+        char *unique_name = nullptr;
         if (progress->canceled) {
             string_list_free (file_list);
             return -1;
@@ -490,7 +490,7 @@ pack_files (const char *store_id,
             Progress *progress)
 {
     int ret = 0;
-    PackDirData *data = NULL;
+    PackDirData *data = nullptr;
 
     data = pack_dir_data_new (store_id, repo_version, dirname,
                               crypt, is_windows);

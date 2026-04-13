@@ -232,7 +232,7 @@ get_utc_file_time_fd (int fd, __time64_t *mtime, __time64_t *ctime)
         return -1;
     }
 
-    if (!GetFileTime (handle, &create_time, NULL, &write_time)) {
+    if (!GetFileTime (handle, &create_time, nullptr, &write_time)) {
         g_warning ("Failed to get file time: %lu.\n", GetLastError());
         return -1;
     }
@@ -264,10 +264,10 @@ set_utc_file_time (const char *path, const wchar_t *wpath, guint64 mtime)
     handle = CreateFileW (wpath,
                           GENERIC_WRITE,
                           FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                          NULL,
+                          nullptr,
                           OPEN_EXISTING,
                           FILE_FLAG_BACKUP_SEMANTICS,
-                          NULL);
+                          nullptr);
     if (handle == INVALID_HANDLE_VALUE) {
         g_warning ("Failed to open %s: %lu.\n", path, GetLastError());
         return -1;
@@ -275,7 +275,7 @@ set_utc_file_time (const char *path, const wchar_t *wpath, guint64 mtime)
 
     unix_time_to_file_time (mtime, &write_time);
 
-    if (!SetFileTime (handle, NULL, NULL, &write_time)) {
+    if (!SetFileTime (handle, nullptr, nullptr, &write_time)) {
         g_warning ("Failed to set file time for %s: %lu.\n", path, GetLastError());
         CloseHandle (handle);
         return -1;
@@ -292,14 +292,14 @@ win32_long_path (const char *path)
     wchar_t *long_path_w;
 
     if (strncmp(path, "//", 2) == 0)
-        long_path = g_strconcat ("\\\\?\\UNC\\", path + 2, NULL);
+        long_path = g_strconcat ("\\\\?\\UNC\\", path + 2, nullptr);
     else
-        long_path = g_strconcat ("\\\\?\\", path, NULL);
+        long_path = g_strconcat ("\\\\?\\", path, nullptr);
     for (p = long_path; *p != 0; ++p)
         if (*p == '/')
             *p = '\\';
 
-    long_path_w = g_utf8_to_utf16 (long_path, -1, NULL, NULL, NULL);
+    long_path_w = g_utf8_to_utf16 (long_path, -1, nullptr, nullptr, nullptr);
 
     g_free (long_path);
     return long_path_w;
@@ -309,12 +309,12 @@ win32_long_path (const char *path)
 wchar_t *
 win32_83_path_to_long_path (const char *worktree, const wchar_t *path, int path_len)
 {
-    wchar_t *worktree_w = g_utf8_to_utf16 (worktree, -1, NULL, NULL, NULL);
+    wchar_t *worktree_w = g_utf8_to_utf16 (worktree, -1, nullptr, nullptr, nullptr);
     int wt_len;
     wchar_t *p;
-    wchar_t *fullpath_w = NULL;
-    wchar_t *fullpath_long = NULL;
-    wchar_t *ret = NULL;
+    wchar_t *fullpath_w = nullptr;
+    wchar_t *fullpath_long = nullptr;
+    wchar_t *ret = nullptr;
     char *fullpath;
 
     for (p = worktree_w; *p != L'\0'; ++p)
@@ -334,7 +334,7 @@ win32_83_path_to_long_path (const char *worktree, const wchar_t *path, int path_
     DWORD n = GetLongPathNameW (fullpath_w, fullpath_long, SEAF_PATH_MAX);
     if (n == 0) {
         /* Failed. */
-        fullpath = g_utf16_to_utf8 (fullpath_w, -1, NULL, NULL, NULL);
+        fullpath = g_utf16_to_utf8 (fullpath_w, -1, nullptr, nullptr, nullptr);
         g_free (fullpath);
 
         goto out;
@@ -344,7 +344,7 @@ win32_83_path_to_long_path (const char *worktree, const wchar_t *path, int path_
         fullpath_long = g_new0 (wchar_t, n);
 
         if (GetLongPathNameW (fullpath_w, fullpath_long, n) != (n - 1)) {
-            fullpath = g_utf16_to_utf8 (fullpath_w, -1, NULL, NULL, NULL);
+            fullpath = g_utf16_to_utf8 (fullpath_w, -1, nullptr, nullptr, nullptr);
             g_free (fullpath);
 
             goto out;
@@ -529,7 +529,7 @@ seaf_util_mkdir (const char *path, mode_t mode)
     wchar_t *wpath = win32_long_path (path);
     int ret = 0;
 
-    if (!CreateDirectoryW (wpath, NULL)) {
+    if (!CreateDirectoryW (wpath, nullptr)) {
         ret = -1;
         errno = windows_error_to_errno (GetLastError());
     }
@@ -559,10 +559,10 @@ seaf_util_open (const char *path, int flags)
     handle = CreateFileW (wpath,
                           access,
                           FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
-                          NULL,
+                          nullptr,
                           OPEN_EXISTING,
                           0,
-                          NULL);
+                          nullptr);
     if (handle == INVALID_HANDLE_VALUE) {
         errno = windows_error_to_errno (GetLastError());
         g_free (wpath);
@@ -596,10 +596,10 @@ seaf_util_create (const char *path, int flags, mode_t mode)
     handle = CreateFileW (wpath,
                           access,
                           FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
-                          NULL,
+                          nullptr,
                           CREATE_ALWAYS,
                           0,
-                          NULL);
+                          nullptr);
     if (handle == INVALID_HANDLE_VALUE) {
         errno = windows_error_to_errno (GetLastError());
         g_free (wpath);
@@ -680,7 +680,7 @@ traverse_directory_win32 (wchar_t *path_w,
     gboolean stop;
     int ret = 0;
 
-    path = g_utf16_to_utf8 (path_w, -1, NULL, NULL, NULL);
+    path = g_utf16_to_utf8 (path_w, -1, nullptr, nullptr, nullptr);
 
     path_len_w = wcslen(path_w);
 
@@ -896,7 +896,7 @@ ccnet_expand_path (const char *src)
         const char *home = g_get_home_dir();
         total_len += strlen(home);
         if (total_len > SEAF_PATH_MAX) {
-            return NULL;
+            return nullptr;
         }
         memcpy(new_path, home, strlen(home));
         p += strlen(new_path);
@@ -904,7 +904,7 @@ ccnet_expand_path (const char *src)
     }
     total_len += strlen(q);
     if (total_len > SEAF_PATH_MAX) {
-        return NULL;
+        return nullptr;
     }
     memcpy(p, q, strlen(q));
 
@@ -923,9 +923,9 @@ ccnet_expand_path (const char *src)
 
    /* special cases */
     if (!src || *src == '\0')
-        return NULL;
+        return nullptr;
     if (strlen(src) > SEAF_PATH_MAX)
-        return NULL;
+        return nullptr;
 
     next_in = src;
     next_out = new_path;
@@ -933,7 +933,7 @@ ccnet_expand_path (const char *src)
 
     if (*src == '~') {
         /* handle src start with '~' or '~<user>' like '~plt' */
-        struct passwd *pw = NULL;
+        struct passwd *pw = nullptr;
 
         for ( ; *next_in != '/' && *next_in != '\0'; next_in++) ;
         
@@ -943,19 +943,19 @@ ccnet_expand_path (const char *src)
         } else {
             /* copy '~<user>' to new_path */
             if (len > SEAF_PATH_MAX) {
-                return NULL;
+                return nullptr;
             }
             memcpy (new_path, src, len);
             new_path[len] = '\0';
             pw = getpwnam (new_path + 1);
         }
-        if (pw == NULL)
-            return NULL;
+        if (pw == nullptr)
+            return nullptr;
        
         len = strlen (pw->pw_dir);
         total_len += len;
         if (total_len > SEAF_PATH_MAX) {
-            return NULL;
+            return nullptr;
         }
         memcpy (new_path, pw->pw_dir, len);
         next_out = new_path + len;
@@ -995,7 +995,7 @@ ccnet_expand_path (const char *src)
             *next_out++ = '/';
             total_len += len;
             if (total_len > SEAF_PATH_MAX) {
-                return NULL;
+                return nullptr;
             }
             memcpy (next_out, ntoken, len);
             next_out += len;
@@ -1093,7 +1093,7 @@ is_uuid_valid (const char *uuid_str)
 char* gen_uuid ()
 {
     char *uuid_str = g_malloc (37);
-    unsigned char *str = NULL;
+    unsigned char *str = nullptr;
     UUID uuid;
 
     UuidCreate(&uuid);
@@ -1105,7 +1105,7 @@ char* gen_uuid ()
 
 void gen_uuid_inplace (char *buf)
 {
-    unsigned char *str = NULL;
+    unsigned char *str = nullptr;
     UUID uuid;
 
     UuidCreate(&uuid);
@@ -1158,7 +1158,7 @@ char* strjoin_n (const char *seperator, int argc, char **argv)
     char *str;
 
     if (argc == 0)
-        return NULL;
+        return nullptr;
     
     buf = g_string_new (argv[0]);
     for (i = 1; i < argc; ++i) {
@@ -1278,7 +1278,7 @@ string_list_is_exists (GList *str_list, const char *string)
 GList*
 string_list_append (GList *str_list, const char *string)
 {
-    g_return_val_if_fail (string != NULL, str_list);
+    g_return_val_if_fail (string != nullptr, str_list);
 
     if (string_list_is_exists(str_list, string))
         return str_list;
@@ -1290,13 +1290,13 @@ string_list_append (GList *str_list, const char *string)
 GList *
 string_list_append_sorted (GList *str_list, const char *string)
 {
-    g_return_val_if_fail (string != NULL, str_list);
+    g_return_val_if_fail (string != nullptr, str_list);
 
     if (string_list_is_exists(str_list, string))
         return str_list;
 
     str_list = g_list_insert_sorted_with_data (str_list, g_strdup(string),
-                                 (GCompareDataFunc)g_strcmp0, NULL);
+                                 (GCompareDataFunc)g_strcmp0, nullptr);
     return str_list;
 }
 
@@ -1304,7 +1304,7 @@ string_list_append_sorted (GList *str_list, const char *string)
 GList *
 string_list_remove (GList *str_list, const char *string)
 {
-    g_return_val_if_fail (string != NULL, str_list);
+    g_return_val_if_fail (string != nullptr, str_list);
 
     GList *ptr;
 
@@ -1352,9 +1352,9 @@ GList *
 string_list_parse (const char *list_in_str, const char *seperator)
 {
     if (!list_in_str)
-        return NULL;
+        return nullptr;
 
-    GList *list = NULL;
+    GList *list = nullptr;
     char **array = g_strsplit (list_in_str, seperator, 0);
     char **ptr;
 
@@ -1530,12 +1530,12 @@ ccnet_encrypt (char **data_out,
                const char *code,
                const int code_len)
 {
-    *data_out = NULL;
+    *data_out = nullptr;
     *out_len = -1;
 
     /* check validation */
-    if ( data_in == NULL || in_len <= 0 ||
-         code == NULL || code_len <= 0) {
+    if ( data_in == nullptr || in_len <= 0 ||
+         code == nullptr || code_len <= 0) {
 
         g_warning ("Invalid params.\n");
         return -1;
@@ -1553,7 +1553,7 @@ ccnet_encrypt (char **data_out,
        actually. */
     key_len  = EVP_BytesToKey (EVP_aes_128_ecb(), /* cipher mode */
                                EVP_sha1(),        /* message digest */
-                               NULL,              /* salt */
+                               nullptr,              /* salt */
                                (unsigned char*)code, /* passwd */
                                code_len,
                                3,   /* iteration times */
@@ -1571,7 +1571,7 @@ ccnet_encrypt (char **data_out,
 
     ret = EVP_EncryptInit_ex (ctx,
                               EVP_aes_128_ecb(), /* cipher mode */
-                              NULL, /* engine, NULL for default */
+                              nullptr, /* engine, nullptr for default */
                               key,  /* derived key */
                               iv);  /* initial vector */
 
@@ -1591,7 +1591,7 @@ ccnet_encrypt (char **data_out,
 
     *data_out = (char *)g_malloc (blks * BLK_SIZE);
 
-    if (*data_out == NULL) {
+    if (*data_out == nullptr) {
         g_warning ("failed to allocate the output buffer.\n");
         goto enc_error;
     }                
@@ -1629,10 +1629,10 @@ enc_error:
 
     *out_len = -1;
 
-    if (*data_out != NULL)
+    if (*data_out != nullptr)
         g_free (*data_out);
 
-    *data_out = NULL;
+    *data_out = nullptr;
 
     return -1;   
 }
@@ -1645,13 +1645,13 @@ ccnet_decrypt (char **data_out,
                const char *code,
                const int code_len)
 {
-    *data_out = NULL;
+    *data_out = nullptr;
     *out_len = -1;
 
     /* Check validation. Because padding is always used, in_len must
      * be a multiple of BLK_SIZE */
-    if ( data_in == NULL || in_len <= 0 || in_len % BLK_SIZE != 0 ||
-         code == NULL || code_len <= 0) {
+    if ( data_in == nullptr || in_len <= 0 || in_len % BLK_SIZE != 0 ||
+         code == nullptr || code_len <= 0) {
 
         g_warning ("Invalid param(s).\n");
         return -1;
@@ -1668,7 +1668,7 @@ ccnet_decrypt (char **data_out,
        actually. */
     key_len  = EVP_BytesToKey (EVP_aes_128_ecb(), /* cipher mode */
                                EVP_sha1(),        /* message digest */
-                               NULL,              /* salt */
+                               nullptr,              /* salt */
                                (unsigned char*)code, /* passwd */
                                code_len,
                                3,   /* iteration times */
@@ -1687,7 +1687,7 @@ ccnet_decrypt (char **data_out,
 
     ret = EVP_DecryptInit_ex (ctx,
                               EVP_aes_128_ecb(), /* cipher mode */
-                              NULL, /* engine, NULL for default */
+                              nullptr, /* engine, nullptr for default */
                               key,  /* derived key */
                               iv);  /* initial vector */
 
@@ -1698,7 +1698,7 @@ ccnet_decrypt (char **data_out,
     
     *data_out = (char *)g_malloc (in_len);
 
-    if (*data_out == NULL) {
+    if (*data_out == nullptr) {
         g_warning ("failed to allocate the output buffer.\n");
         goto dec_error;
     }                
@@ -1736,10 +1736,10 @@ dec_error:
     EVP_CIPHER_CTX_free (ctx);
 
     *out_len = -1;
-    if (*data_out != NULL)
+    if (*data_out != nullptr)
         g_free (*data_out);
 
-    *data_out = NULL;
+    *data_out = nullptr;
 
     return -1;
     
@@ -1749,12 +1749,12 @@ dec_error:
 char *ccnet_locale_to_utf8 (const gchar *src)
 {
     if (!src)
-        return NULL;
+        return nullptr;
 
     gsize bytes_read = 0;
     gsize bytes_written = 0;
-    GError *error = NULL;
-    gchar *dst = NULL;
+    GError *error = nullptr;
+    gchar *dst = nullptr;
 
     dst = g_locale_to_utf8
         (src,                   /* locale specific string */
@@ -1764,7 +1764,7 @@ char *ccnet_locale_to_utf8 (const gchar *src)
          &error);
 
     if (error) {
-        return NULL;
+        return nullptr;
     }
 
     return dst;
@@ -1774,12 +1774,12 @@ char *ccnet_locale_to_utf8 (const gchar *src)
 char *ccnet_locale_from_utf8 (const gchar *src)
 {
     if (!src)
-        return NULL;
+        return nullptr;
 
     gsize bytes_read = 0;
     gsize bytes_written = 0;
-    GError *error = NULL;
-    gchar *dst = NULL;
+    GError *error = nullptr;
+    gchar *dst = nullptr;
 
     dst = g_locale_from_utf8
         (src,                   /* locale specific string */
@@ -1789,7 +1789,7 @@ char *ccnet_locale_from_utf8 (const gchar *src)
          &error);
 
     if (error) {
-        return NULL;
+        return nullptr;
     }
 
     return dst;
@@ -1810,7 +1810,7 @@ get_process_handle (const char *process_name_in)
     DWORD aProcesses[1024], cbNeeded, cProcesses;
 
     if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
-        return NULL;
+        return nullptr;
 
     /* Calculate how many process identifiers were returned. */
     cProcesses = cbNeeded / sizeof(DWORD);
@@ -1839,7 +1839,7 @@ get_process_handle (const char *process_name_in)
         }
     }
     /* Not found */
-    return NULL;
+    return nullptr;
 }
 
 int count_process (const char *process_name_in)
@@ -1922,8 +1922,8 @@ win32_spawn_process (char *cmdline_in, char *working_directory_in)
     if (!cmdline_in)
         return -1;
 
-    wchar_t *cmdline_w = NULL;
-    wchar_t *working_directory_w = NULL;
+    wchar_t *cmdline_w = nullptr;
+    wchar_t *working_directory_w = nullptr;
 
     cmdline_w = wchar_from_utf8 (cmdline_in);
     if (!cmdline_in) {
@@ -1956,8 +1956,8 @@ win32_spawn_process (char *cmdline_in, char *working_directory_in)
     
     memset(&pi, 0, sizeof(pi));
 
-    success = CreateProcessW (NULL, cmdline_w, NULL, NULL, TRUE, flags,
-                              NULL, working_directory_w, &si, &pi);
+    success = CreateProcessW (nullptr, cmdline_w, nullptr, nullptr, TRUE, flags,
+                              nullptr, working_directory_w, &si, &pi);
     free (cmdline_w);
     if (working_directory_w) free (working_directory_w);
     
@@ -1977,11 +1977,11 @@ win32_spawn_process (char *cmdline_in, char *working_directory_in)
 char *
 wchar_to_utf8 (const wchar_t *wch)
 {
-    if (wch == NULL) {
-        return NULL;
+    if (wch == nullptr) {
+        return nullptr;
     }
 
-    char *utf8 = NULL;
+    char *utf8 = nullptr;
     int bufsize, len;
 
     bufsize = WideCharToMultiByte
@@ -1991,12 +1991,12 @@ wchar_to_utf8 (const wchar_t *wch)
          -1,                    /* src len, -1 for all includes \0 */
          utf8,                  /* dst */
          0,                     /* dst buf len */
-         NULL,                  /* default char */
-         NULL);                 /* BOOL flag indicates default char is used */
+         nullptr,                  /* default char */
+         nullptr);                 /* BOOL flag indicates default char is used */
 
     if (bufsize <= 0) {
         g_warning ("failed to convert a string from wchar to utf8 0");
-        return NULL;
+        return nullptr;
     }
 
     utf8 = g_malloc(bufsize);
@@ -2007,13 +2007,13 @@ wchar_to_utf8 (const wchar_t *wch)
          -1,                    /* src len, -1 for all includes \0 */
          utf8,                  /* dst */
          bufsize,               /* dst buf len */
-         NULL,                  /* default char */
-         NULL);                 /* BOOL flag indicates default char is used */
+         nullptr,                  /* default char */
+         nullptr);                 /* BOOL flag indicates default char is used */
 
     if (len != bufsize) {
         g_free (utf8);
         g_warning ("failed to convert a string from wchar to utf8");
-        return NULL;
+        return nullptr;
     }
 
     return utf8;
@@ -2022,11 +2022,11 @@ wchar_to_utf8 (const wchar_t *wch)
 wchar_t *
 wchar_from_utf8 (const char *utf8)
 {
-    if (utf8 == NULL) {
-        return NULL;
+    if (utf8 == nullptr) {
+        return nullptr;
     }
 
-    wchar_t *wch = NULL;
+    wchar_t *wch = nullptr;
     int bufsize, len;
 
     bufsize = MultiByteToWideChar
@@ -2039,7 +2039,7 @@ wchar_from_utf8 (const char *utf8)
 
     if (bufsize <= 0) {
         g_warning ("failed to convert a string from wchar to utf8 0");
-        return NULL;
+        return nullptr;
     }
 
     wch = g_malloc (bufsize * sizeof(wchar_t));
@@ -2054,7 +2054,7 @@ wchar_from_utf8 (const char *utf8)
     if (len != bufsize) {
         g_free (wch);
         g_warning ("failed to convert a string from utf8 to wchar");
-        return NULL;
+        return nullptr;
     }
 
     return wch;
@@ -2101,7 +2101,7 @@ gboolean process_is_running (const char *process_name)
         return FALSE;
     }
 
-    struct dirent *subdir = NULL;
+    struct dirent *subdir = nullptr;
     while ((subdir = readdir(proc_dir))) {
         char first = subdir->d_name[0];
         /* /proc/[1-9][0-9]* */
@@ -2127,7 +2127,7 @@ int count_process(const char *process_name)
         return FALSE;
     }
 
-    struct dirent *subdir = NULL;
+    struct dirent *subdir = nullptr;
     while ((subdir = readdir(proc_dir))) {
         char first = subdir->d_name[0];
         /* /proc/[1-9][0-9]* */
@@ -2158,7 +2158,7 @@ ccnet_object_type_from_id (const char *object_id)
     char *ptr;
 
     if ( !(ptr = strchr(object_id, '/')) )
-        return NULL;
+        return nullptr;
 
     return g_strndup(object_id, ptr - object_id);
 }
@@ -2191,7 +2191,7 @@ calc_recursively (const char *path, GError **calc_error)
 {
     gint64 sum = 0;
 
-    GError *error = NULL;
+    GError *error = nullptr;
     GDir *folder = g_dir_open(path, 0, &error);
     if (!folder) {
         g_set_error (calc_error, CCNET_DOMAIN, 0,
@@ -2199,10 +2199,10 @@ calc_recursively (const char *path, GError **calc_error)
         return -1;
     }
 
-    const char *name = NULL;
-    while ((name = g_dir_read_name(folder)) != NULL) {
+    const char *name = nullptr;
+    while ((name = g_dir_read_name(folder)) != nullptr) {
         STAT_STRUCT sb;
-        char *full_path= g_build_filename (path, name, NULL);
+        char *full_path= g_build_filename (path, name, nullptr);
         if (STAT_FUNC(full_path, &sb) < 0) {
             g_set_error (calc_error, CCNET_DOMAIN, 0, "failed to stat on %s: %s\n",
                          full_path, strerror(errno));
@@ -2246,21 +2246,21 @@ strtok_r(char *s, const char *delim, char **save_ptr)
 {
     char *token;
     
-    if(s == NULL)
+    if(s == nullptr)
         s = *save_ptr;
     
     /* Scan leading delimiters.  */
     s += strspn(s, delim);
     if(*s == '\0') {
         *save_ptr = s;
-        return NULL;
+        return nullptr;
     }
     
     /* Find the end of the token.  */
     token = s;
     s = strpbrk(token, delim);
     
-    if(s == NULL) {
+    if(s == nullptr) {
         /* This token finishes the string.  */
         *save_ptr = strchr(token, '\0');
     } else {
@@ -2280,14 +2280,14 @@ json_object_get_string_member (json_t *object, const char *key)
 {
     json_t *string = json_object_get (object, key);
     if (!string)
-        return NULL;
+        return nullptr;
     return json_string_value (string);
 }
 
 gboolean
 json_object_has_member (json_t *object, const char *key)
 {
-    return (json_object_get (object, key) != NULL);
+    return (json_object_get (object, key) != nullptr);
 }
 
 gint64
@@ -2335,8 +2335,8 @@ clean_utf8_data (char *data, int len)
 char *
 normalize_utf8_path (const char *path)
 {
-    if (!g_utf8_validate (path, -1, NULL))
-        return NULL;
+    if (!g_utf8_validate (path, -1, nullptr))
+        return nullptr;
     return g_utf8_normalize (path, -1, G_NORMALIZE_NFC);
 }
 
@@ -2448,7 +2448,7 @@ format_dir_path (const char *path)
     int path_len = strlen (path);
     char *rpath;
     if (path[0] != '/') {
-        rpath = g_strconcat ("/", path, NULL);
+        rpath = g_strconcat ("/", path, nullptr);
         path_len++;
     } else {
         rpath = g_strdup (path);
@@ -2488,7 +2488,7 @@ seaf_key_file_get_string (GKeyFile *key_file,
     v = g_key_file_get_string (key_file, group, key, error);
     if (!v || v[0] == '\0') {
         g_free (v);
-        return NULL;
+        return nullptr;
     }
 
     return g_strchomp(v);
@@ -2501,13 +2501,13 @@ ccnet_key_file_get_string (GKeyFile *keyf,
 {
     gchar *v;
 
-    if (!g_key_file_has_key (keyf, category, key, NULL))
-        return NULL;
+    if (!g_key_file_has_key (keyf, category, key, nullptr))
+        return nullptr;
 
-    v = g_key_file_get_string (keyf, category, key, NULL);
-    if (v != NULL && v[0] == '\0') {
+    v = g_key_file_get_string (keyf, category, key, nullptr);
+    if (v != nullptr && v[0] == '\0') {
         g_free(v);
-        return NULL;
+        return nullptr;
     }
 
     return g_strchomp(v);

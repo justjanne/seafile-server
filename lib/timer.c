@@ -48,7 +48,7 @@ ccnet_timer_free (CcnetTimer **ptimer)
     g_return_if_fail (ptimer);
 
     timer = *ptimer;
-    *ptimer = NULL;
+    *ptimer = nullptr;
 
     /* destroy the timer directly or via the command queue */
     if (timer && !timer->inCallback)

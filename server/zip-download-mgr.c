@@ -92,7 +92,7 @@ validate_download_size (DownloadObj *obj, GError **error);
 ZipDownloadMgr *
 zip_download_mgr_new ()
 {
-    GError *error = NULL;
+    GError *error = nullptr;
     ZipDownloadMgr *mgr = g_new0 (ZipDownloadMgr, 1);
     ZipDownloadMgrPriv *priv = g_new0 (ZipDownloadMgrPriv, 1);
 
@@ -106,10 +106,10 @@ zip_download_mgr_new ()
         }
         g_free (priv);
         g_free (mgr);
-        return NULL;
+        return nullptr;
     }
 
-    pthread_mutex_init (&priv->progress_lock, NULL);
+    pthread_mutex_init (&priv->progress_lock, nullptr);
     priv->progress_store = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                                   (GDestroyNotify)free_progress);
     priv->scan_progress_timer = ccnet_timer_new (scan_progress, priv,
@@ -130,7 +130,7 @@ remove_progress_by_token (ZipDownloadMgrPriv *priv, const char *token)
 static int
 scan_progress (void *data)
 {
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     ZipDownloadMgrPriv *priv = data;
     GHashTableIter iter;
     gpointer key, value;
@@ -154,19 +154,19 @@ scan_progress (void *data)
 static SeafileCrypt *
 get_seafile_crypt (SeafRepo *repo, const char *user)
 {
-    SeafileCryptKey *key = NULL;
+    SeafileCryptKey *key = nullptr;
     char *key_hex, *iv_hex;
     unsigned char enc_key[32], enc_iv[16];
-    SeafileCrypt *crypt = NULL;
+    SeafileCrypt *crypt = nullptr;
 
     key = seaf_passwd_manager_get_decrypt_key (seaf->passwd_mgr,
                                                repo->id, user);
     if (!key) {
         seaf_warning ("Failed to get derypt key for repo %.8s.\n", repo->id);
-        return NULL;
+        return nullptr;
     }
 
-    g_object_get (key, "key", &key_hex, "iv", &iv_hex, NULL);
+    g_object_get (key, "key", &key_hex, "iv", &iv_hex, nullptr);
     if (repo->enc_version == 1)
         hex_to_rawdata (key_hex, enc_key, 16);
     else
@@ -186,7 +186,7 @@ start_zip_task (gpointer data, gpointer user_data)
     DownloadObj *obj = data;
     ZipDownloadMgrPriv *priv = user_data;
     SeafRepo *repo = obj->repo;
-    SeafileCrypt *crypt = NULL;
+    SeafileCrypt *crypt = nullptr;
     int ret = 0;
 
     if (repo->encrypted) {
@@ -197,13 +197,13 @@ start_zip_task (gpointer data, gpointer user_data)
         }
     }
 
-    if (!validate_download_size (obj, NULL)) {
+    if (!validate_download_size (obj, nullptr)) {
         ret = -1;
         obj->progress->size_too_large = TRUE;
         goto out;
     }
 
-    int file_count = get_download_file_count (obj, NULL);
+    int file_count = get_download_file_count (obj, nullptr);
     if (file_count < 0) {
         ret = -1;
         goto out;
@@ -276,8 +276,8 @@ parse_download_multi_data (DownloadObj *obj, const char *data)
     const char *file_name;
     SeafDirent *dirent;
     SeafDir *dir;
-    GList *dirent_list = NULL, *p = NULL;
-    GError *error = NULL;
+    GList *dirent_list = nullptr, *p = nullptr;
+    GError *error = nullptr;
 
     jobj = json_loadb (data, strlen(data), 0, &jerror);
     if (!jobj) {
@@ -334,14 +334,14 @@ parse_download_multi_data (DownloadObj *obj, const char *data)
             seaf_warning ("Invalid download file name: %s.\n", file_name);
             if (dirent_list) {
                 g_list_free_full (dirent_list, (GDestroyNotify)seaf_dirent_free);
-                dirent_list = NULL;
+                dirent_list = nullptr;
             }
             break;
         }
 
         // Packing files in multi-level directories.
-        if (strchr (file_name, '/') != NULL) {
-            char *fullpath = g_build_path ("/", parent_dir, file_name, NULL);
+        if (strchr (file_name, '/') != nullptr) {
+            char *fullpath = g_build_path ("/", parent_dir, file_name, nullptr);
             dirent = seaf_fs_manager_get_dirent_by_path (seaf->fs_mgr, repo->store_id, repo->version, repo->root_id, fullpath, &error);
             if (!dirent) {
                 if (error) {
@@ -354,7 +354,7 @@ parse_download_multi_data (DownloadObj *obj, const char *data)
                 }
                 if (dirent_list) {
                     g_list_free_full (dirent_list, (GDestroyNotify)seaf_dirent_free);
-                    dirent_list = NULL;
+                    dirent_list = nullptr;
                 }
                 g_free (fullpath);
                 break;
@@ -368,7 +368,7 @@ parse_download_multi_data (DownloadObj *obj, const char *data)
                                file_name, parent_dir, repo->store_id);
                 if (dirent_list) {
                     g_list_free_full (dirent_list, (GDestroyNotify)seaf_dirent_free);
-                    dirent_list = NULL;
+                    dirent_list = nullptr;
                 }
                 break;
             }
@@ -579,14 +579,14 @@ zip_download_mgr_start_zip_task (ZipDownloadMgr *mgr,
      * the zip has been finished too early.
      */
     progress->total = 1;
-    progress->expire_ts = time(NULL) + PROGRESS_TTL;
+    progress->expire_ts = time(nullptr) + PROGRESS_TTL;
     obj->progress = progress;
 
     pthread_mutex_lock (&priv->progress_lock);
     g_hash_table_replace (priv->progress_store, g_strdup (token), progress);
     pthread_mutex_unlock (&priv->progress_lock);
 
-    g_thread_pool_push (priv->zip_tpool, obj, NULL);
+    g_thread_pool_push (priv->zip_tpool, obj, nullptr);
 
 out:
     if (ret < 0) {
@@ -609,7 +609,7 @@ gen_new_token (GHashTable *token_hash)
         token = g_strndup(uuid, TOKEN_LEN);
 
         // Make sure the new token doesn't conflict with an existing one.
-        if (g_hash_table_lookup (token_hash, token) != NULL)
+        if (g_hash_table_lookup (token_hash, token) != nullptr)
             g_free (token);
         else
             return token;
@@ -623,10 +623,10 @@ zip_download_mgr_start_zip_task_v2 (ZipDownloadMgr *mgr,
                                     const char *user,
                                     GList *dirent_list)
 {
-    SeafRepo *repo = NULL;
-    char *token = NULL;
-    char *task_id = NULL;
-    char *filename = NULL;
+    SeafRepo *repo = nullptr;
+    char *token = nullptr;
+    char *task_id = nullptr;
+    char *filename = nullptr;
     DownloadObj *obj;
     Progress *progress;
     ZipDownloadMgrPriv *priv = mgr->priv;
@@ -634,7 +634,7 @@ zip_download_mgr_start_zip_task_v2 (ZipDownloadMgr *mgr,
     repo = seaf_repo_manager_get_repo(seaf->repo_mgr, repo_id);
     if (!repo) {
         seaf_warning ("Failed to get repo %s\n", repo_id);
-        return NULL;
+        return nullptr;
     }
 
     obj = g_new0 (DownloadObj, 1);
@@ -653,17 +653,17 @@ zip_download_mgr_start_zip_task_v2 (ZipDownloadMgr *mgr,
         obj->type = DOWNLOAD_MULTI;
         obj->dir_name = g_strdup("");
         obj->internal = dirent_list;
-        time_t now = time(NULL);
+        time_t now = time(nullptr);
         char date_str[11];
         strftime(date_str, sizeof(date_str), "%Y-%m-%d", localtime(&now));
-        filename = g_strconcat (MULTI_DOWNLOAD_FILE_PREFIX, date_str, NULL);
+        filename = g_strconcat (MULTI_DOWNLOAD_FILE_PREFIX, date_str, nullptr);
     }
 
     progress = g_new0 (Progress, 1);
     // Set to real total in worker thread. Here to just prevent the client from thinking
     // the zip has been finished too early.
     progress->total = 1;
-    progress->expire_ts = time(NULL) + PROGRESS_TTL;
+    progress->expire_ts = time(nullptr) + PROGRESS_TTL;
     progress->zip_file_name = filename;
     obj->progress = progress;
 
@@ -674,7 +674,7 @@ zip_download_mgr_start_zip_task_v2 (ZipDownloadMgr *mgr,
     obj->token = g_strdup (token);
     task_id = g_strdup (token);
 
-    g_thread_pool_push (priv->zip_tpool, obj, NULL);
+    g_thread_pool_push (priv->zip_tpool, obj, nullptr);
 
     return task_id;
 }
@@ -702,7 +702,7 @@ zip_download_mgr_query_zip_progress (ZipDownloadMgr *mgr,
 
     progress = get_progress_obj (mgr->priv, token);
     if (!progress)
-        return NULL;
+        return nullptr;
 
     obj = json_object ();
     json_object_set_int_member (obj, "zipped", g_atomic_int_get (&progress->zipped));
@@ -739,7 +739,7 @@ zip_download_mgr_get_zip_file_path (struct ZipDownloadMgr *mgr,
 
     progress = get_progress_obj (mgr->priv, token);
     if (!progress) {
-        return NULL;
+        return nullptr;
     }
     return progress->zip_file_path;
 }
@@ -753,7 +753,7 @@ zip_download_mgr_get_zip_file_name (struct ZipDownloadMgr *mgr,
 
     progress = get_progress_obj (mgr->priv, token);
     if (!progress) {
-        return NULL;
+        return nullptr;
     }
     return progress->zip_file_name;
 }

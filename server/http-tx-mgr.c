@@ -35,10 +35,10 @@ connection_new ()
 {
     Connection *conn = g_new0 (Connection, 1);
     if (!conn)
-        return NULL;
+        return nullptr;
 
     conn->curl = curl_easy_init();
-    conn->ctime = (gint64)time(NULL);
+    conn->ctime = (gint64)time(nullptr);
 
     return conn;
 }
@@ -58,10 +58,10 @@ connection_pool_new ()
 {
     ConnectionPool *pool = g_new0 (ConnectionPool, 1);
     if (!pool)
-        return NULL;
+        return nullptr;
 
     pool->queue = g_queue_new ();
-    pthread_mutex_init (&pool->lock, NULL);
+    pthread_mutex_init (&pool->lock, nullptr);
     return pool;
 }
 
@@ -78,7 +78,7 @@ connection_pool_free (ConnectionPool *pool)
 Connection *
 connection_pool_get_connection (ConnectionPool *pool)
 {
-    Connection *conn = NULL;
+    Connection *conn = nullptr;
 
     pthread_mutex_lock (&pool->lock);
     conn = g_queue_pop_head (pool->queue);
@@ -364,13 +364,13 @@ http_post (Connection *conn, const char *url, const char *token,
            int *rsp_status, char **rsp_content, gint64 *rsp_size,
            gboolean timeout, int timeout_sec)
 {
-    struct curl_slist *headers = NULL;
+    struct curl_slist *headers = nullptr;
     int ret = 0;
     CURL *curl;
 
     curl = conn->curl;
 
-    g_return_val_if_fail (req_content != NULL, -1);
+    g_return_val_if_fail (req_content != nullptr, -1);
 
     ret = http_post_common (curl, url, &headers, token, req_content, req_size,
                             rsp_status, rsp_content, rsp_size, timeout, timeout_sec);
@@ -384,16 +384,16 @@ http_post (Connection *conn, const char *url, const char *token,
 static char *
 parse_nickname (const char *rsp_content, int rsp_size)
 {
-    json_t *array = NULL, *object, *member;
+    json_t *array = nullptr, *object, *member;
     json_error_t jerror;
     size_t n;
     int i;
-    char *nickname = NULL;
+    char *nickname = nullptr;
 
     object = json_loadb (rsp_content, rsp_size, 0, &jerror);
     if (!object) {
         seaf_warning ("Parse response failed: %s.\n", jerror.text);
-        return NULL;
+        return nullptr;
     }
 
     array = json_object_get (object, "user_list");
@@ -420,17 +420,17 @@ out:
 static char *
 gen_jwt_token ()
 {
-    char *jwt_token = NULL;
-    gint64 now = (gint64)time(NULL);
+    char *jwt_token = nullptr;
+    gint64 now = (gint64)time(nullptr);
 
-    jwt_t *jwt = NULL;
+    jwt_t *jwt = nullptr;
 
     if (!seaf->seahub_pk) {
-        return NULL;
+        return nullptr;
     }
 
     int ret = jwt_new (&jwt);
-    if (ret != 0 || jwt == NULL) {
+    if (ret != 0 || jwt == nullptr) {
         seaf_warning ("Failed to create jwt\n");
         goto out;
     }
@@ -462,30 +462,30 @@ out:
 char *
 http_tx_manager_get_nickname (const char *modifier)
 {
-    Connection *conn = NULL;
-    struct curl_slist *headers = NULL;
+    Connection *conn = nullptr;
+    struct curl_slist *headers = nullptr;
     int ret = 0;
     CURL *curl;
-    json_t *content = NULL;
-    json_t *array = NULL;
+    json_t *content = nullptr;
+    json_t *array = nullptr;
     int rsp_status;
-    char *req_content = NULL;
-    char *jwt_token = NULL;
-    char *rsp_content = NULL;
-    char *nickname = NULL;
+    char *req_content = nullptr;
+    char *jwt_token = nullptr;
+    char *rsp_content = nullptr;
+    char *nickname = nullptr;
     gint64 rsp_size;
-    char *url = NULL;
+    char *url = nullptr;
 
     jwt_token = gen_jwt_token ();
     if (!jwt_token) {
-        return NULL;
+        return nullptr;
     }
 
     conn = connection_pool_get_connection (seaf->seahub_conn_pool);
     if (!conn) {
         g_free (jwt_token);
         seaf_warning ("Failed to get connection: out of memory.\n");
-        return NULL;
+        return nullptr;
     }
 
     content = json_object ();
@@ -534,16 +534,16 @@ parse_share_link_info (const char *rsp_content, int rsp_size)
     json_error_t jerror;
     size_t n;
     int i;
-    const char *repo_id = NULL;
-    const char *file_path = NULL;
-    const char *parent_dir = NULL;
-    const char *share_type = NULL;
-    SeafileShareLinkInfo *info = NULL;
+    const char *repo_id = nullptr;
+    const char *file_path = nullptr;
+    const char *parent_dir = nullptr;
+    const char *share_type = nullptr;
+    SeafileShareLinkInfo *info = nullptr;
 
     object = json_loadb (rsp_content, rsp_size, 0, &jerror);
     if (!object) {
         seaf_warning ("Parse response failed: %s.\n", jerror.text);
-        return NULL;
+        return nullptr;
     }
 
     repo_id = json_object_get_string_member (object, "repo_id");
@@ -560,7 +560,7 @@ parse_share_link_info (const char *rsp_content, int rsp_size)
                          "file_path", file_path,
                          "parent_dir", parent_dir,
                          "share_type", share_type,
-                         NULL);
+                         nullptr);
 
 out:
     json_decref (object);
@@ -572,11 +572,11 @@ parse_error_message (const char *rsp_content, int rsp_size)
 {
     json_t *object;
     json_error_t jerror;
-    const char *err_msg = NULL;
-    char *ret = NULL;
+    const char *err_msg = nullptr;
+    char *ret = nullptr;
 
     if (!rsp_content) {
-        return NULL;
+        return nullptr;
     }
 
     object = json_loadb (rsp_content, rsp_size, 0, &jerror);
@@ -602,30 +602,30 @@ SeafileShareLinkInfo *
 http_tx_manager_query_share_link_info (const char *token, const char *cookie, const char *type,
                                        const char *ip_addr, const char *user_agent, int *status, char **err_msg)
 {
-    Connection *conn = NULL;
+    Connection *conn = nullptr;
     char *cookie_header;
-    struct curl_slist *headers = NULL;
+    struct curl_slist *headers = nullptr;
     int ret = 0;
     CURL *curl;
-    json_t *content = NULL;
-    char *req_content = NULL;
+    json_t *content = nullptr;
+    char *req_content = nullptr;
     int rsp_status;
-    char *jwt_token = NULL;
-    char *rsp_content = NULL;
+    char *jwt_token = nullptr;
+    char *rsp_content = nullptr;
     gint64 rsp_size;
-    SeafileShareLinkInfo *info = NULL;
-    char *url = NULL;
+    SeafileShareLinkInfo *info = nullptr;
+    char *url = nullptr;
 
     jwt_token = gen_jwt_token ();
     if (!jwt_token) {
-        return NULL;
+        return nullptr;
     }
 
     conn = connection_pool_get_connection (seaf->seahub_conn_pool);
     if (!conn) {
         g_free (jwt_token);
         seaf_warning ("Failed to get connection: out of memory.\n");
-        return NULL;
+        return nullptr;
     }
 
     content = json_object ();
@@ -681,13 +681,13 @@ parse_file_access_info (const char *rsp_content, int rsp_size)
 {
     json_t *object;
     json_error_t jerror;
-    const char *user = NULL;
-    char *ret = NULL;
+    const char *user = nullptr;
+    char *ret = nullptr;
 
     object = json_loadb (rsp_content, rsp_size, 0, &jerror);
     if (!object) {
         seaf_warning ("Failed to parse response when check file access in Seahub: %s.\n", jerror.text);
-        return NULL;
+        return nullptr;
     }
 
     user = json_object_get_string_member (object, "user");
@@ -709,18 +709,18 @@ http_tx_manager_check_file_access (const char *repo_id, const char *token, const
                                    const char *user_agent, char **user,
                                    int *status, char **err_msg)
 {
-    Connection *conn = NULL;
+    Connection *conn = nullptr;
     char *cookie_header;
-    struct curl_slist *headers = NULL;
+    struct curl_slist *headers = nullptr;
     int ret = -1;
     CURL *curl;
-    json_t *content = NULL;
+    json_t *content = nullptr;
     int rsp_status;
-    char *req_content = NULL;
-    char *jwt_token = NULL;
-    char *rsp_content = NULL;
+    char *req_content = nullptr;
+    char *jwt_token = nullptr;
+    char *rsp_content = nullptr;
     gint64 rsp_size;
-    char *url = NULL;
+    char *url = nullptr;
 
     jwt_token = gen_jwt_token ();
     if (!jwt_token) {
@@ -774,7 +774,7 @@ http_tx_manager_check_file_access (const char *repo_id, const char *token, const
     }
 
     *user = parse_file_access_info (rsp_content, rsp_size);
-    if (*user == NULL) {
+    if (*user == nullptr) {
         ret = -1;
         goto out;
     }

@@ -62,7 +62,7 @@ seaf_web_at_manager_new (SeafileSession *session)
     mgr->priv->access_token_hash = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                     g_free,
                                                     (GDestroyNotify)free_access_info);
-    pthread_mutex_init (&mgr->priv->lock, NULL);
+    pthread_mutex_init (&mgr->priv->lock, nullptr);
 
     return mgr;
 }
@@ -84,7 +84,7 @@ static int
 clean_pulse (void *vmanager)
 {
     SeafWebAccessTokenManager *manager = vmanager;
-    long now = (long)time(NULL);
+    long now = (long)time(nullptr);
 
     pthread_mutex_lock (&manager->priv->lock);
 
@@ -115,7 +115,7 @@ gen_new_token (GHashTable *token_hash)
         token = g_strndup(uuid, TOKEN_LEN);
 
         /* Make sure the new token doesn't conflict with an existing one. */
-        if (g_hash_table_lookup (token_hash, token) != NULL)
+        if (g_hash_table_lookup (token_hash, token) != nullptr)
             g_free (token);
         else
             return token;
@@ -132,7 +132,7 @@ seaf_web_at_manager_get_access_token (SeafWebAccessTokenManager *mgr,
                                       GError **error)
 {
     AccessInfo *info;
-    long now = (long)time(NULL);
+    long now = (long)time(nullptr);
     long expire;
     char *t;
     SeafileWebAccess *webaccess;
@@ -154,7 +154,7 @@ seaf_web_at_manager_get_access_token (SeafWebAccessTokenManager *mgr,
         strcmp(op, "update-blks-aj") != 0) {
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                      "Invalid operation type.");
-        return NULL;
+        return nullptr;
     }
 
     pthread_mutex_lock (&mgr->priv->lock);
@@ -188,7 +188,7 @@ seaf_web_at_manager_get_access_token (SeafWebAccessTokenManager *mgr,
                                       "obj_id", info->obj_id,
                                       "op", info->op,
                                       "username", info->username,
-                                      NULL);
+                                      nullptr);
 
             if (zip_download_mgr_start_zip_task (seaf->zip_download_mgr,
                                                  t, webaccess, error) < 0) {
@@ -198,7 +198,7 @@ seaf_web_at_manager_get_access_token (SeafWebAccessTokenManager *mgr,
 
                 g_object_unref (webaccess);
                 g_free (t);
-                return NULL;
+                return nullptr;
             }
             g_object_unref (webaccess);
         }
@@ -219,19 +219,19 @@ seaf_web_at_manager_query_access_token (SeafWebAccessTokenManager *mgr,
     info = g_hash_table_lookup (mgr->priv->access_token_hash, token);
     pthread_mutex_unlock (&mgr->priv->lock);
 
-    if (info != NULL) {
+    if (info != nullptr) {
         long expire_time = info->expire_time;
-        long now = (long)time(NULL);        
+        long now = (long)time(nullptr);
 
         if (now - expire_time >= 0) {
-            return NULL;
+            return nullptr;
         } else {
             webaccess = g_object_new (SEAFILE_TYPE_WEB_ACCESS,
                                       "repo_id", info->repo_id,
                                       "obj_id", info->obj_id,
                                       "op", info->op,
                                       "username", info->username,
-                                      NULL);
+                                      nullptr);
 
             if (info->use_onetime) {
                 pthread_mutex_lock (&mgr->priv->lock);
@@ -243,5 +243,5 @@ seaf_web_at_manager_query_access_token (SeafWebAccessTokenManager *mgr,
         }
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -16,10 +16,10 @@ merge_trees_recursive (const char *store_id, int version,
 static const char *
 get_nickname_by_modifier (GHashTable *email_to_nickname, const char *modifier)
 {
-    const char *nickname = NULL;
+    const char *nickname = nullptr;
 
     if (!modifier) {
-        return NULL;
+        return nullptr;
     }
 
     nickname = g_hash_table_lookup (email_to_nickname, modifier);
@@ -43,12 +43,12 @@ merge_conflict_filename (const char *store_id, int version,
                          const char *basedir,
                          const char *filename)
 {
-    char *path = NULL, *modifier = NULL, *conflict_name = NULL;
-    const char *nickname = NULL;
+    char *path = nullptr, *modifier = nullptr, *conflict_name = nullptr;
+    const char *nickname = nullptr;
     gint64 mtime;
     SeafCommit *commit;
 
-    path = g_strconcat (basedir, filename, NULL);
+    path = g_strconcat (basedir, filename, nullptr);
 
     int rc = get_file_modifier_mtime (opt->remote_repo_id,
                                       store_id,
@@ -67,7 +67,7 @@ merge_conflict_filename (const char *store_id, int version,
             goto out;
         }
         modifier = g_strdup(commit->creator_name);
-        mtime = (gint64)time(NULL);
+        mtime = (gint64)time(nullptr);
         seaf_commit_unref (commit);
     }
 
@@ -89,8 +89,8 @@ merge_conflict_dirname (const char *store_id, int version,
                         const char *basedir,
                         const char *dirname)
 {
-    char *modifier = NULL, *conflict_name = NULL;
-    const char *nickname = NULL;
+    char *modifier = nullptr, *conflict_name = nullptr;
+    const char *nickname = nullptr;
     SeafCommit *commit;
 
     commit = seaf_commit_manager_get_commit (seaf->commit_mgr,
@@ -108,7 +108,7 @@ merge_conflict_dirname (const char *store_id, int version,
     if (seaf->seahub_pk)
         nickname = get_nickname_by_modifier (opt->email_to_nickname, modifier);
 
-    conflict_name = gen_conflict_path (dirname, nickname, (gint64)time(NULL));
+    conflict_name = gen_conflict_path (dirname, nickname, (gint64)time(nullptr));
 
 out:
     g_free (modifier);
@@ -237,7 +237,7 @@ threeway_merge (const char *store_id, int version,
         }
     } else if (base && !head && remote) {
         if (strcmp (base->id, remote->id) != 0) {
-            if (dents[1] != NULL) {
+            if (dents[1] != nullptr) {
                 /* D/F conflict:
                  * Head replaces file with dir, while remote change the file.
                  */
@@ -278,7 +278,7 @@ threeway_merge (const char *store_id, int version,
         }
     } else if (base && head && !remote) {
         if (strcmp (base->id, head->id) != 0) {
-            if (dents[2] != NULL) {
+            if (dents[2] != nullptr) {
                 /* D/F conflict:
                  * Remote replaces file with dir, while head change the file.
                  */
@@ -324,7 +324,7 @@ threeway_merge (const char *store_id, int version,
             seaf_debug ("%s%s: added in remote\n", basedir, remote->name);
 
             *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(remote));
-        } else if (dents[0] != NULL && strcmp(dents[0]->id, dents[1]->id) == 0) {
+        } else if (dents[0] != nullptr && strcmp(dents[0]->id, dents[1]->id) == 0) {
             /* Contents in the dir is not changed.
              * The dir will be deleted in merge_directories().
              */
@@ -364,7 +364,7 @@ threeway_merge (const char *store_id, int version,
             seaf_debug ("%s%s: added in head\n", basedir, head->name);
 
             *dents_out = g_list_prepend (*dents_out, seaf_dirent_dup(head));
-        } else if (dents[0] != NULL && strcmp(dents[0]->id, dents[2]->id) == 0) {
+        } else if (dents[0] != nullptr && strcmp(dents[0]->id, dents[2]->id) == 0) {
             /* Contents in the dir is not changed.
              * The dir will be deleted in merge_directories().
              */
@@ -433,7 +433,7 @@ merge_directories (const char *store_id, int version,
 {
     SeafDir *dir;
     SeafDir *sub_dirs[3];
-    char *dirname = NULL;
+    char *dirname = nullptr;
     char *new_basedir;
     int ret = 0;
     int dir_mask = 0, i;
@@ -539,7 +539,7 @@ merge_directories (const char *store_id, int version,
 
     memset (sub_dirs, 0, sizeof(sub_dirs[0])*n);
     for (i = 0; i < n; ++i) {
-        if (dents[i] != NULL && S_ISDIR(dents[i]->mode)) {
+        if (dents[i] != nullptr && S_ISDIR(dents[i]->mode)) {
             dir = seaf_fs_manager_get_seafdir (seaf->fs_mgr,
                                                store_id, version,
                                                dents[i]->id);
@@ -555,7 +555,7 @@ merge_directories (const char *store_id, int version,
         }
     }
 
-    new_basedir = g_strconcat (basedir, dirname, "/", NULL);
+    new_basedir = g_strconcat (basedir, dirname, "/", nullptr);
 
     ret = merge_trees_recursive (store_id, version, n, sub_dirs, new_basedir, opt);
 
@@ -608,23 +608,23 @@ merge_trees_recursive (const char *store_id, int version,
     gboolean done;
     int ret = 0;
     SeafDir *merged_tree;
-    GList *merged_dents = NULL;
+    GList *merged_dents = nullptr;
 
     for (i = 0; i < n; ++i) {
         if (trees[i])
             ptrs[i] = trees[i]->entries;
         else
-            ptrs[i] = NULL;
+            ptrs[i] = nullptr;
     }
 
     while (1) {
-        first_name = NULL;
+        first_name = nullptr;
         memset (dents, 0, sizeof(dents[0])*n);
         done = TRUE;
 
         /* Find the "largest" name, assuming dirents are sorted. */
         for (i = 0; i < n; ++i) {
-            if (ptrs[i] != NULL) {
+            if (ptrs[i] != nullptr) {
                 done = FALSE;
                 dent = ptrs[i]->data;
                 if (!first_name)
@@ -642,7 +642,7 @@ merge_trees_recursive (const char *store_id, int version,
          */
         int n_files = 0, n_dirs = 0;
         for (i = 0; i < n; ++i) {
-            if (ptrs[i] != NULL) {
+            if (ptrs[i] != nullptr) {
                 dent = ptrs[i]->data;
                 if (strcmp(first_name, dent->name) == 0) {
                     if (S_ISREG(dent->mode))
@@ -675,7 +675,7 @@ merge_trees_recursive (const char *store_id, int version,
 
     if (n == 3) {
         merged_dents = g_list_sort (merged_dents, compare_dirents);
-        merged_tree = seaf_dir_new (NULL, merged_dents,
+        merged_tree = seaf_dir_new (nullptr, merged_dents,
                                     dir_version_from_repo_version(version));
 
         memcpy (opt->merged_tree_root, merged_tree->dir_id, 40);
@@ -692,7 +692,7 @@ merge_trees_recursive (const char *store_id, int version,
         }
     } else if (n == 2) {
         merged_dents = g_list_sort (merged_dents, compare_dirents);
-        merged_tree = seaf_dir_new (NULL, merged_dents,
+        merged_tree = seaf_dir_new (nullptr, merged_dents,
                                     dir_version_from_repo_version(version));
 
         memcpy (opt->merged_tree_root, merged_tree->dir_id, 40);

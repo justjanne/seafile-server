@@ -35,7 +35,7 @@ sqlite_query_prepare (sqlite3 *db, const char *sql)
     sqlite3_stmt *stmt;
     int result;
 
-    result = sqlite3_prepare_v2 (db, sql, -1, &stmt, NULL);
+    result = sqlite3_prepare_v2 (db, sql, -1, &stmt, nullptr);
 
     if (result != SQLITE_OK) {
         const gchar *str = sqlite3_errmsg (db);
@@ -43,7 +43,7 @@ sqlite_query_prepare (sqlite3 *db, const char *sql)
         g_warning ("Couldn't prepare query, error:%d->'%s'\n\t%s\n", 
                    result, str ? str : "no error given", sql);
 
-        return NULL;
+        return nullptr;
     }
 
     return stmt;
@@ -52,13 +52,13 @@ sqlite_query_prepare (sqlite3 *db, const char *sql)
 int
 sqlite_query_exec (sqlite3 *db, const char *sql)
 {
-    char *errmsg = NULL;
+    char *errmsg = nullptr;
     int result;
 
-    result = sqlite3_exec (db, sql, NULL, NULL, &errmsg);
+    result = sqlite3_exec (db, sql, nullptr, nullptr, &errmsg);
 
     if (result != SQLITE_OK) {
-        if (errmsg != NULL) {
+        if (errmsg != nullptr) {
             g_warning ("SQL error: %d - %s\n:\t%s\n", result, errmsg, sql);
             sqlite3_free (errmsg);
         }
@@ -202,13 +202,13 @@ gint64 sqlite_get_int64 (sqlite3 *db, const char *sql)
 
 char *sqlite_get_string (sqlite3 *db, const char *sql)
 {
-    const char *res = NULL;
+    const char *res = nullptr;
     int result;
     sqlite3_stmt *stmt;
     char *ret;
 
     if ( !(stmt = sqlite_query_prepare(db, sql)) )
-        return NULL;
+        return nullptr;
 
     result = sqlite3_step (stmt);
     if (result == SQLITE_ROW) {
@@ -223,9 +223,9 @@ char *sqlite_get_string (sqlite3 *db, const char *sql)
         g_warning ("Couldn't execute query, error: %d->'%s'\n",
                    result, str ? str : "no error given");
         sqlite3_finalize (stmt);
-        return NULL;
+        return nullptr;
     }
 
     sqlite3_finalize(stmt);
-    return NULL;
+    return nullptr;
 }

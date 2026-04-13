@@ -10,26 +10,26 @@
 
 #include "utils.h"
 
-static char *ccnet_dir = NULL;
-static char *seafile_dir = NULL;
-static char *central_config_dir = NULL;
+static char *ccnet_dir = nullptr;
+static char *seafile_dir = nullptr;
+static char *central_config_dir = nullptr;
 
 SeafileSession *seaf;
 
 static const char *short_opts = "hvc:d:VDrRF:Ct:i:";
 static const struct option long_opts[] = {
-    { "help", no_argument, NULL, 'h', },
-    { "version", no_argument, NULL, 'v', },
-    { "config-file", required_argument, NULL, 'c', },
-    { "central-config-dir", required_argument, NULL, 'F' },
-    { "seafdir", required_argument, NULL, 'd', },
-    { "verbose", no_argument, NULL, 'V' },
-    { "dry-run", no_argument, NULL, 'D' },
-    { "rm-deleted", no_argument, NULL, 'r' },
-    { "rm-fs", no_argument, NULL, 'R' },
-    { "check", no_argument, NULL, 'C' },
-    { "thread-num", required_argument, NULL, 't', },
-    { "id-prefix", required_argument, NULL, 'i', },
+    { "help", no_argument, nullptr, 'h', },
+    { "version", no_argument, nullptr, 'v', },
+    { "config-file", required_argument, nullptr, 'c', },
+    { "central-config-dir", required_argument, nullptr, 'F' },
+    { "seafdir", required_argument, nullptr, 'd', },
+    { "verbose", no_argument, nullptr, 'V' },
+    { "dry-run", no_argument, nullptr, 'D' },
+    { "rm-deleted", no_argument, nullptr, 'r' },
+    { "rm-fs", no_argument, nullptr, 'R' },
+    { "check", no_argument, nullptr, 'C' },
+    { "thread-num", required_argument, nullptr, 't', },
+    { "id-prefix", required_argument, nullptr, 'i', },
     { 0, 0, 0, 0 },
 };
 
@@ -53,15 +53,15 @@ static char **
 get_argv_utf8 (int *argc)
 {
     int i = 0;
-    char **argv = NULL;
-    const wchar_t *cmdline = NULL;
-    wchar_t **argv_w = NULL;
+    char **argv = nullptr;
+    const wchar_t *cmdline = nullptr;
+    wchar_t **argv_w = nullptr;
 
     cmdline = GetCommandLineW();
     argv_w = CommandLineToArgvW (cmdline, argc);
     if (!argv_w) {
         printf("failed to CommandLineToArgvW(), GLE=%lu\n", GetLastError());
-        return NULL;
+        return nullptr;
     }
 
     argv = (char **)malloc (sizeof(char*) * (*argc));
@@ -85,8 +85,8 @@ main(int argc, char *argv[])
     int rm_fs = 0;
     int check_integrity = 0;
     int thread_num = 1;
-    const char *debug_str = NULL;
-    char *id_prefix = NULL;
+    const char *debug_str = nullptr;
+    char *id_prefix = nullptr;
 
 #ifdef WIN32
     argv = get_argv_utf8 (&argc);
@@ -95,7 +95,7 @@ main(int argc, char *argv[])
     ccnet_dir = DEFAULT_CONFIG_DIR;
 
     while ((c = getopt_long(argc, argv,
-                short_opts, long_opts, NULL)) != EOF) {
+                short_opts, long_opts, nullptr)) != EOF) {
         switch (c) {
         case 'h':
             usage();
@@ -152,8 +152,8 @@ main(int argc, char *argv[])
         exit (1);
     }
 
-    if (seafile_dir == NULL)
-        seafile_dir = g_build_filename (ccnet_dir, "seafile-data", NULL);
+    if (seafile_dir == nullptr)
+        seafile_dir = g_build_filename (ccnet_dir, "seafile-data", nullptr);
     
     seaf = seafile_session_new(central_config_dir, seafile_dir, ccnet_dir, TRUE);
     if (!seaf) {
@@ -166,7 +166,7 @@ main(int argc, char *argv[])
         return 0;
     }
 
-    GList *repo_id_list = NULL;
+    GList *repo_id_list = nullptr;
     int i;
     for (i = optind; i < argc; i++)
         repo_id_list = g_list_append (repo_id_list, g_strdup(argv[i]));

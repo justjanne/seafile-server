@@ -72,8 +72,8 @@ load_cache_option_from_env (CacheOption *option)
 ObjCache *
 objcache_new ()
 {
-    ObjCache *cache = NULL;
-    GError *error = NULL;
+    ObjCache *cache = nullptr;
+    GError *error = nullptr;
     CacheOption *option = g_new0 (CacheOption, 1);
     int redis_port;
     int redis_expiry;

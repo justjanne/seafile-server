@@ -63,7 +63,7 @@ seafile_log (const gchar *log_domain, GLogLevelFlags log_level,
         fputs (name_buf, logfp);
     }
 
-    t = time(NULL);
+    t = time(nullptr);
     tm = localtime(&t);
     len = strftime (buf, 1024, "[%Y-%m-%d %H:%M:%S] ", tm);
     g_return_if_fail (len < 1024);
@@ -99,7 +99,7 @@ ccnet_log (const gchar *log_domain, GLogLevelFlags log_level,
     if (log_level > ccnet_log_level)
         return;
 
-    t = time(NULL);
+    t = time(nullptr);
     tm = localtime(&t);
     len = strftime (buf, 1024, "[%x %X] ", tm);
     g_return_if_fail (len < 1024);
@@ -139,10 +139,10 @@ int
 seafile_log_init (const char *_logfile, const char *ccnet_debug_level_str,
                   const char *seafile_debug_level_str, const char *_app_name)
 {
-    g_log_set_handler (NULL, G_LOG_LEVEL_MASK | G_LOG_FLAG_FATAL
-                       | G_LOG_FLAG_RECURSION, seafile_log, NULL);
+    g_log_set_handler (nullptr, G_LOG_LEVEL_MASK | G_LOG_FLAG_FATAL
+                       | G_LOG_FLAG_RECURSION, seafile_log, nullptr);
     g_log_set_handler ("Ccnet", G_LOG_LEVEL_MASK | G_LOG_FLAG_FATAL
-                       | G_LOG_FLAG_RECURSION, ccnet_log, NULL);
+                       | G_LOG_FLAG_RECURSION, ccnet_log, nullptr);
 
     /* record all log message */
     ccnet_log_level = get_debug_level(ccnet_debug_level_str, G_LOG_LEVEL_INFO);
@@ -160,7 +160,7 @@ seafile_log_init (const char *_logfile, const char *ccnet_debug_level_str,
         logfile = g_strdup (_logfile);
     } else {
         logfile = ccnet_expand_path(_logfile);
-        if ((logfp = g_fopen (logfile, "a+")) == NULL) {
+        if ((logfp = g_fopen (logfile, "a+")) == nullptr) {
             seaf_message ("Failed to open file %s\n", logfile);
             return -1;
         }
@@ -177,7 +177,7 @@ seafile_log_reopen ()
     if (g_strcmp0(logfile, "-") == 0 || log_to_stdout)
         return 0;
 
-    if ((fp = g_fopen (logfile, "a+")) == NULL) {
+    if ((fp = g_fopen (logfile, "a+")) == nullptr) {
         seaf_message ("Failed to open file %s\n", logfile);
         return -1;
     }
@@ -245,8 +245,8 @@ set_syslog_config (GKeyFile *config)
 {
     enable_syslog = g_key_file_get_boolean (config,
                                             "general", "enable_syslog",
-                                            NULL);
+                                            nullptr);
     if (enable_syslog)
-        openlog (NULL, LOG_NDELAY | LOG_PID, LOG_USER);
+        openlog (nullptr, LOG_NDELAY | LOG_PID, LOG_USER);
 }
 #endif

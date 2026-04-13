@@ -45,21 +45,21 @@ ccnet_org_manager_prepare (CcnetOrgManager *manager)
 static CcnetDB *
 open_sqlite_db (CcnetOrgManager *manager)
 {
-    CcnetDB *db = NULL;
+    CcnetDB *db = nullptr;
     char *db_dir;
     char *db_path;
 
-    db_dir = g_build_filename (manager->session->ccnet_dir, "OrgMgr", NULL);
+    db_dir = g_build_filename (manager->session->ccnet_dir, "OrgMgr", nullptr);
     if (checkdir_with_mkdir(db_dir) < 0) {
         ccnet_error ("Cannot open db dir %s: %s\n", db_dir,
                      strerror(errno));
         g_free (db_dir);
-        return NULL;
+        return nullptr;
     }
     g_free (db_dir);
 
     db_path = g_build_filename (manager->session->ccnet_dir, "OrgMgr",
-                                "orgmgr.db", NULL);
+                                "orgmgr.db", nullptr);
     db = seaf_db_new_sqlite (db_path, DEFAULT_MAX_CONNECTIONS);
 
     g_free (db_path);
@@ -70,7 +70,7 @@ open_sqlite_db (CcnetOrgManager *manager)
 static int
 open_db (CcnetOrgManager *manager)
 {
-    CcnetDB *db = NULL;
+    CcnetDB *db = nullptr;
 
     switch (seaf_db_type(manager->session->ccnet_db)) {
     case SEAF_DB_TYPE_SQLITE:
@@ -176,7 +176,7 @@ static gboolean
 get_all_orgs_cb (CcnetDBRow *row, void *data)
 {
     GList **p_list = data;
-    CcnetOrganization *org = NULL;
+    CcnetOrganization *org = nullptr;
     int org_id;
     const char *org_name;
     const char *url_prefix;
@@ -195,7 +195,7 @@ get_all_orgs_cb (CcnetDBRow *row, void *data)
                         "url_prefix", url_prefix,
                         "creator", creator,
                         "ctime", ctime,
-                        NULL);
+                        nullptr);
 
     *p_list = g_list_prepend (*p_list, org);
 
@@ -210,7 +210,7 @@ ccnet_org_manager_get_all_orgs (CcnetOrgManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
+    GList *ret = nullptr;
     int rc;
 
     if (start == -1 && limit == -1) {
@@ -223,7 +223,7 @@ ccnet_org_manager_get_all_orgs (CcnetOrgManager *mgr,
     }
 
     if (rc < 0)
-        return NULL;
+        return nullptr;
 
     return g_list_reverse (ret);
 }
@@ -264,7 +264,7 @@ get_org_cb (CcnetDBRow *row, void *data)
                            "url_prefix", url_prefix,
                            "creator", creator,
                            "ctime", ctime,
-                           NULL);
+                           nullptr);
     return FALSE;
 }
 
@@ -276,12 +276,12 @@ ccnet_org_manager_get_org_by_url_prefix (CcnetOrgManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    CcnetOrganization *org = NULL;
+    CcnetOrganization *org = nullptr;
 
     if (seaf_db_statement_foreach_row (db, queries->get_organization_by_url_prefix,
             get_org_cb, &org,
             1, "string", url_prefix) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return org;
@@ -295,12 +295,12 @@ ccnet_org_manager_get_org_by_id (CcnetOrgManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    CcnetOrganization *org = NULL;
+    CcnetOrganization *org = nullptr;
 
     if (seaf_db_statement_foreach_row (db, queries->get_organization,
             get_org_cb, &org,
             1, "int", org_id) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return org;
@@ -337,7 +337,7 @@ static gboolean
 get_orgs_by_user_cb (CcnetDBRow *row, void *data)
 {
     GList **p_list = (GList **)data;
-    CcnetOrganization *org = NULL;
+    CcnetOrganization *org = nullptr;
     int org_id;
     const char *email;
     int is_staff;
@@ -362,7 +362,7 @@ get_orgs_by_user_cb (CcnetDBRow *row, void *data)
                         "url_prefix", url_prefix,
                         "creator", creator,
                         "ctime", ctime,
-                        NULL);
+                        nullptr);
     *p_list = g_list_prepend (*p_list, org);
         
     return TRUE;
@@ -376,13 +376,13 @@ ccnet_org_manager_get_orgs_by_user (CcnetOrgManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
+    GList *ret = nullptr;
 
     if (seaf_db_statement_foreach_row (db, queries->get_org_user_by_email,
             get_orgs_by_user_cb, &ret,
             1, "string", email) < 0) {
         g_list_free (ret);
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (ret);
@@ -406,7 +406,7 @@ ccnet_org_manager_get_org_emailusers (CcnetOrgManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
+    GList *ret = nullptr;
     int rc;
 
     if (start == -1 && limit == -1) {
@@ -420,7 +420,7 @@ ccnet_org_manager_get_org_emailusers (CcnetOrgManager *mgr,
     }
 
     if (rc < 0)
-        return NULL;
+        return nullptr;
 
     return g_list_reverse (ret);
 }
@@ -504,7 +504,7 @@ ccnet_org_manager_get_org_group_ids (CcnetOrgManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
+    GList *ret = nullptr;
     int rc;
 
     if (limit == -1) {
@@ -519,7 +519,7 @@ ccnet_org_manager_get_org_group_ids (CcnetOrgManager *mgr,
     
     if (rc < 0) {
         g_list_free (ret);
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (ret);
@@ -544,7 +544,7 @@ get_org_groups (CcnetDBRow *row, void *data)
                           "timestamp", ts,
                           "source", "DB",
                           "parent_group_id", parent_group_id,
-                          NULL);
+                          nullptr);
 
     *plist = g_list_prepend (*plist, group);
 
@@ -557,14 +557,14 @@ ccnet_org_manager_get_org_top_groups (CcnetOrgManager *mgr, int org_id, GError *
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
+    GList *ret = nullptr;
     int rc;
 
     rc = seaf_db_statement_foreach_row (db, queries->list_org_group_parent,
         get_org_groups, &ret,
         1, "int", org_id);
     if (rc < 0)
-        return NULL;
+        return nullptr;
 
     return g_list_reverse (ret);
 }
@@ -578,7 +578,7 @@ ccnet_org_manager_get_org_groups (CcnetOrgManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
+    GList *ret = nullptr;
     int rc;
 
     if (limit == -1) {
@@ -592,7 +592,7 @@ ccnet_org_manager_get_org_groups (CcnetOrgManager *mgr,
     }
     
     if (rc < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (ret);
@@ -606,14 +606,14 @@ ccnet_org_manager_get_org_groups_by_user (CcnetOrgManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
+    GList *ret = nullptr;
     int rc;
 
     rc = seaf_db_statement_foreach_row (db, queries->list_org_group_membership,
         get_org_groups, &ret,
         2, "int", org_id, "string", user);
     if (rc < 0)
-        return NULL;
+        return nullptr;
 
     return g_list_reverse (ret);
 }

@@ -42,7 +42,7 @@ seaf_notif_manager_new (struct _SeafileSession *seaf, char *url)
     if (!priv->connection_pool) {
         g_free (priv);
         g_free (mgr);
-        return NULL;
+        return nullptr;
     }
 
     priv->notif_url = url;
@@ -54,18 +54,18 @@ seaf_notif_manager_new (struct _SeafileSession *seaf, char *url)
 static char *
 gen_jwt_token ()
 {
-    char *jwt_token = NULL;
-    gint64 now = (gint64)time(NULL);
+    char *jwt_token = nullptr;
+    gint64 now = (gint64)time(nullptr);
 
-    jwt_t *jwt = NULL;
+    jwt_t *jwt = nullptr;
 
     if (!seaf->notif_server_private_key) {
         seaf_warning ("No private key is configured for generating jwt token\n");
-        return NULL;
+        return nullptr;
     }
 
     int ret = jwt_new (&jwt);
-    if (ret != 0 || jwt == NULL) {
+    if (ret != 0 || jwt == nullptr) {
         seaf_warning ("Failed to create jwt\n");
         goto out;
     }
@@ -93,10 +93,10 @@ send_event (void *data)
 {
     Event *event= data;
     NotifPriv *priv = event->priv;
-    Connection *conn = NULL;
+    Connection *conn = nullptr;
     int rsp_status;
-    char *req_url = NULL;
-    char *jwt_token = NULL;
+    char *req_url = nullptr;
+    char *jwt_token = nullptr;
 
     jwt_token = gen_jwt_token ();
     if (!jwt_token) {
@@ -115,7 +115,7 @@ send_event (void *data)
     int ret;
 
     ret = http_post (conn, req_url, jwt_token, event->msg, strlen (event->msg),
-                     &rsp_status, NULL, NULL, TRUE, NOTIF_TIMEOUT_SEC);
+                     &rsp_status, nullptr, nullptr, TRUE, NOTIF_TIMEOUT_SEC);
     if (ret < 0) {
         goto out;
     }

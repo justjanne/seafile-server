@@ -40,12 +40,12 @@ seaf_copy_manager_new (struct _SeafileSession *session)
     mgr->priv->copy_tasks = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                    g_free,
                                                    (GDestroyNotify)copy_task_free);
-    pthread_mutex_init (&mgr->priv->lock, NULL);
+    pthread_mutex_init (&mgr->priv->lock, nullptr);
 
     mgr->max_files = g_key_file_get_int64 (session->config,
-                                           "web_copy", "max_files", NULL);
+                                           "web_copy", "max_files", nullptr);
     mgr->max_size = g_key_file_get_int64 (session->config,
-                                          "web_copy", "max_size", NULL);
+                                          "web_copy", "max_size", nullptr);
     /* size is given in MB */
     mgr->max_size <<= 20;
 
@@ -66,7 +66,7 @@ seaf_copy_manager_get_task (SeafCopyManager *mgr,
 {
     SeafCopyManagerPriv *priv = mgr->priv;
     CopyTask *task;
-    SeafileCopyTask *t = NULL;
+    SeafileCopyTask *t = nullptr;
 
     pthread_mutex_lock (&priv->lock);
 
@@ -77,7 +77,7 @@ seaf_copy_manager_get_task (SeafCopyManager *mgr,
         g_object_set (t, "done", task->done, "total", task->total,
                       "canceled", task->canceled, "failed", task->failed,
                       "failed_reason", task->failed_reason, "successful", task->successful,
-                      NULL);
+                      nullptr);
         if (task->canceled || task->failed || task->successful)
             g_hash_table_remove(priv->copy_tasks, task_id);
     }
@@ -141,8 +141,8 @@ seaf_copy_manager_add_task (SeafCopyManager *mgr,
                             gboolean need_progress)
 {
     SeafCopyManagerPriv *priv = mgr->priv;
-    char *task_id = NULL;
-    CopyTask *task = NULL;
+    char *task_id = nullptr;
+    CopyTask *task = nullptr;
     struct CopyThreadData *data;
 
     if (need_progress) {

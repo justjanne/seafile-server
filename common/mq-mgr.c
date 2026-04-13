@@ -23,7 +23,7 @@ seaf_mq_manager_new ()
 static GAsyncQueue *
 seaf_mq_manager_channel_new (SeafMqManager *mgr, const char *channel)
 {
-    GAsyncQueue *async_queue = NULL;
+    GAsyncQueue *async_queue = nullptr;
     async_queue = g_async_queue_new_full ((GDestroyNotify)json_decref);
 
     g_hash_table_replace (mgr->priv->chans, g_strdup (channel), async_queue);
@@ -53,7 +53,7 @@ seaf_mq_manager_publish_event (SeafMqManager *mgr, const char *channel, const ch
 
     json_t *msg = json_object();
     json_object_set_new (msg, "content", json_string(content));
-    json_object_set_new (msg, "ctime", json_integer(time(NULL)));
+    json_object_set_new (msg, "ctime", json_integer(time(nullptr)));
     g_async_queue_push (async_queue, msg);
 
     return ret;
@@ -64,7 +64,7 @@ seaf_mq_manager_pop_event (SeafMqManager *mgr, const char *channel)
 {
     GAsyncQueue *async_queue = g_hash_table_lookup (mgr->priv->chans, channel);
     if (!async_queue)
-        return NULL;
+        return nullptr;
 
     return g_async_queue_try_pop (async_queue);
 }

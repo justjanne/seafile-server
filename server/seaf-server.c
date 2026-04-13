@@ -30,23 +30,23 @@
 
 SeafileSession *seaf;
 
-char *pidfile = NULL;
+char *pidfile = nullptr;
 
 static const char *short_options = "hvc:d:l:fP:D:F:p:tr:";
 static struct option long_options[] = {
-    { "help", no_argument, NULL, 'h', },
-    { "version", no_argument, NULL, 'v', },
-    { "config-file", required_argument, NULL, 'c' },
-    { "central-config-dir", required_argument, NULL, 'F' },
-    { "seafdir", required_argument, NULL, 'd' },
-    { "log", required_argument, NULL, 'l' },
-    { "debug", required_argument, NULL, 'D' },
-    { "foreground", no_argument, NULL, 'f' },
-    { "pidfile", required_argument, NULL, 'P' },
-    { "rpc-pipe-path", required_argument, NULL, 'p' },
-    { "test-config", no_argument, NULL, 't' },
-    { "repair-repo", required_argument, NULL, 'r' },
-    { NULL, 0, NULL, 0, },
+    { "help", no_argument, nullptr, 'h', },
+    { "version", no_argument, nullptr, 'v', },
+    { "config-file", required_argument, nullptr, 'c' },
+    { "central-config-dir", required_argument, nullptr, 'F' },
+    { "seafdir", required_argument, nullptr, 'd' },
+    { "log", required_argument, nullptr, 'l' },
+    { "debug", required_argument, nullptr, 'D' },
+    { "foreground", no_argument, nullptr, 'f' },
+    { "pidfile", required_argument, nullptr, 'P' },
+    { "rpc-pipe-path", required_argument, nullptr, 'p' },
+    { "test-config", no_argument, nullptr, 't' },
+    { "repair-repo", required_argument, nullptr, 'r' },
+    { nullptr, 0, nullptr, 0, },
 };
 
 static void usage ()
@@ -66,8 +66,8 @@ static void usage ()
 static void start_rpc_service (const char *seafile_dir,
                                const char *rpc_pipe_path)
 {
-    SearpcNamedPipeServer *rpc_server = NULL;
-    char *pipe_path = NULL;
+    SearpcNamedPipeServer *rpc_server = nullptr;
+    char *pipe_path = nullptr;
 
     searpc_server_init (register_marshals);
 
@@ -1074,9 +1074,9 @@ static void start_rpc_service (const char *seafile_dir,
                                      searpc_signature_string__string());
 
     if (rpc_pipe_path) {
-        pipe_path = g_build_path ("/", rpc_pipe_path, SEAFILE_RPC_PIPE_NAME, NULL);
+        pipe_path = g_build_path ("/", rpc_pipe_path, SEAFILE_RPC_PIPE_NAME, nullptr);
     } else {
-        pipe_path = g_build_path ("/", seafile_dir, SEAFILE_RPC_PIPE_NAME, NULL);
+        pipe_path = g_build_path ("/", seafile_dir, SEAFILE_RPC_PIPE_NAME, nullptr);
     }
     rpc_server = searpc_create_named_pipe_server_with_threadpool (pipe_path, NAMED_PIPE_SERVER_THREAD_POOL_SIZE);
 
@@ -1108,8 +1108,8 @@ set_signal_handlers (SeafileSession *session)
     signal (SIGPIPE, SIG_IGN);
 
     /* design as reopen log */
-    event_set(&sigusr1, SIGUSR1, EV_SIGNAL | EV_PERSIST, sigusr1Handler, NULL);
-    event_add(&sigusr1, NULL);
+    event_set(&sigusr1, SIGUSR1, EV_SIGNAL | EV_PERSIST, sigusr1Handler, nullptr);
+    event_add(&sigusr1, nullptr);
 #endif
 }
 
@@ -1163,15 +1163,15 @@ static char **
 get_argv_utf8 (int *argc)
 {
     int i = 0;
-    char **argv = NULL;
-    const wchar_t *cmdline = NULL;
-    wchar_t **argv_w = NULL;
+    char **argv = nullptr;
+    const wchar_t *cmdline = nullptr;
+    wchar_t **argv_w = nullptr;
 
     cmdline = GetCommandLineW();
     argv_w = CommandLineToArgvW (cmdline, argc);
     if (!argv_w) {
         printf("failed to CommandLineToArgvW(), GLE=%lu\n", GetLastError());
-        return NULL;
+        return nullptr;
     }
 
     argv = (char **)malloc (sizeof(char*) * (*argc));
@@ -1197,7 +1197,7 @@ test_seafile_config(const char *central_config_dir, const char *config_dir, cons
 
     seafile_log_init ("-", "debug", "debug", "seaf-server");
 
-    srand (time(NULL));
+    srand (time(nullptr));
 
     event_init ();
 
@@ -1218,21 +1218,21 @@ main (int argc, char **argv)
 {
     int c;
     char *ccnet_dir = DEFAULT_CONFIG_DIR;
-    char *seafile_dir = NULL;
-    char *central_config_dir = NULL;
-    char *logfile = NULL;
-    char *rpc_pipe_path = NULL;
-    const char *debug_str = NULL;
+    char *seafile_dir = nullptr;
+    char *central_config_dir = nullptr;
+    char *logfile = nullptr;
+    char *rpc_pipe_path = nullptr;
+    const char *debug_str = nullptr;
     int daemon_mode = 1;
     gboolean test_config = FALSE;
-    char *repo_id = NULL;
+    char *repo_id = nullptr;
 
 #ifdef WIN32
     argv = get_argv_utf8 (&argc);
 #endif
 
     while ((c = getopt_long (argc, argv, short_options, 
-                             long_options, NULL)) != EOF)
+                             long_options, nullptr)) != EOF)
     {
         switch (c) {
         case 'h':
@@ -1319,17 +1319,17 @@ main (int argc, char **argv)
     g_type_init();
 #endif
 #if !GLIB_CHECK_VERSION(2,32,0)
-    g_thread_init (NULL);
+    g_thread_init (nullptr);
 #endif
 
     if (!debug_str)
         debug_str = g_getenv("SEAFILE_DEBUG");
     seafile_debug_set_flags_string (debug_str);
 
-    if (seafile_dir == NULL)
-        seafile_dir = g_build_filename (ccnet_dir, "seafile", NULL);
-    if (logfile == NULL)
-        logfile = g_build_filename (seafile_dir, "seafile.log", NULL);
+    if (seafile_dir == nullptr)
+        seafile_dir = g_build_filename (ccnet_dir, "seafile", nullptr);
+    if (logfile == nullptr)
+        logfile = g_build_filename (seafile_dir, "seafile.log", nullptr);
 
     if (seafile_log_init (logfile, "info", "debug", "seaf-server") < 0) {
         seaf_warning ("Failed to init log.\n");

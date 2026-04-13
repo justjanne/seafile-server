@@ -38,7 +38,7 @@ typedef struct MergeScheduler {
     CcnetTimer *timer;
 } MergeScheduler;
 
-static MergeScheduler *scheduler = NULL;
+static MergeScheduler *scheduler = nullptr;
 
 static void
 add_merge_task (const char *repo_id);
@@ -72,15 +72,15 @@ do_create_virtual_repo (SeafRepoManager *mgr,
                         const char *passwd,
                         GError **error)
 {
-    SeafRepo *repo = NULL;
-    SeafCommit *commit = NULL;
-    SeafBranch *master = NULL;
+    SeafRepo *repo = nullptr;
+    SeafCommit *commit = nullptr;
+    SeafBranch *master = nullptr;
     int ret = 0;
 
     repo = seaf_repo_new (repo_id, repo_name, repo_desc);
 
     repo->no_local_history = TRUE;
-    if (passwd != NULL && passwd[0] != '\0') {
+    if (passwd != nullptr && passwd[0] != '\0') {
         repo->encrypted = TRUE;
         repo->enc_version = origin_repo->enc_version;
         if (repo->enc_version >= 3)
@@ -106,7 +106,7 @@ do_create_virtual_repo (SeafRepoManager *mgr,
     repo->version = origin_repo->version;
     memcpy (repo->store_id, origin_repo->id, 36);
 
-    commit = seaf_commit_new (NULL, repo->id,
+    commit = seaf_commit_new (nullptr, repo->id,
                               root_id, /* root id */
                               user, /* creator */
                               EMPTY_SHA1, /* creator id */
@@ -194,17 +194,17 @@ create_virtual_repo_common (SeafRepoManager *mgr,
                             const char *passwd,
                             GError **error)
 {
-    SeafRepo *origin_repo = NULL;
-    SeafCommit *origin_head = NULL;
-    char *repo_id = NULL;
-    char *dir_id = NULL;
+    SeafRepo *origin_repo = nullptr;
+    SeafCommit *origin_head = nullptr;
+    char *repo_id = nullptr;
+    char *dir_id = nullptr;
 
     origin_repo = seaf_repo_manager_get_repo (mgr, origin_repo_id);
     if (!origin_repo) {
         seaf_warning ("Failed to get origin repo %.10s\n", origin_repo_id);
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                      "Origin library not exists");
-        return NULL;
+        return nullptr;
     }
     if (origin_repo->status != REPO_STATUS_NORMAL) {
         seaf_warning("Status of repo %.8s is %d, can't create VirtualRepo\n",
@@ -212,7 +212,7 @@ create_virtual_repo_common (SeafRepoManager *mgr,
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                      "Unnormal repo status");
         seaf_repo_unref (origin_repo);
-        return NULL;
+        return nullptr;
     }
 
     if (origin_repo->encrypted) {
@@ -220,14 +220,14 @@ create_virtual_repo_common (SeafRepoManager *mgr,
             g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS,
                          "Library encryption version must be higher than 2");
             seaf_repo_unref (origin_repo);
-            return NULL;
+            return nullptr;
         }
 
         if (!passwd || passwd[0] == 0) {
             g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS,
                          "Password is not set");
             seaf_repo_unref (origin_repo);
-            return NULL;
+            return nullptr;
         }
 
         if (origin_repo->pwd_hash_algo) {
@@ -241,7 +241,7 @@ create_virtual_repo_common (SeafRepoManager *mgr,
                 g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                              "Incorrect password");
                 seaf_repo_unref (origin_repo);
-                return NULL;
+                return nullptr;
             }
         } else {
             if (seafile_verify_repo_passwd (origin_repo_id,
@@ -252,7 +252,7 @@ create_virtual_repo_common (SeafRepoManager *mgr,
                 g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                              "Incorrect password");
                 seaf_repo_unref (origin_repo);
-                return NULL;
+                return nullptr;
             }
         }
     }
@@ -273,7 +273,7 @@ create_virtual_repo_common (SeafRepoManager *mgr,
                                                      origin_repo->store_id,
                                                      origin_repo->version,
                                                      origin_head->root_id,
-                                                     path, NULL);
+                                                     path, nullptr);
     if (!dir_id) {
         seaf_warning ("Path %s doesn't exist or is not a dir in repo %.10s.\n",
                       path, origin_repo_id);
@@ -310,16 +310,16 @@ error:
     seaf_commit_unref (origin_head);
     g_free (repo_id);
     g_free (dir_id);
-    return NULL;
+    return nullptr;
 }
 
 static char *
 canonical_vrepo_path (const char *path)
 {
-    char *ret = NULL;
+    char *ret = nullptr;
 
     if (path[0] != '/')
-        ret = g_strconcat ("/", path, NULL);
+        ret = g_strconcat ("/", path, nullptr);
     else
         ret = g_strdup(path);
 
@@ -341,24 +341,24 @@ seaf_repo_manager_create_virtual_repo (SeafRepoManager *mgr,
                                        const char *passwd,
                                        GError **error)
 {
-    char *repo_id = NULL;
-    char *orig_owner = NULL;
-    char *canon_path = NULL;
-    SeafVirtRepo *vrepo = NULL;
-    char *r_origin_repo_id = NULL;
-    char *r_path = NULL;
+    char *repo_id = nullptr;
+    char *orig_owner = nullptr;
+    char *canon_path = nullptr;
+    SeafVirtRepo *vrepo = nullptr;
+    char *r_origin_repo_id = nullptr;
+    char *r_path = nullptr;
 
     if (g_strcmp0 (path, "/") == 0) {
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                      "Invalid path");
-        return NULL;
+        return nullptr;
     }
 
     canon_path = canonical_vrepo_path (path);
     vrepo = seaf_repo_manager_get_virtual_repo_info (mgr, origin_repo_id);
     if (vrepo) {
         // virtual repo
-        r_path = g_strconcat(vrepo->path, canon_path, NULL);
+        r_path = g_strconcat(vrepo->path, canon_path, nullptr);
         r_origin_repo_id = g_strdup (vrepo->origin_repo_id);
         seaf_virtual_repo_info_free (vrepo);
         repo_id = get_existing_virtual_repo (mgr, r_origin_repo_id, r_path);
@@ -394,7 +394,7 @@ seaf_repo_manager_create_virtual_repo (SeafRepoManager *mgr,
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                      "Failed to set repo owner.");
         g_free (repo_id);
-        repo_id = NULL;
+        repo_id = nullptr;
     }
 
 out:
@@ -432,7 +432,7 @@ seaf_repo_manager_get_virtual_repo_info (SeafRepoManager *mgr,
                                          const char *repo_id)
 {
     char *sql;
-    SeafVirtRepo *vinfo = NULL;
+    SeafVirtRepo *vinfo = nullptr;
 
     sql = "SELECT repo_id, origin_repo, path, base_commit FROM VirtualRepo "
         "WHERE repo_id = ?";
@@ -504,8 +504,8 @@ seaf_repo_manager_get_virtual_repos_by_owner (SeafRepoManager *mgr,
                                               const char *owner,
                                               GError **error)
 {
-    GList *id_list = NULL, *ptr;
-    GList *ret = NULL;
+    GList *id_list = nullptr, *ptr;
+    GList *ret = nullptr;
     char *sql;
 
     sql = "SELECT RepoOwner.repo_id FROM RepoOwner, VirtualRepo "
@@ -516,7 +516,7 @@ seaf_repo_manager_get_virtual_repos_by_owner (SeafRepoManager *mgr,
                                        collect_virtual_repo_ids, &id_list,
                                        1, "string", owner) < 0) {
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL, "DB error");
-        return NULL;
+        return nullptr;
     }
 
     char *repo_id;
@@ -524,7 +524,7 @@ seaf_repo_manager_get_virtual_repos_by_owner (SeafRepoManager *mgr,
     for (ptr = id_list; ptr; ptr = ptr->next) {
         repo_id = ptr->data;
         repo = seaf_repo_manager_get_repo (mgr, repo_id);
-        if (repo != NULL)
+        if (repo != nullptr)
             ret = g_list_prepend (ret, repo);
     }
 
@@ -536,14 +536,14 @@ GList *
 seaf_repo_manager_get_virtual_repo_ids_by_origin (SeafRepoManager *mgr,
                                                   const char *origin_repo)
 {
-    GList *ret = NULL;
+    GList *ret = nullptr;
     char *sql;
 
     sql = "SELECT repo_id FROM VirtualRepo WHERE origin_repo=?";
     if (seaf_db_statement_foreach_row (mgr->seaf->db, sql, 
                                        collect_virtual_repo_ids, &ret,
                                        1, "string", origin_repo) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (ret);
@@ -576,7 +576,7 @@ GList *
 seaf_repo_manager_get_virtual_info_by_origin (SeafRepoManager *mgr,
                                               const char *origin_repo)
 {
-    GList *ret = NULL;
+    GList *ret = nullptr;
     char *sql;
 
     sql = "SELECT repo_id, origin_repo, path, base_commit "
@@ -584,7 +584,7 @@ seaf_repo_manager_get_virtual_info_by_origin (SeafRepoManager *mgr,
     if (seaf_db_statement_foreach_row (mgr->seaf->db, sql, 
                                        collect_virtual_info, &ret,
                                        1, "string", origin_repo) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (ret);
@@ -605,7 +605,7 @@ seaf_repo_manager_merge_virtual_repo (SeafRepoManager *mgr,
                                       const char *repo_id,
                                       const char *exclude_repo)
 {
-    GList *vrepos = NULL, *ptr;
+    GList *vrepos = nullptr, *ptr;
     char *vrepo_id;
     int ret = 0;
 
@@ -637,9 +637,9 @@ handle_missing_virtual_repo (SeafRepoManager *mgr,
                              SeafRepo *repo, SeafCommit *head, SeafVirtRepo *vinfo,
                              char **return_new_path)
 {
-    SeafCommit *parent = NULL;
-    char *old_dir_id = NULL;
-    GList *diff_res = NULL, *ptr;
+    SeafCommit *parent = nullptr;
+    char *old_dir_id = nullptr;
+    GList *diff_res = nullptr, *ptr;
     DiffEntry *de;
 
     parent = seaf_commit_manager_get_commit (seaf->commit_mgr,
@@ -662,10 +662,10 @@ handle_missing_virtual_repo (SeafRepoManager *mgr,
     gboolean is_renamed = FALSE;
     p = &path[strlen(path)];
     par_path = g_strdup(path);
-    sub_path = NULL;
+    sub_path = nullptr;
 
     while (1) {
-        GError *error = NULL;
+        GError *error = nullptr;
         old_dir_id = seaf_fs_manager_get_seafdir_id_by_path (seaf->fs_mgr,
                                                              repo->store_id,
                                                              repo->version,
@@ -690,10 +690,10 @@ handle_missing_virtual_repo (SeafRepoManager *mgr,
             if (de->status == DIFF_STATUS_DIR_RENAMED) {
                 rawdata_to_hex (de->sha1, de_id, 20);
                 if (strcmp (de_id, old_dir_id) == 0) {
-                    if (sub_path != NULL)
-                        new_path = g_strconcat ("/", de->new_name, "/", sub_path, NULL);
+                    if (sub_path != nullptr)
+                        new_path = g_strconcat ("/", de->new_name, "/", sub_path, nullptr);
                     else
-                        new_path = g_strconcat ("/", de->new_name, NULL);
+                        new_path = g_strconcat ("/", de->new_name, nullptr);
                     seaf_debug ("Updating path of virtual repo %s to %s.\n",
                                 vinfo->repo_id, new_path);
                     set_virtual_repo_base_commit_path (vinfo->repo_id,
@@ -703,12 +703,12 @@ handle_missing_virtual_repo (SeafRepoManager *mgr,
                     /* 'sub_path = NUll' means the virtual dir itself has been renamed,
                      *  we need to make a new commit for the virtual repo
                      */
-                    if (sub_path == NULL) {
+                    if (sub_path == nullptr) {
                         new_name = g_path_get_basename(new_path);
                         seaf_repo_manager_edit_repo (vinfo->repo_id,
                                                      new_name,
                                                      "Changed library name",
-                                                     NULL,
+                                                     nullptr,
                                                      &error);
                         if (error) {
                             seaf_warning ("Failed to rename repo %s", new_name);
@@ -758,12 +758,12 @@ void
 seaf_repo_manager_cleanup_virtual_repos (SeafRepoManager *mgr,
                                          const char *origin_repo_id)
 {
-    SeafRepo *repo = NULL;
-    SeafCommit *head = NULL;
-    GList *vinfo_list = NULL, *ptr;
+    SeafRepo *repo = nullptr;
+    SeafCommit *head = nullptr;
+    GList *vinfo_list = nullptr, *ptr;
     SeafVirtRepo *vinfo;
     SeafDir *dir;
-    GError *error = NULL;
+    GError *error = nullptr;
 
     repo = seaf_repo_manager_get_repo (mgr, origin_repo_id);
     if (!repo) {
@@ -793,7 +793,7 @@ seaf_repo_manager_cleanup_virtual_repos (SeafRepoManager *mgr,
                                                    &error);
         if (error) {
             if (error->code == SEAF_ERR_PATH_NO_EXIST) {
-                handle_missing_virtual_repo (mgr, repo, head, vinfo, NULL);
+                handle_missing_virtual_repo (mgr, repo, head, vinfo, nullptr);
             }
             g_clear_error (&error);
         } else
@@ -813,12 +813,12 @@ static void *merge_virtual_repo (void *vtask)
     SeafRepoManager *mgr = seaf->repo_mgr;
     char *repo_id = task->repo_id;
     SeafVirtRepo *vinfo;
-    SeafRepo *repo = NULL, *orig_repo = NULL;
-    SeafCommit *head = NULL, *orig_head = NULL, *base = NULL;
-    char *root = NULL, *orig_root = NULL, *base_root = NULL;
+    SeafRepo *repo = nullptr, *orig_repo = nullptr;
+    SeafCommit *head = nullptr, *orig_head = nullptr, *base = nullptr;
+    char *root = nullptr, *orig_root = nullptr, *base_root = nullptr;
     char new_base_commit[41] = {0};
     int ret = 0;
-    GError *error = NULL;
+    GError *error = nullptr;
 
     /* repos */
     repo = seaf_repo_manager_get_repo (mgr, repo_id);
@@ -876,15 +876,15 @@ static void *merge_virtual_repo (void *vtask)
         seaf_debug("Path %s not found in origin repo %.8s, delete or rename virtual repo %.8s\n",
                     vinfo->path, vinfo->origin_repo_id, repo_id);
 
-        char *new_path = NULL;
+        char *new_path = nullptr;
         handle_missing_virtual_repo (mgr, orig_repo, orig_head, vinfo, &new_path);
-        if (new_path != NULL) {
+        if (new_path != nullptr) {
             orig_root = seaf_fs_manager_get_seafdir_id_by_path (seaf->fs_mgr,
                                                         orig_repo->store_id,
                                                         orig_repo->version,
                                                         orig_head->root_id,
                                                         new_path,
-                                                        NULL);
+                                                        nullptr);
             g_free (new_path);
         }
         if (!orig_root)
@@ -909,7 +909,7 @@ static void *merge_virtual_repo (void *vtask)
                                                         orig_repo->version,
                                                         base->root_id,
                                                         vinfo->path,
-                                                        NULL);
+                                                        nullptr);
     if (!base_root) {
         seaf_warning ("Cannot find seafdir for repo %.10s path %s.\n",
                       vinfo->origin_repo_id, vinfo->path);
@@ -929,8 +929,8 @@ static void *merge_virtual_repo (void *vtask)
                                             orig_root,
                                             orig_head->creator_name,
                                             head->commit_id,
-                                            NULL,
-                                            NULL);
+                                            nullptr,
+                                            nullptr);
         if (ret < 0) {
             seaf_warning ("Failed to update root of virtual repo %.10s.\n",
                           repo_id);
@@ -949,7 +949,7 @@ static void *merge_virtual_repo (void *vtask)
                                             head->creator_name,
                                             orig_head->commit_id,
                                             new_base_commit,
-                                            NULL);
+                                            nullptr);
         if (ret < 0) {
             seaf_warning ("Failed to update origin repo %.10s path %s.\n",
                           vinfo->origin_repo_id, vinfo->path);
@@ -999,8 +999,8 @@ static void *merge_virtual_repo (void *vtask)
                                             opt.merged_tree_root,
                                             orig_head->creator_name,
                                             head->commit_id,
-                                            NULL,
-                                            NULL);
+                                            nullptr,
+                                            nullptr);
         if (ret < 0) {
             seaf_warning ("Failed to update root of virtual repo %.10s.\n",
                           repo_id);
@@ -1015,7 +1015,7 @@ static void *merge_virtual_repo (void *vtask)
                                             head->creator_name,
                                             orig_head->commit_id,
                                             new_base_commit,
-                                            NULL);
+                                            nullptr);
         if (ret < 0) {
             seaf_warning ("Failed to update origin repo %.10s path %s.\n",
                           vinfo->origin_repo_id, vinfo->path);
@@ -1120,7 +1120,7 @@ add_merge_task (const char *repo_id)
 
     pthread_mutex_lock (&scheduler->q_lock);
 
-    if (g_queue_find_custom (scheduler->queue, task, task_cmp) != NULL) {
+    if (g_queue_find_custom (scheduler->queue, task, task_cmp) != nullptr) {
         seaf_debug ("Task for repo %.8s is already queued.\n", repo_id);
         g_free (task);
     } else
@@ -1136,7 +1136,7 @@ seaf_repo_manager_init_merge_scheduler ()
     if (!scheduler)
         return -1;
 
-    pthread_mutex_init (&scheduler->q_lock, NULL);
+    pthread_mutex_init (&scheduler->q_lock, nullptr);
 
     scheduler->queue = g_queue_new ();
     scheduler->running = g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -1153,13 +1153,13 @@ int
 seaf_repo_manager_repair_virtual_repo (char *repo_id)
 {
     SeafRepoManager *mgr = seaf->repo_mgr;
-    SeafVirtRepo *vinfo = NULL;
-    SeafRepo *repo = NULL, *orig_repo = NULL;
-    SeafCommit *head = NULL, *orig_head = NULL;
-    char *root = NULL, *orig_root = NULL;
+    SeafVirtRepo *vinfo = nullptr;
+    SeafRepo *repo = nullptr, *orig_repo = nullptr;
+    SeafCommit *head = nullptr, *orig_head = nullptr;
+    char *root = nullptr, *orig_root = nullptr;
     char new_base_commit[41] = {0};
     int ret = 0;
-    GError *error = NULL;
+    GError *error = nullptr;
 
     /* repos */
     repo = seaf_repo_manager_get_repo (mgr, repo_id);
@@ -1262,8 +1262,8 @@ seaf_repo_manager_repair_virtual_repo (char *repo_id)
                                         opt.merged_tree_root,
                                         orig_head->creator_name,
                                         head->commit_id,
-                                        NULL,
-                                        NULL);
+                                        nullptr,
+                                        nullptr);
     if (ret < 0) {
         seaf_warning ("Failed to update root of virtual repo %.10s.\n",
                       repo_id);
@@ -1278,7 +1278,7 @@ seaf_repo_manager_repair_virtual_repo (char *repo_id)
                                         head->creator_name,
                                         orig_head->commit_id,
                                         new_base_commit,
-                                        NULL);
+                                        nullptr);
     if (ret < 0) {
         seaf_warning ("Failed to update origin repo %.10s path %s.\n",
                       vinfo->origin_repo_id, vinfo->path);

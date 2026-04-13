@@ -183,7 +183,7 @@ get_file_updated_commit (SeafCommit *commit, void *vdata, gboolean *stop)
 
     char *file_id;
     guint32 mode;
-    GError *error = NULL;
+    GError *error = nullptr;
     file_id = seaf_fs_manager_path_to_obj_id (seaf->fs_mgr,
                                               repo->store_id, repo->version,
                                               commit->root_id, data->file_path, &mode, &error);
@@ -212,7 +212,7 @@ check_file_size (FsckData *fsck_data, SeafDirent *dent, const char *path)
     SeafRepo *repo = fsck_data->repo;
     const char *store_id = repo->store_id;
     int version = repo->version;
-    Seafile *seafile = NULL;
+    Seafile *seafile = nullptr;
 
     seafile = seaf_fs_manager_get_seafile (seaf->fs_mgr, store_id,
                                            version, dent->id);
@@ -233,7 +233,7 @@ check_file_size (FsckData *fsck_data, SeafDirent *dent, const char *path)
     data.file_id = dent->id;
     data.commit_id = g_strdup (repo->head->commit_id);
     data.visited_commits = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                   g_free, NULL);
+                                                   g_free, nullptr);
     data.truncate_time = fsck_data->truncate_time;
     // Get the commit that added or modified this file.
     seaf_commit_manager_traverse_commit_tree (seaf->commit_mgr,
@@ -242,7 +242,7 @@ check_file_size (FsckData *fsck_data, SeafDirent *dent, const char *path)
                                               get_file_updated_commit,
                                               &data,
                                               FALSE);
-    SeafCommit *commit = NULL;
+    SeafCommit *commit = nullptr;
     if (data.found) {
         commit = seaf_commit_manager_get_commit (seaf->commit_mgr, repo->id,
                                                  repo->version, data.commit_id);
@@ -276,8 +276,8 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
     SeafDir *new_dir;
     GList *p;
     SeafDirent *seaf_dent;
-    char *dir_id = NULL;
-    char *path = NULL;
+    char *dir_id = nullptr;
+    char *path = nullptr;
     gboolean io_error = FALSE;
 
     SeafFSManager *mgr = seaf->fs_mgr;
@@ -318,7 +318,7 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
                 }
                 // file damaged, set it empty
                 memcpy (seaf_dent->id, EMPTY_SHA1, 40);
-                seaf_dent->mtime = (gint64)time(NULL);
+                seaf_dent->mtime = (gint64)time(nullptr);
                 seaf_dent->size = 0;
 
                 fsck_data->repaired_files = g_list_prepend (fsck_data->repaired_files,
@@ -341,7 +341,7 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
                     }
                     // file damaged, set it empty
                     memcpy (seaf_dent->id, EMPTY_SHA1, 40);
-                    seaf_dent->mtime = (gint64)time(NULL);
+                    seaf_dent->mtime = (gint64)time(nullptr);
                     seaf_dent->size = 0;
 
                     fsck_data->repaired_files = g_list_prepend (fsck_data->repaired_files,
@@ -381,7 +381,7 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
                                                               g_strdup(path));
             } else {
                 char *sub_dir_id = fsck_check_dir_recursive (seaf_dent->id, path, fsck_data);
-                if (sub_dir_id == NULL) {
+                if (sub_dir_id == nullptr) {
                     // IO error
                     g_free (path);
                     goto out;
@@ -398,19 +398,19 @@ fsck_check_dir_recursive (const char *id, const char *parent_dir, FsckData *fsck
     }
 
     if (is_corrupted) {
-        new_dir = seaf_dir_new (NULL, dir->entries, version);
+        new_dir = seaf_dir_new (nullptr, dir->entries, version);
         if (fsck_data->options->repair) {
             if (seaf_dir_save (mgr, store_id, version, new_dir) < 0) {
                 seaf_warning ("Repo[%.8s] failed to save dir\n", fsck_data->repo->id);
                 seaf_dir_free (new_dir);
                 // dir->entries was taken by new_dir, which has been freed.
-                dir->entries = NULL;
+                dir->entries = nullptr;
                 goto out;
             }
         }
         dir_id = g_strdup (new_dir->dir_id);
         seaf_dir_free (new_dir);
-        dir->entries = NULL;
+        dir->entries = nullptr;
     } else {
         dir_id = g_strdup (dir->dir_id);
     }
@@ -461,8 +461,8 @@ reset_commit_to_repair (SeafRepo *repo, SeafCommit *parent, char *new_root_id,
 
     char *desc = gen_repair_commit_desc (repaired_files, repaired_folders);
 
-    SeafCommit *new_commit = NULL;
-    new_commit = seaf_commit_new (NULL, repo->id, new_root_id,
+    SeafCommit *new_commit = nullptr;
+    new_commit = seaf_commit_new (nullptr, repo->id, new_root_id,
                                   parent->creator_name, parent->creator_id,
                                   desc, 0);
     g_free (desc);
@@ -494,8 +494,8 @@ static void
 check_and_recover_repo (SeafRepo *repo, gboolean reset, FsckOptions *options)
 {
     FsckData fsck_data;
-    SeafCommit *rep_commit = NULL;
-    char *root_id = NULL;
+    SeafCommit *rep_commit = nullptr;
+    char *root_id = nullptr;
 
     seaf_message ("Checking file system integrity of repo %s(%.8s)...\n",
                   repo->name, repo->id);
@@ -512,7 +512,7 @@ check_and_recover_repo (SeafRepo *repo, gboolean reset, FsckOptions *options)
     fsck_data.options = options;
     fsck_data.repo = repo;
     fsck_data.existing_blocks = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                       g_free, NULL);
+                                                       g_free, nullptr);
     if (options->check_file_size) {
         fsck_data.truncate_time = seaf_repo_manager_get_repo_truncate_time (seaf->repo_mgr,
                                                                             repo->id);
@@ -520,7 +520,7 @@ check_and_recover_repo (SeafRepo *repo, gboolean reset, FsckOptions *options)
 
     root_id = fsck_check_dir_recursive (rep_commit->root_id, "/", &fsck_data);
     g_hash_table_destroy (fsck_data.existing_blocks);
-    if (root_id == NULL) {
+    if (root_id == nullptr) {
         goto out;
     }
 
@@ -534,7 +534,7 @@ check_and_recover_repo (SeafRepo *repo, gboolean reset, FsckOptions *options)
         } else if (reset) {
             // for reset commit but fs objects not damaged, also create a repaired commit
             reset_commit_to_repair (repo, rep_commit, rep_commit->root_id,
-                                    NULL, NULL);
+                                    nullptr, nullptr);
         }
     }
 
@@ -558,17 +558,17 @@ static gboolean
 fsck_get_repo_commit (const char *repo_id, int version,
                       const char *obj_id, void *commit_list)
 {
-    void *data = NULL;
+    void *data = nullptr;
     int data_len;
     GList **cur_list = (GList **)commit_list;
 
     int ret = seaf_obj_store_read_obj (seaf->commit_mgr->obj_store, repo_id,
                                        version, obj_id, &data, &data_len);
-    if (ret < 0 || data == NULL)
+    if (ret < 0 || data == nullptr)
         return TRUE;
 
     SeafCommit *cur_commit = seaf_commit_from_data (obj_id, data, data_len);
-    if (cur_commit != NULL) {
+    if (cur_commit != nullptr) {
        *cur_list = g_list_prepend (*cur_list, cur_commit);
     }
 
@@ -579,12 +579,12 @@ fsck_get_repo_commit (const char *repo_id, int version,
 static SeafRepo*
 get_available_repo (char *repo_id, gboolean repair)
 {
-    GList *commit_list = NULL;
-    GList *temp_list = NULL;
-    SeafCommit *temp_commit = NULL;
-    SeafBranch *branch = NULL;
-    SeafRepo *repo = NULL;
-    SeafVirtRepo *vinfo = NULL;
+    GList *commit_list = nullptr;
+    GList *temp_list = nullptr;
+    SeafCommit *temp_commit = nullptr;
+    SeafBranch *branch = nullptr;
+    SeafRepo *repo = nullptr;
+    SeafVirtRepo *vinfo = nullptr;
     gboolean io_error;
 
     seaf_message ("Scanning available commits...\n");
@@ -592,16 +592,16 @@ get_available_repo (char *repo_id, gboolean repair)
     seaf_obj_store_foreach_obj (seaf->commit_mgr->obj_store, repo_id,
                                 1, fsck_get_repo_commit, &commit_list);
 
-    if (commit_list == NULL) {
+    if (commit_list == nullptr) {
         seaf_warning ("No available commits for repo %.8s, can't be repaired.\n",
                       repo_id);
-        return NULL;
+        return nullptr;
     }
 
     commit_list = g_list_sort (commit_list, compare_commit_by_ctime);
 
-    repo = seaf_repo_new (repo_id, NULL, NULL);
-    if (repo == NULL) {
+    repo = seaf_repo_new (repo_id, nullptr, nullptr);
+    if (repo == nullptr) {
         seaf_warning ("Out of memory, stop to run fsck for repo %.8s.\n",
                       repo_id);
         goto out;
@@ -625,7 +625,7 @@ get_available_repo (char *repo_id, gboolean repair)
                                   &io_error, VERIFY_DIR, repair)) {
             if (io_error) {
                 seaf_repo_unref (repo);
-                repo = NULL;
+                repo = nullptr;
                 goto out;
             }
             // fs object of this commit is damaged,
@@ -634,11 +634,11 @@ get_available_repo (char *repo_id, gboolean repair)
         }
 
         branch = seaf_branch_new ("master", repo_id, temp_commit->commit_id);
-        if (branch == NULL) {
+        if (branch == nullptr) {
             seaf_warning ("Out of memory, stop to run fsck for repo %.8s.\n",
                           repo_id);
             seaf_repo_unref (repo);
-            repo = NULL;
+            repo = nullptr;
             goto out;
         }
         repo->head = branch;
@@ -662,7 +662,7 @@ out:
         seaf_warning("No available commits found for repo %.8s, can't be repaired.\n",
                      repo_id);
         seaf_repo_unref (repo);
-        return NULL;
+        return nullptr;
     }
 
     return repo;
@@ -762,7 +762,7 @@ repair_repos (GList *repo_id_list, FsckOptions *options)
 
     if (options->max_thread_num) {
         pool = g_thread_pool_new(
-            (GFunc)repair_repo_with_thread_pool, NULL, options->max_thread_num, FALSE, NULL);
+            (GFunc)repair_repo_with_thread_pool, nullptr, options->max_thread_num, FALSE, nullptr);
         if (!pool) {
             seaf_warning ("Failed to create check and recover repo thread pool.\n");
             return;
@@ -776,7 +776,7 @@ repair_repos (GList *repo_id_list, FsckOptions *options)
             CheckAndRecoverRepoObj *obj = g_new0(CheckAndRecoverRepoObj, 1);
             obj->repo_id = repo_id;
             obj->options = options;
-            g_thread_pool_push(pool, obj, NULL);
+            g_thread_pool_push(pool, obj, nullptr);
         } else {
             repair_repo(repo_id, options);
         }
@@ -1040,7 +1040,7 @@ export_repo_files_recursive (const char *repo_id,
 
     for (p = dir->entries; p; p = p->next) {
         seaf_dent = p->data;
-        path = g_build_filename (parent_dir, seaf_dent->name, NULL);
+        path = g_build_filename (parent_dir, seaf_dent->name, nullptr);
 
         if (S_ISREG(seaf_dent->mode)) {
             // create file
@@ -1066,10 +1066,10 @@ export_repo_files_recursive (const char *repo_id,
 static SeafCommit*
 get_available_commit (const char *repo_id)
 {
-    GList *commit_list = NULL;
-    GList *temp_list = NULL;
-    GList *next_list = NULL;
-    SeafCommit *temp_commit = NULL;
+    GList *commit_list = nullptr;
+    GList *temp_list = nullptr;
+    GList *next_list = nullptr;
+    SeafCommit *temp_commit = nullptr;
     gboolean io_error;
 
     seaf_message ("Scanning available commits for repo %s...\n", repo_id);
@@ -1077,10 +1077,10 @@ get_available_commit (const char *repo_id)
     seaf_obj_store_foreach_obj (seaf->commit_mgr->obj_store, repo_id,
                                 1, fsck_get_repo_commit, &commit_list);
 
-    if (commit_list == NULL) {
+    if (commit_list == nullptr) {
         seaf_warning ("No available commits for repo %.8s, export failed.\n\n",
                       repo_id);
-        return NULL;
+        return nullptr;
     }
 
     commit_list = g_list_sort (commit_list, compare_commit_by_ctime);
@@ -1092,13 +1092,13 @@ get_available_commit (const char *repo_id)
 
         if (memcmp (temp_commit->root_id, EMPTY_SHA1, 40) == 0) {
             seaf_commit_unref (temp_commit);
-            temp_commit = NULL;
+            temp_commit = nullptr;
             temp_list = next_list;
             continue;
         } else if (!fsck_verify_seafobj (repo_id, 1, temp_commit->root_id,
                                          &io_error, VERIFY_DIR, FALSE)) {
             seaf_commit_unref (temp_commit);
-            temp_commit = NULL;
+            temp_commit = nullptr;
             temp_list = next_list;
 
             if (io_error) {
@@ -1153,7 +1153,7 @@ export_repo_files (const char *repo_id,
     char *dir_name = g_strdup_printf ("%.8s_%s_%s", repo_id,
                                       commit->repo_name,
                                       commit->creator_name);
-    char * export_path = g_build_filename (init_path, dir_name, NULL);
+    char * export_path = g_build_filename (init_path, dir_name, nullptr);
     g_free (dir_name);
     if (g_mkdir (export_path, 0777) < 0) {
         seaf_warning ("Failed to create export dir %s: %s, export failed.\n",
@@ -1174,10 +1174,10 @@ export_repo_files (const char *repo_id,
 static GList *
 get_repo_ids (const char *seafile_dir)
 {
-    GList *repo_ids = NULL;
+    GList *repo_ids = nullptr;
     char *commit_path = g_build_filename (seafile_dir, "storage",
-                                          "commits", NULL);
-    GError *error = NULL;
+                                          "commits", nullptr);
+    GError *error = nullptr;
 
     GDir *dir = g_dir_open (commit_path, 0, &error);
     if (!dir) {
@@ -1185,11 +1185,11 @@ get_repo_ids (const char *seafile_dir)
                       commit_path, error->message);
         g_clear_error (&error);
         g_free (commit_path);
-        return NULL;
+        return nullptr;
     }
 
     const char *file_name;
-    while ((file_name = g_dir_read_name (dir)) != NULL) {
+    while ((file_name = g_dir_read_name (dir)) != nullptr) {
         repo_ids = g_list_prepend (repo_ids, g_strdup (file_name));
     }
     g_dir_close (dir);
@@ -1253,7 +1253,7 @@ export_file (GList *repo_id_list, const char *seafile_dir, char *export_path)
 
     if (g_hash_table_size (enc_repos) > 0) {
         seaf_message ("The following repos are encrypted and are not exported:\n");
-        g_hash_table_foreach (enc_repos, print_enc_repo, NULL);
+        g_hash_table_foreach (enc_repos, print_enc_repo, nullptr);
     }
 
     while (repo_id_list) {

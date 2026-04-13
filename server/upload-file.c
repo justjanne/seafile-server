@@ -142,7 +142,7 @@ get_content_length (evhtp_request_t *req)
         return -1;
     }
 
-    return strtoll (content_len_str, NULL, 10);
+    return strtoll (content_len_str, nullptr, 10);
 }
 
 static void
@@ -173,7 +173,7 @@ send_success_reply_ie8_compatible (evhtp_request_t *req, evhtp_res code)
     set_content_length_header (req);
 
     const char *accept = evhtp_kv_find (req->headers_in, "Accept");
-    if (accept && strstr (accept, "application/json") != NULL) {
+    if (accept && strstr (accept, "application/json") != nullptr) {
         evhtp_headers_add_header (
             req->headers_out,
             evhtp_header_new("Content-Type", "application/json; charset=utf-8", 1, 1));
@@ -270,11 +270,11 @@ static gboolean
 check_parent_dir (evhtp_request_t *req, const char *repo_id,
                   const char *parent_dir)
 {
-    char *canon_path = NULL;
-    SeafRepo *repo = NULL;
-    SeafCommit *commit = NULL;
-    SeafDir *dir = NULL;
-    GError *error = NULL;
+    char *canon_path = nullptr;
+    SeafRepo *repo = nullptr;
+    SeafCommit *commit = nullptr;
+    SeafDir *dir = nullptr;
+    GError *error = nullptr;
     gboolean ret = TRUE;
 
     repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
@@ -320,8 +320,8 @@ is_parent_matched (const char *upload_dir,
                    const char *parent_dir)
 {
     gboolean ret = TRUE;
-    char *upload_dir_canon = NULL;
-    char *parent_dir_canon = NULL;
+    char *upload_dir_canon = nullptr;
+    char *parent_dir_canon = nullptr;
 
     upload_dir_canon = get_canonical_path (upload_dir);
     parent_dir_canon = get_canonical_path (parent_dir);
@@ -364,7 +364,7 @@ static int
 create_relative_path (RecvFSM *fsm, char *parent_dir, char *relative_path)
 {
     int rc = 0;
-    GError *error = NULL;
+    GError *error = nullptr;
 
     if (!relative_path)
         return 0;
@@ -396,10 +396,10 @@ file_id_list_from_json (const char *ret_json)
     array = json_loadb (ret_json, strlen(ret_json), 0, &err);
     if (!array) {
         seaf_warning ("Failed to load ret_json: %s.\n", err.text);
-        return NULL;
+        return nullptr;
     }
 
-    id_list = g_string_new (NULL);
+    id_list = g_string_new (nullptr);
     size_t n = json_array_size (array);
     for (index = 0; index < n; index++) {
         obj = json_array_get (array, index);
@@ -420,7 +420,7 @@ rfc3339_to_timestamp (const char *last_modify)
     if (!last_modify) {
         return -1;
     }
-    GDateTime *date_time = g_date_time_new_from_iso8601(last_modify, NULL);
+    GDateTime *date_time = g_date_time_new_from_iso8601(last_modify, nullptr);
     if (!date_time) {
         return -1;
     }
@@ -435,10 +435,10 @@ upload_api_cb(evhtp_request_t *req, void *arg)
 {
     RecvFSM *fsm = arg;
     char *parent_dir, *replace_str;
-    char *relative_path = NULL, *new_parent_dir = NULL;
-    char *last_modify = NULL;
+    char *relative_path = nullptr, *new_parent_dir = nullptr;
+    char *last_modify = nullptr;
     gint64 mtime = 0;
-    GError *error = NULL;
+    GError *error = nullptr;
     int error_code = -1;
     char *filenames_json, *tmp_files_json;
     int replace = 0;
@@ -499,7 +499,7 @@ upload_api_cb(evhtp_request_t *req, void *arg)
         return;
     }
     relative_path = g_hash_table_lookup (fsm->form_kvs, "relative_path");
-    if (relative_path != NULL) {
+    if (relative_path != nullptr) {
         if (relative_path[0] == '/' || relative_path[0] == '\\') {
             seaf_warning ("Invalid relative path %s.\n", relative_path);
             send_error_reply (req, EVHTP_RES_BADREQ, "Invalid relative path.");
@@ -507,7 +507,7 @@ upload_api_cb(evhtp_request_t *req, void *arg)
         }
         char *tmp_p = get_canonical_path(parent_dir);
         char *tmp_r = get_canonical_path(relative_path);
-        new_parent_dir = g_build_path("/", tmp_p, tmp_r, NULL);
+        new_parent_dir = g_build_path("/", tmp_p, tmp_r, nullptr);
         g_free(tmp_p);
         g_free(tmp_r);
     } else {
@@ -528,7 +528,7 @@ upload_api_cb(evhtp_request_t *req, void *arg)
         }
 
         if (!fsm->resumable_tmp_file)
-            fsm->resumable_tmp_file = g_build_path ("/", new_parent_dir, (char *)fsm->filenames->data, NULL);
+            fsm->resumable_tmp_file = g_build_path ("/", new_parent_dir, (char *)fsm->filenames->data, nullptr);
 
         if (write_block_data_to_tmp_file (fsm, new_parent_dir,
                                           (char *)fsm->filenames->data) < 0) {
@@ -581,8 +581,8 @@ upload_api_cb(evhtp_request_t *req, void *arg)
     filenames_json = file_list_to_json (fsm->filenames);
     tmp_files_json = file_list_to_json (fsm->files);
 
-    char *ret_json = NULL;
-    char *task_id = NULL;
+    char *ret_json = nullptr;
+    char *task_id = nullptr;
     rc = seaf_repo_manager_post_multi_files (seaf->repo_mgr,
                                              fsm->repo_id,
                                              new_parent_dir,
@@ -592,7 +592,7 @@ upload_api_cb(evhtp_request_t *req, void *arg)
                                              replace,
                                              mtime,
                                              &ret_json,
-                                             fsm->need_idx_progress ? &task_id : NULL,
+                                             fsm->need_idx_progress ? &task_id : nullptr,
                                              &error);
     g_free (filenames_json);
     g_free (tmp_files_json);
@@ -648,7 +648,7 @@ static void
 upload_raw_blks_api_cb(evhtp_request_t *req, void *arg)
 {
     RecvFSM *fsm = arg;
-    GError *error = NULL;
+    GError *error = nullptr;
     int error_code = -1;
     char *blockids_json, *tmp_files_json;
 
@@ -700,9 +700,9 @@ upload_blks_api_cb(evhtp_request_t *req, void *arg)
 {
     RecvFSM *fsm = arg;
     const char *parent_dir, *file_name, *size_str, *replace_str, *commitonly_str;
-    char *last_modify = NULL;
+    char *last_modify = nullptr;
     gint64 mtime = 0;
-    GError *error = NULL;
+    GError *error = nullptr;
     int error_code = -1;
     char *blockids_json;
     gint64 file_size = -1;
@@ -749,7 +749,7 @@ upload_blks_api_cb(evhtp_request_t *req, void *arg)
     if (!check_parent_dir (req, fsm->repo_id, parent_dir))
         return;
 
-    char *new_file_id = NULL;
+    char *new_file_id = nullptr;
     int rc = 0;
     /* if (!commitonly_str) { */
     /*     gint64 content_len = get_content_length (req); */
@@ -781,7 +781,7 @@ upload_blks_api_cb(evhtp_request_t *req, void *arg)
     /* } else { */
 
     blockids_json = g_hash_table_lookup (fsm->form_kvs, "blockids");
-    if (blockids_json == NULL) {
+    if (blockids_json == nullptr) {
         seaf_debug ("[upload-blks] No blockids given.\n");
         send_error_reply (req, EVHTP_RES_BADREQ, "No blockids.\n");
         return;
@@ -842,7 +842,7 @@ out:
 /* { */
 /*     RecvFSM *fsm = arg; */
 /*     char *parent_dir, *file_name, *size_str; */
-/*     GError *error = NULL; */
+/*     GError *error = nullptr; */
 /*     int error_code = ERROR_INTERNAL; */
 /*     char *blockids_json, *tmp_files_json; */
 /*     gint64 file_size = -1; */
@@ -912,7 +912,7 @@ out:
 /*                                                  fsm->user, */
 /*                                                  file_size, */
 /*                                                  0, */
-/*                                                  NULL, */
+/*                                                  nullptr, */
 /*                                                  &error); */
 /*     g_free (blockids_json); */
 /*     g_free (tmp_files_json); */
@@ -992,14 +992,14 @@ write_block_data_to_tmp_file (RecvFSM *fsm, const char *parent_dir,
                               const char *file_name)
 {
     char *abs_path;
-    char *temp_file = NULL;
-    GError *error = NULL;
+    char *temp_file = nullptr;
+    GError *error = nullptr;
     int tmp_fd = -1;
     int ret = 0;
     HttpServerStruct *htp_server = seaf->http_server;
     int cluster_shared_temp_file_mode = htp_server->cluster_shared_temp_file_mode;
 
-    abs_path = g_build_path ("/", parent_dir, file_name, NULL);
+    abs_path = g_build_path ("/", parent_dir, file_name, nullptr);
 
     temp_file = seaf_repo_manager_get_upload_tmp_file (seaf->repo_mgr,
                                                        fsm->repo_id,
@@ -1068,7 +1068,7 @@ out:
     close (fsm->fd);
     g_unlink (fsm->tmp_file);
     g_free (fsm->tmp_file);
-    fsm->tmp_file = NULL;
+    fsm->tmp_file = nullptr;
 
     return ret;
 }
@@ -1080,10 +1080,10 @@ static void
 upload_ajax_cb(evhtp_request_t *req, void *arg)
 {
     RecvFSM *fsm = arg;
-    char *parent_dir = NULL, *relative_path = NULL, *new_parent_dir = NULL;
-    char *last_modify = NULL;
+    char *parent_dir = nullptr, *relative_path = nullptr, *new_parent_dir = nullptr;
+    char *last_modify = nullptr;
     gint64 mtime = 0;
-    GError *error = NULL;
+    GError *error = nullptr;
     int error_code = -1;
     char *filenames_json, *tmp_files_json;
     int rc;
@@ -1135,7 +1135,7 @@ upload_ajax_cb(evhtp_request_t *req, void *arg)
     }
 
     relative_path = g_hash_table_lookup (fsm->form_kvs, "relative_path");
-    if (relative_path != NULL) {
+    if (relative_path != nullptr) {
         if (relative_path[0] == '/' || relative_path[0] == '\\') {
             seaf_warning ("Invalid relative path %s.\n", relative_path);
             send_error_reply (req, EVHTP_RES_BADREQ, "Invalid relative path.");
@@ -1143,7 +1143,7 @@ upload_ajax_cb(evhtp_request_t *req, void *arg)
         }
         char *tmp_p = get_canonical_path(parent_dir);
         char *tmp_r = get_canonical_path(relative_path);
-        new_parent_dir = g_build_path("/", tmp_p, tmp_r, NULL);
+        new_parent_dir = g_build_path("/", tmp_p, tmp_r, nullptr);
         g_free(tmp_p);
         g_free(tmp_r);
     } else {
@@ -1164,7 +1164,7 @@ upload_ajax_cb(evhtp_request_t *req, void *arg)
         }
 
         if (!fsm->resumable_tmp_file)
-            fsm->resumable_tmp_file = g_build_path ("/", new_parent_dir, (char *)fsm->filenames->data, NULL);
+            fsm->resumable_tmp_file = g_build_path ("/", new_parent_dir, (char *)fsm->filenames->data, nullptr);
 
         if (write_block_data_to_tmp_file (fsm, new_parent_dir,
                                           (char *)fsm->filenames->data) < 0) {
@@ -1218,8 +1218,8 @@ upload_ajax_cb(evhtp_request_t *req, void *arg)
     filenames_json = file_list_to_json (fsm->filenames);
     tmp_files_json = file_list_to_json (fsm->files);
 
-    char *ret_json = NULL;
-    char *task_id = NULL;
+    char *ret_json = nullptr;
+    char *task_id = nullptr;
     rc = seaf_repo_manager_post_multi_files (seaf->repo_mgr,
                                              fsm->repo_id,
                                              new_parent_dir,
@@ -1229,7 +1229,7 @@ upload_ajax_cb(evhtp_request_t *req, void *arg)
                                              0,
                                              mtime,
                                              &ret_json,
-                                             fsm->need_idx_progress ? &task_id : NULL,
+                                             fsm->need_idx_progress ? &task_id : nullptr,
                                              &error);
     g_free (filenames_json);
     g_free (tmp_files_json);
@@ -1276,13 +1276,13 @@ static void
 update_api_cb(evhtp_request_t *req, void *arg)
 {
     RecvFSM *fsm = arg;
-    char *target_file, *parent_dir = NULL, *filename = NULL;
-    char *last_modify = NULL;
+    char *target_file, *parent_dir = nullptr, *filename = nullptr;
+    char *last_modify = nullptr;
     gint64 mtime = 0;
-    const char *head_id = NULL;
-    GError *error = NULL;
+    const char *head_id = nullptr;
+    GError *error = nullptr;
     int error_code = -1;
-    char *new_file_id = NULL;
+    char *new_file_id = nullptr;
 
     evhtp_headers_add_header (req->headers_out,
                               evhtp_header_new("Access-Control-Allow-Headers",
@@ -1348,7 +1348,7 @@ update_api_cb(evhtp_request_t *req, void *arg)
         }
 
         if (!fsm->resumable_tmp_file)
-            fsm->resumable_tmp_file = g_build_path ("/", parent_dir, filename, NULL);
+            fsm->resumable_tmp_file = g_build_path ("/", parent_dir, filename, nullptr);
 
         if (write_block_data_to_tmp_file (fsm, parent_dir, filename) < 0) {
             send_error_reply (req, EVHTP_RES_SERVERR, "Internal error.\n");
@@ -1419,9 +1419,9 @@ out:
         // File upload success, try to remove tmp file from WebUploadTmpFile table
         char *abs_path;
 
-        abs_path = g_build_path ("/", parent_dir, filename, NULL);
+        abs_path = g_build_path ("/", parent_dir, filename, nullptr);
 
-        seaf_repo_manager_del_upload_tmp_file (seaf->repo_mgr, fsm->repo_id, abs_path, NULL);
+        seaf_repo_manager_del_upload_tmp_file (seaf->repo_mgr, fsm->repo_id, abs_path, nullptr);
         g_free (abs_path);
     }
     g_free (parent_dir);
@@ -1436,13 +1436,13 @@ static void
 update_blks_api_cb(evhtp_request_t *req, void *arg)
 {
     RecvFSM *fsm = arg;
-    char *target_file, *parent_dir = NULL, *filename = NULL, *size_str = NULL;
-    char *last_modify = NULL;
+    char *target_file, *parent_dir = nullptr, *filename = nullptr, *size_str = nullptr;
+    char *last_modify = nullptr;
     gint64 mtime = 0;
     const char *commitonly_str;
-    GError *error = NULL;
+    GError *error = nullptr;
     int error_code = -1;
-    char *new_file_id = NULL;
+    char *new_file_id = nullptr;
     char *blockids_json;
     gint64 file_size = -1;
 
@@ -1504,7 +1504,7 @@ update_blks_api_cb(evhtp_request_t *req, void *arg)
     /* } else { */
 
     blockids_json = g_hash_table_lookup (fsm->form_kvs, "blockids");
-    if (blockids_json == NULL) {
+    if (blockids_json == nullptr) {
         seaf_debug ("[upload-blks] No blockids given.\n");
         send_error_reply (req, EVHTP_RES_BADREQ, "No blockids.\n");
         goto out;
@@ -1554,9 +1554,9 @@ out:
 /* update_blks_ajax_cb(evhtp_request_t *req, void *arg) */
 /* { */
 /*     RecvFSM *fsm = arg; */
-/*     char *target_file, *parent_dir = NULL, *filename = NULL, *size_str = NULL; */
-/*     const char *head_id = NULL; */
-/*     GError *error = NULL; */
+/*     char *target_file, *parent_dir = nullptr, *filename = nullptr, *size_str = nullptr; */
+/*     const char *head_id = nullptr; */
+/*     GError *error = nullptr; */
 /*     int error_code = ERROR_INTERNAL; */
 /*     char *blockids_json, *tmp_files_json; */
 /*     gint64 file_size = -1; */
@@ -1623,7 +1623,7 @@ out:
 /*                                                 fsm->user, */
 /*                                                 head_id, */
 /*                                                 file_size, */
-/*                                                 NULL, */
+/*                                                 nullptr, */
 /*                                                 &error); */
 /*     g_free (blockids_json); */
 /*     g_free (tmp_files_json); */
@@ -1696,13 +1696,13 @@ static void
 update_ajax_cb(evhtp_request_t *req, void *arg)
 {
     RecvFSM *fsm = arg;
-    char *target_file, *parent_dir = NULL, *filename = NULL;
-    char *last_modify = NULL;
+    char *target_file, *parent_dir = nullptr, *filename = nullptr;
+    char *last_modify = nullptr;
     gint64 mtime = 0;
-    const char *head_id = NULL;
-    GError *error = NULL;
+    const char *head_id = nullptr;
+    GError *error = nullptr;
     int error_code = -1;
-    char *new_file_id = NULL;
+    char *new_file_id = nullptr;
     gint64 size;
 
     evhtp_headers_add_header (req->headers_out,
@@ -1858,7 +1858,7 @@ upload_finish_cb (evhtp_request_t *req, void *arg)
 
     if (fsm->resumable_tmp_file) {
         if (fsm->rstart >= 0 && fsm->rend == fsm->fsize - 1) {
-            seaf_repo_manager_del_upload_tmp_file (seaf->repo_mgr, fsm->repo_id, fsm->resumable_tmp_file, NULL);
+            seaf_repo_manager_del_upload_tmp_file (seaf->repo_mgr, fsm->repo_id, fsm->resumable_tmp_file, nullptr);
         }
         g_free (fsm->resumable_tmp_file);
     }
@@ -1902,7 +1902,7 @@ get_mime_header_param_value (const char *param)
     last_quote = strrchr (param, '\"');
     if (!first_quote || !last_quote || first_quote == last_quote) {
         seaf_debug ("[upload] Invalid mime param %s.\n", param);
-        return NULL;
+        return nullptr;
     }
 
     value = g_strndup (first_quote + 1, last_quote - first_quote - 1);
@@ -1912,17 +1912,17 @@ get_mime_header_param_value (const char *param)
 static char *
 parse_file_name_from_header (evhtp_request_t *req)
 {
-    const char *dispose = NULL;
+    const char *dispose = nullptr;
     char **p;
     char **params;
-    char *dec_file_name = NULL;
+    char *dec_file_name = nullptr;
 
     dispose = evhtp_kv_find (req->headers_in, "Content-Disposition");
     if (!dispose)
-        return NULL;
+        return nullptr;
 
     params = g_strsplit (dispose, ";", 2);
-    for (p = params; *p != NULL; ++p)
+    for (p = params; *p != nullptr; ++p)
         *p = g_strstrip (*p);
 
     if (g_strv_length (params) != 2 ||
@@ -1930,12 +1930,12 @@ parse_file_name_from_header (evhtp_request_t *req)
         strncasecmp (params[1], "filename", strlen("filename")) != 0) {
         seaf_warning ("[upload] Invalid Content-Disposition header.\n");
         g_strfreev (params);
-        return NULL;
+        return nullptr;
     }
 
     char *file_name = get_mime_header_param_value (params[1]);
     if (file_name)
-        dec_file_name = g_uri_unescape_string (file_name, NULL);
+        dec_file_name = g_uri_unescape_string (file_name, nullptr);
     g_free (file_name);
     g_strfreev (params);
 
@@ -1958,7 +1958,7 @@ parse_mime_header (evhtp_request_t *req, char *header, RecvFSM *fsm)
     // Content-Disposition is case-insensitive.
     if (strcasecmp (header, "Content-Disposition") == 0) {
         params = g_strsplit (colon + 1, ";", 3);
-        for (p = params; *p != NULL; ++p)
+        for (p = params; *p != nullptr; ++p)
             *p = g_strstrip (*p);
 
         if (g_strv_length (params) < 2) {
@@ -1972,7 +1972,7 @@ parse_mime_header (evhtp_request_t *req, char *header, RecvFSM *fsm)
             return -1;
         }
 
-        for (p = params; *p != NULL; ++p) {
+        for (p = params; *p != nullptr; ++p) {
             if (strncasecmp (*p, "name", strlen("name")) == 0) {
                 fsm->input_name = get_mime_header_param_value (*p);
                 break;
@@ -1986,7 +1986,7 @@ parse_mime_header (evhtp_request_t *req, char *header, RecvFSM *fsm)
 
         if (strcmp (fsm->input_name, "file") == 0) {
             char *file_name;
-            for (p = params; *p != NULL; ++p) {
+            for (p = params; *p != nullptr; ++p) {
                 if (strncasecmp (*p, "filename", strlen("filename")) == 0) {
                     if (fsm->rstart >= 0) {
                         file_name = parse_file_name_from_header (req);
@@ -2017,7 +2017,7 @@ parse_mime_header (evhtp_request_t *req, char *header, RecvFSM *fsm)
 static int
 open_temp_file (RecvFSM *fsm)
 {
-    GString *temp_file = g_string_new (NULL);
+    GString *temp_file = g_string_new (nullptr);
     char *base_name = get_basename(fsm->file_name);
 
     g_string_printf (temp_file, "%s/%sXXXXXX",
@@ -2049,12 +2049,12 @@ recv_form_field (RecvFSM *fsm, gboolean *no_line)
     *no_line = FALSE;
 
     line = evbuffer_readln (fsm->line, &len, EVBUFFER_EOL_CRLF_STRICT);
-    if (line != NULL) {
-        if (strstr (line, fsm->boundary) != NULL) {
+    if (line != nullptr) {
+        if (strstr (line, fsm->boundary) != nullptr) {
             seaf_debug ("[upload] form field ends.\n");
 
             g_free (fsm->input_name);
-            fsm->input_name = NULL;
+            fsm->input_name = nullptr;
             fsm->state = RECV_HEADERS;
         } else {
             seaf_debug ("[upload] form field is %s.\n", line);
@@ -2073,12 +2073,12 @@ recv_form_field (RecvFSM *fsm, gboolean *no_line)
             struct evbuffer_ptr search_boundary = evbuffer_search (fsm->line,
                                                                    fsm->boundary,
                                                                    strlen(fsm->boundary),
-                                                                   NULL);
+                                                                   nullptr);
             if (search_boundary.pos != -1) {
                 seaf_debug ("[upload] form field ends.\n");
                 evbuffer_drain (fsm->line, size);
                 g_free (fsm->input_name);
-                fsm->input_name = NULL;
+                fsm->input_name = nullptr;
                 fsm->state = RECV_HEADERS;
             }
         }
@@ -2105,14 +2105,14 @@ add_uploaded_file (RecvFSM *fsm)
 
         g_free (fsm->file_name);
         g_free (fsm->tmp_file);
-        fsm->file_name = NULL;
-        fsm->tmp_file = NULL;
+        fsm->file_name = nullptr;
+        fsm->tmp_file = nullptr;
         fsm->recved_crlf = FALSE;
     } else {
         fsm->filenames = g_list_prepend (fsm->filenames,
                                          get_basename(fsm->file_name));
         g_free (fsm->file_name);
-        fsm->file_name = NULL;
+        fsm->file_name = nullptr;
         fsm->recved_crlf = FALSE;
     }
 
@@ -2141,7 +2141,7 @@ recv_file_data (RecvFSM *fsm, gboolean *no_line)
             char *buf = g_new0 (char, size + 1);
             evbuffer_remove (fsm->line, buf, size);
             // strstr need a '\0'
-            if (strstr(buf, fsm->boundary) != NULL) {
+            if (strstr(buf, fsm->boundary) != nullptr) {
                 seaf_debug ("[upload] file data ends.\n");
                 evhtp_res res = add_uploaded_file (fsm);
                 if (res != EVHTP_RES_OK) {
@@ -2149,7 +2149,7 @@ recv_file_data (RecvFSM *fsm, gboolean *no_line)
                     return res;
                 }
                 g_free (fsm->input_name);
-                fsm->input_name = NULL;
+                fsm->input_name = nullptr;
                 fsm->state = RECV_HEADERS;
             } else {
                 seaf_debug ("[upload] recv file data %d bytes.\n", size);
@@ -2171,7 +2171,7 @@ recv_file_data (RecvFSM *fsm, gboolean *no_line)
             g_free(buf);
         }
         *no_line = TRUE;
-    } else if (strstr (line, fsm->boundary) != NULL) {
+    } else if (strstr (line, fsm->boundary) != nullptr) {
         seaf_debug ("[upload] file data ends.\n");
 
         evhtp_res res = add_uploaded_file (fsm);
@@ -2181,7 +2181,7 @@ recv_file_data (RecvFSM *fsm, gboolean *no_line)
         }
 
         g_free (fsm->input_name);
-        fsm->input_name = NULL;
+        fsm->input_name = nullptr;
         fsm->state = RECV_HEADERS;
         free (line);
     } else {
@@ -2252,7 +2252,7 @@ upload_read_cb (evhtp_request_t *req, evbuf_t *buf, void *arg)
         switch (fsm->state) {
         case RECV_INIT:
             line = evbuffer_readln (fsm->line, &len, EVBUFFER_EOL_CRLF_STRICT);
-            if (line != NULL) {
+            if (line != nullptr) {
                 seaf_debug ("[upload] boundary line: %s.\n", line);
                 if (!strstr (line, fsm->boundary)) {
                     seaf_debug ("[upload] no boundary found in the first line.\n");
@@ -2269,7 +2269,7 @@ upload_read_cb (evhtp_request_t *req, evbuf_t *buf, void *arg)
             break;
         case RECV_HEADERS:
             line = evbuffer_readln (fsm->line, &len, EVBUFFER_EOL_CRLF_STRICT);
-            if (line != NULL) {
+            if (line != nullptr) {
                 seaf_debug ("[upload] mime header line: %s.\n", line);
                 if (len == 0) {
                     /* Read an blank line, headers end. */
@@ -2342,7 +2342,7 @@ get_http_header_param_value (const char *param)
     equal = strchr (param, '=');
     if (!equal) {
         seaf_debug ("[upload] Invalid http header param %s.\n", param);
-        return NULL;
+        return nullptr;
     }
 
     value = g_strdup (equal + 1);
@@ -2354,7 +2354,7 @@ get_boundary (evhtp_headers_t *hdr)
 {
     const char *content_type;
     char **params, **p;
-    char *boundary = NULL;
+    char *boundary = nullptr;
 
     content_type = evhtp_kv_find (hdr, "Content-Type");
     if (!content_type) {
@@ -2363,7 +2363,7 @@ get_boundary (evhtp_headers_t *hdr)
     }
 
     params = g_strsplit (content_type, ";", 0);
-    for (p = params; *p != NULL; ++p)
+    for (p = params; *p != nullptr; ++p)
         *p = g_strstrip (*p);
 
     if (!params || g_strv_length (params) < 2) {
@@ -2377,7 +2377,7 @@ get_boundary (evhtp_headers_t *hdr)
         return boundary;
     }
 
-    for (p = params; *p != NULL; ++p) {
+    for (p = params; *p != nullptr; ++p) {
         if (strncasecmp (*p, "boundary", strlen("boundary")) == 0) {
             boundary = get_http_header_param_value (*p);
             break;
@@ -2442,7 +2442,7 @@ check_access_token (const char *token,
     *user = g_strdup (seafile_web_access_get_username (webaccess));
 
     _obj_id  = seafile_web_access_get_obj_id (webaccess);
-    parent_dir_json = json_loadb (_obj_id, strlen (_obj_id), 0, NULL);
+    parent_dir_json = json_loadb (_obj_id, strlen (_obj_id), 0, nullptr);
     if (parent_dir_json) {
         _parent_dir = json_object_get_string_member (parent_dir_json, "parent_dir");
         
@@ -2465,7 +2465,7 @@ parse_range_val (evhtp_headers_t *hdr, gint64 *rstart,
     if (!tmp)
         return TRUE;
 
-    char *next = NULL;
+    char *next = nullptr;
     gint64 start;
     gint64 end;
     gint64 fsize;
@@ -2527,7 +2527,7 @@ get_progress_info (evhtp_request_t *req,
         seaf_debug ("[upload] Content-Length not found.\n");
         return -1;
     }
-    *content_len = strtoll (content_len_str, NULL, 10);
+    *content_len = strtoll (content_len_str, nullptr, 10);
 
     return 0;
 }
@@ -2535,16 +2535,16 @@ get_progress_info (evhtp_request_t *req,
 static evhtp_res
 upload_headers_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
 {
-    char **parts = NULL;
-    char *token, *repo_id = NULL, *user = NULL;
-    char *parent_dir = NULL;
-    char *boundary = NULL;
+    char **parts = nullptr;
+    char *token, *repo_id = nullptr, *user = nullptr;
+    char *parent_dir = nullptr;
+    char *boundary = nullptr;
     gint64 content_len;
-    char *progress_id = NULL;
-    char *err_msg = NULL;
-    char *token_type = NULL;
-    RecvFSM *fsm = NULL;
-    Progress *progress = NULL;
+    char *progress_id = nullptr;
+    char *err_msg = nullptr;
+    char *token_type = nullptr;
+    RecvFSM *fsm = nullptr;
+    Progress *progress = nullptr;
     int error_code = EVHTP_RES_BADREQ;
     htp_method method = evhtp_request_get_method(req);
 
@@ -2614,7 +2614,7 @@ upload_headers_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
         goto err;
     }
 
-    if (progress_id != NULL) {
+    if (progress_id != nullptr) {
         pthread_mutex_lock (&pg_lock);
         if (g_hash_table_lookup (upload_progress, progress_id)) {
             pthread_mutex_unlock (&pg_lock);
@@ -2641,7 +2641,7 @@ upload_headers_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
     /*     fsm->need_idx_progress = TRUE; */
     fsm->need_idx_progress = FALSE;
 
-    if (progress_id != NULL) {
+    if (progress_id != nullptr) {
         progress = g_new0 (Progress, 1);
         progress->size = content_len;
         fsm->progress_id = progress_id;
@@ -2687,20 +2687,20 @@ err:
 static evhtp_res
 upload_link_headers_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
 {
-    char **parts = NULL;
-    char *token = NULL;
-    const char *repo_id = NULL, *parent_dir = NULL;
-    char *r_parent_dir = NULL;
-    char *norm_parent_dir = NULL;
-    char *user = NULL;
-    char *boundary = NULL;
+    char **parts = nullptr;
+    char *token = nullptr;
+    const char *repo_id = nullptr, *parent_dir = nullptr;
+    char *r_parent_dir = nullptr;
+    char *norm_parent_dir = nullptr;
+    char *user = nullptr;
+    char *boundary = nullptr;
     gint64 content_len;
-    char *progress_id = NULL;
-    char *err_msg = NULL;
-    RecvFSM *fsm = NULL;
-    Progress *progress = NULL;
+    char *progress_id = nullptr;
+    char *err_msg = nullptr;
+    RecvFSM *fsm = nullptr;
+    Progress *progress = nullptr;
     int error_code = EVHTP_RES_BADREQ;
-    SeafileShareLinkInfo *info = NULL;
+    SeafileShareLinkInfo *info = nullptr;
 
     if (!seaf->seahub_pk) {
         seaf_warning ("No seahub private key is configured.\n");
@@ -2752,7 +2752,7 @@ upload_link_headers_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
         goto err;
     }
 
-    if (progress_id != NULL) {
+    if (progress_id != nullptr) {
         pthread_mutex_lock (&pg_lock);
         if (g_hash_table_lookup (upload_progress, progress_id)) {
             pthread_mutex_unlock (&pg_lock);
@@ -2788,7 +2788,7 @@ upload_link_headers_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
     //     fsm->need_idx_progress = TRUE; 
     fsm->need_idx_progress = FALSE;
 
-    if (progress_id != NULL) {
+    if (progress_id != nullptr) {
         progress = g_new0 (Progress, 1);
         progress->size = content_len;
         fsm->progress_id = progress_id;
@@ -2844,7 +2844,7 @@ idx_progress_cb(evhtp_request_t *req, void *arg)
         return;
     }
     char *progress_info = index_blocks_mgr_query_progress (seaf->index_blocks_mgr,
-                                                           progress_id, NULL);
+                                                           progress_id, nullptr);
     if (!progress_info) {
         send_error_reply (req, EVHTP_RES_NOTFOUND, "Failed to get index progress");
         return;
@@ -2888,7 +2888,7 @@ upload_progress_cb(evhtp_request_t *req, void *arg)
     }
 
     /* Return JSONP formated data. */
-    buf = g_string_new (NULL);
+    buf = g_string_new (nullptr);
     g_string_append_printf (buf,
                             "%s({\"uploaded\": %"G_GINT64_FORMAT", \"length\": %"G_GINT64_FORMAT"});",
                             callback, progress->uploaded, progress->size);
@@ -2920,45 +2920,45 @@ upload_file_init (evhtp_t *htp, const char *http_temp_dir)
     }
     g_free (cluster_shared_dir);
 
-    cb = evhtp_set_regex_cb (htp, "^/upload-api/.*", upload_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/upload-api/.*", upload_api_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, nullptr);
 
     cb = evhtp_set_regex_cb (htp, "^/upload-raw-blks-api/.*",
-                             upload_raw_blks_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
+                             upload_raw_blks_api_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, nullptr);
 
-    cb = evhtp_set_regex_cb (htp, "^/upload-blks-api/.*", upload_blks_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/upload-blks-api/.*", upload_blks_api_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, nullptr);
 
-    /* cb = evhtp_set_regex_cb (htp, "^/upload-blks-aj/.*", upload_blks_ajax_cb, NULL); */
-    /* evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL); */
+    /* cb = evhtp_set_regex_cb (htp, "^/upload-blks-aj/.*", upload_blks_ajax_cb, nullptr); */
+    /* evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, nullptr); */
 
-    cb = evhtp_set_regex_cb (htp, "^/upload-aj/.*", upload_ajax_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/upload-aj/.*", upload_ajax_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, nullptr);
 
-    cb = evhtp_set_regex_cb (htp, "^/update-api/.*", update_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/update-api/.*", update_api_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, nullptr);
 
-    cb = evhtp_set_regex_cb (htp, "^/update-blks-api/.*", update_blks_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/update-blks-api/.*", update_blks_api_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, nullptr);
 
-    /* cb = evhtp_set_regex_cb (htp, "^/update-blks-aj/.*", update_blks_ajax_cb, NULL); */
-    /* evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL); */
+    /* cb = evhtp_set_regex_cb (htp, "^/update-blks-aj/.*", update_blks_ajax_cb, nullptr); */
+    /* evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, nullptr); */
 
-    cb = evhtp_set_regex_cb (htp, "^/update-aj/.*", update_ajax_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/update-aj/.*", update_ajax_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, nullptr);
 
     // upload links
-    // cb = evhtp_set_regex_cb (htp, "^/u/.*", upload_link_cb, NULL);
-    //evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_link_headers_cb, NULL);
+    // cb = evhtp_set_regex_cb (htp, "^/u/.*", upload_link_cb, nullptr);
+    //evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_link_headers_cb, nullptr);
 
-    evhtp_set_regex_cb (htp, "^/upload_progress.*", upload_progress_cb, NULL);
+    evhtp_set_regex_cb (htp, "^/upload_progress.*", upload_progress_cb, nullptr);
 
-    evhtp_set_regex_cb (htp, "^/idx_progress.*", idx_progress_cb, NULL);
+    evhtp_set_regex_cb (htp, "^/idx_progress.*", idx_progress_cb, nullptr);
 
     upload_progress = g_hash_table_new_full (g_str_hash, g_str_equal,
                                              g_free, g_free);
-    pthread_mutex_init (&pg_lock, NULL);
+    pthread_mutex_init (&pg_lock, nullptr);
 
     return 0;
 }

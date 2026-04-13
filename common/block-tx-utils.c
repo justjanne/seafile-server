@@ -15,7 +15,7 @@ blocktx_generate_encrypt_key (unsigned char *session_key, int sk_len,
 {
     EVP_BytesToKey (EVP_aes_256_cbc(), /* cipher mode */
                     EVP_sha1(),        /* message digest */
-                    NULL,              /* salt */
+                    nullptr,              /* salt */
                     session_key,
                     sk_len,
                     3,   /* iteration times */
@@ -35,7 +35,7 @@ blocktx_encrypt_init (EVP_CIPHER_CTX **ctx,
 
     ret = EVP_EncryptInit_ex (*ctx,
                               EVP_aes_256_cbc(), /* cipher mode */
-                              NULL, /* engine, NULL for default */
+                              nullptr, /* engine, nullptr for default */
                               key,  /* derived key */
                               iv);  /* initial vector */
     if (ret == 0)
@@ -56,7 +56,7 @@ blocktx_decrypt_init (EVP_CIPHER_CTX **ctx,
 
     ret = EVP_DecryptInit_ex (*ctx,
                               EVP_aes_256_cbc(), /* cipher mode */
-                              NULL, /* engine, NULL for default */
+                              nullptr, /* engine, nullptr for default */
                               key,  /* derived key */
                               iv);  /* initial vector */
     if (ret == 0)
@@ -210,7 +210,7 @@ handle_one_frame (struct evbuffer *buf, FrameParser *parser)
 static int
 handle_frame_fragment_content (struct evbuffer *buf, FrameParser *parser)
 {
-    char *fragment = NULL, *out = NULL;
+    char *fragment = nullptr, *out = nullptr;
     int fragment_len, outlen;
     int ret = 0;
 

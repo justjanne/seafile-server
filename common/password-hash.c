@@ -18,7 +18,7 @@ typedef struct Pbkdf2Params {
 static Pbkdf2Params *
 parse_pbkdf2_sha256_params (const char *params_str)
 {
-    Pbkdf2Params *params = NULL;
+    Pbkdf2Params *params = nullptr;
     if (!params_str) {
         params = g_new0 (Pbkdf2Params, 1);
         params->iteration = 1000;
@@ -81,7 +81,7 @@ parse_argon2id_params (const char *params_str)
         return argon2_params;
     }
 
-    char *p = NULL;
+    char *p = nullptr;
     p = g_strstrip (params[0]);
     argon2_params->time_cost = atoll (p);
     if (argon2_params->time_cost <= 0) {
@@ -138,7 +138,7 @@ parse_pwd_hash_params (const char *algo, const char *params_str, PwdHashParams *
         else
             params->params_str = g_strdup ("2,102400,8");
     } else {
-        params->algo = NULL;
+        params->algo = nullptr;
     }
 
     seaf_message ("password hash algorithms: %s, params: %s\n ", params->algo, params->params_str);

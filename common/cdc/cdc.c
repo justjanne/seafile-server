@@ -69,7 +69,7 @@ static int init_cdc_file_descriptor (int fd,
     if (file_descr->block_sz <= 0)
         file_descr->block_sz = BLOCK_SZ;
 
-    if (file_descr->write_block == NULL)
+    if (file_descr->write_block == nullptr)
         file_descr->write_block = (WriteblockFunc)default_write_chunk;
 
     block_min_sz = file_descr->block_min_sz;

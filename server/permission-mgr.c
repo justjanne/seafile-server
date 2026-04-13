@@ -32,7 +32,7 @@ seaf_perm_manager_init (SeafPermManager *mgr)
 static int
 load_db (SeafPermManager *mgr)
 {
-    char *db_path = g_build_filename (mgr->seaf->seaf_dir, PERM_DB, NULL);
+    char *db_path = g_build_filename (mgr->seaf->seaf_dir, PERM_DB, nullptr);
     if (sqlite_open_db (db_path, &mgr->priv->db) < 0) {
         g_critical ("[Permission mgr] Failed to open permission db\n");
         g_free (db_path);

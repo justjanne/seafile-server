@@ -144,8 +144,8 @@ fs_callback (SeafFSManager *mgr,
 {
     GCData *data = user_data;
 
-    if (data->visited != NULL) {
-        if (g_hash_table_lookup (data->visited, obj_id) != NULL) {
+    if (data->visited != nullptr) {
+        if (g_hash_table_lookup (data->visited, obj_id) != nullptr) {
             *stop = TRUE;
             return TRUE;
         }
@@ -158,9 +158,9 @@ fs_callback (SeafFSManager *mgr,
         ++(data->keep_alive_obj_counter);
 
         if (data->keep_alive_obj_counter >= KEEP_ALIVE_PER_OBJS &&
-            ((gint64)time(NULL) - data->keep_alive_last_time) >= KEEP_ALIVE_PER_SECOND)
+            ((gint64)time(nullptr) - data->keep_alive_last_time) >= KEEP_ALIVE_PER_SECOND)
         {
-            data->keep_alive_last_time = (gint64)time(NULL);
+            data->keep_alive_last_time = (gint64)time(nullptr);
             data->keep_alive_obj_counter = 0;
             seaf_db_trans_query(data->trans, "SELECT 1;", 0);
         }
@@ -300,9 +300,9 @@ gc_data_new (SeafRepo *repo, Bloom *blocks_index, Bloom *fs_index, int verbose)
     data->repo = repo;
     data->blocks_index = blocks_index;
     data->fs_index = fs_index;
-    data->visited = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+    data->visited = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
     data->visited_commits = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                   g_free, NULL);
+                                                   g_free, nullptr);
     data->verbose = verbose;
 
     gint64 truncate_time;
@@ -311,7 +311,7 @@ gc_data_new (SeafRepo *repo, Bloom *blocks_index, Bloom *fs_index, int verbose)
     update_valid_since_time (repo, truncate_time);
     data->truncate_time = truncate_time;
 
-    data->keep_alive_last_time = (gint64)time(NULL);
+    data->keep_alive_last_time = (gint64)time(nullptr);
     data->keep_alive_obj_counter = 0;
 
     return data;
@@ -334,7 +334,7 @@ gc_data_free (GCData *data)
 static gint64
 populate_gc_index_for_repo_for_new_commits (GCData *data, SeafDBTrans *trans)
 {
-    SeafBranch *new_branch = NULL;
+    SeafBranch *new_branch = nullptr;
     gint64 n_blocks_last = 0;
     int n_commits_last = 0;
     gboolean res;
@@ -342,7 +342,7 @@ populate_gc_index_for_repo_for_new_commits (GCData *data, SeafDBTrans *trans)
     SeafRepo *repo = data->repo;
 
     if (!repo->is_virtual) {
-        if (trans != NULL && update_gc_id (repo, trans) < 0) {
+        if (trans != nullptr && update_gc_id (repo, trans) < 0) {
             seaf_warning ("Failed to update GCID for repo %s.\n", repo->id);
             ret = -1;
             goto out;
@@ -419,9 +419,9 @@ populate_gc_index_for_repo (GCData *data, SeafDBTrans *trans)
     // Traverse the base commit of the virtual repo. Otherwise, if the virtual repo has not been updated for a long time,
     // the fs object corresponding to the base commit will be removed by mistake.
     if (!repo->is_virtual) {
-        GList *vrepo_ids = NULL, *ptr;
-        char *repo_id = NULL;
-        SeafVirtRepo *vinfo = NULL;
+        GList *vrepo_ids = nullptr, *ptr;
+        char *repo_id = nullptr;
+        SeafVirtRepo *vinfo = nullptr;
         vrepo_ids = seaf_repo_manager_get_virtual_repo_ids_by_origin (seaf->repo_mgr,
                                                                       repo->id);
         for (ptr = vrepo_ids; ptr; ptr = ptr->next) {
@@ -499,9 +499,9 @@ check_existing_blocks (char *store_id, int repo_version, GHashTable *exist_block
                        Bloom *blocks_index, int dry_run)
 {
     char *block_id;
-    GThreadPool *tpool = NULL;
-    GAsyncQueue *async_queue = NULL;
-    CheckBlockParam *param = NULL;
+    GThreadPool *tpool = nullptr;
+    GAsyncQueue *async_queue = nullptr;
+    CheckBlockParam *param = nullptr;
     GHashTableIter iter;
     gpointer key, value;
     gint64 ret = 0;
@@ -513,9 +513,9 @@ check_existing_blocks (char *store_id, int repo_version, GHashTable *exist_block
     param->index = blocks_index;
     param->dry_run = dry_run;
     param->async_queue = async_queue;
-    pthread_mutex_init (&param->counter_lock, NULL);
+    pthread_mutex_init (&param->counter_lock, nullptr);
 
-    tpool = g_thread_pool_new (check_block_liveness, param, MAX_THREADS, FALSE, NULL);
+    tpool = g_thread_pool_new (check_block_liveness, param, MAX_THREADS, FALSE, nullptr);
     if (!tpool) {
         seaf_warning ("Failed to create thread pool for repo %s, stop gc.\n",
                       store_id);
@@ -526,7 +526,7 @@ check_existing_blocks (char *store_id, int repo_version, GHashTable *exist_block
     g_hash_table_iter_init (&iter, exist_blocks);
 
     while (g_hash_table_iter_next (&iter, &key, &value)) {
-        g_thread_pool_push (tpool, (char *)key, NULL);
+        g_thread_pool_push (tpool, (char *)key, nullptr);
     }
 
     while ((block_id = g_async_queue_pop (async_queue))) {
@@ -582,9 +582,9 @@ check_existing_fs (char *store_id, int repo_version, GHashTable *exist_fs,
                    Bloom *fs_index, int dry_run)
 {
     char *fs_id;
-    GThreadPool *tpool = NULL;
-    GAsyncQueue *async_queue = NULL;
-    CheckFSParam *param = NULL;
+    GThreadPool *tpool = nullptr;
+    GAsyncQueue *async_queue = nullptr;
+    CheckFSParam *param = nullptr;
     GHashTableIter iter;
     gpointer key, value;
     gint64 ret = 0;
@@ -596,9 +596,9 @@ check_existing_fs (char *store_id, int repo_version, GHashTable *exist_fs,
     param->index = fs_index;
     param->dry_run = dry_run;
     param->async_queue = async_queue;
-    pthread_mutex_init (&param->counter_lock, NULL);
+    pthread_mutex_init (&param->counter_lock, nullptr);
 
-    tpool = g_thread_pool_new (check_fs_liveness, param, MAX_THREADS, FALSE, NULL);
+    tpool = g_thread_pool_new (check_fs_liveness, param, MAX_THREADS, FALSE, nullptr);
     if (!tpool) {
         seaf_warning ("Failed to create thread pool for repo %s, stop gc.\n",
                       store_id);
@@ -609,7 +609,7 @@ check_existing_fs (char *store_id, int repo_version, GHashTable *exist_fs,
     g_hash_table_iter_init (&iter, exist_fs);
 
     while (g_hash_table_iter_next (&iter, &key, &value)) {
-        g_thread_pool_push (tpool, (char *)key, NULL);
+        g_thread_pool_push (tpool, (char *)key, nullptr);
     }
 
     while ((fs_id = g_async_queue_pop (async_queue))) {
@@ -649,7 +649,7 @@ populate_gc_index_for_virtual_repos_for_new_commits (GList *virtual_repos,
     SeafRepo *vrepo;
     gint64 scan_ret = 0;
     gint64 ret = 0;
-    GCData *data = NULL;
+    GCData *data = nullptr;
 
     for (ptr = virtual_repos; ptr; ptr = ptr->next) {
         data = ptr->data;
@@ -681,7 +681,7 @@ populate_gc_index_for_virtual_repos (SeafRepo *repo,
                                      SeafDBTrans *trans,
                                      int verbose)
 {
-    GList *vrepo_ids = NULL, *ptr;
+    GList *vrepo_ids = nullptr, *ptr;
     char *repo_id;
     SeafRepo *vrepo;
     gint64 scan_ret = 0;
@@ -724,18 +724,18 @@ out:
 gint64
 gc_v1_repo (SeafRepo *repo, int dry_run, int online, int verbose, int rm_fs)
 {
-    Bloom *blocks_index = NULL;
-    Bloom *fs_index = NULL;
-    GHashTable *exist_blocks = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-    GHashTable *exist_fs = NULL;
-    GList *virtual_repos = NULL;
+    Bloom *blocks_index = nullptr;
+    Bloom *fs_index = nullptr;
+    GHashTable *exist_blocks = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
+    GHashTable *exist_fs = nullptr;
+    GList *virtual_repos = nullptr;
     guint64 total_blocks = 0;
     guint64 total_fs = 0;
     guint64 reachable_blocks = 0;
     gint64 removed_fs = 0;
     gint64 ret;
     GCData *data;
-    SeafDBTrans *trans = NULL;
+    SeafDBTrans *trans = nullptr;
 
     ret = seaf_block_manager_foreach_block (seaf->block_mgr,
                                             repo->store_id, repo->version,
@@ -756,7 +756,7 @@ gc_v1_repo (SeafRepo *repo, int dry_run, int online, int verbose, int rm_fs)
     }
 
      if (rm_fs) {
-        exist_fs = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+        exist_fs = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
         ret = seaf_obj_store_foreach_obj (seaf->fs_mgr->obj_store,
                                           repo->store_id, repo->version,
                                           collect_exist_fs,
@@ -977,12 +977,12 @@ remove_store (gpointer data, gpointer user_data)
 void
 delete_garbaged_repos (int dry_run, int thread_num)
 {
-    GList *del_repos = NULL;
+    GList *del_repos = nullptr;
     GList *ptr;
-    GAsyncQueue *async_queue = NULL;
+    GAsyncQueue *async_queue = nullptr;
     int tnum;
-    GThreadPool *tpool = NULL;
-    RemoveTask *task = NULL;
+    GThreadPool *tpool = nullptr;
+    RemoveTask *task = nullptr;
     int n_tasks = 0;
     char *repo_id;
     char *dup_id;
@@ -990,7 +990,7 @@ delete_garbaged_repos (int dry_run, int thread_num)
     gpointer key, value;
     GHashTable *deleted;
 
-    deleted = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+    deleted = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
 
     seaf_message ("=== Repos deleted by users ===\n");
     del_repos = seaf_repo_manager_list_garbage_repos (seaf->repo_mgr);
@@ -1003,7 +1003,7 @@ delete_garbaged_repos (int dry_run, int thread_num)
         }
 
         tnum = thread_num <= 0 ? MAX_THREADS : thread_num;
-        tpool = g_thread_pool_new (remove_store, async_queue, tnum, FALSE, NULL);
+        tpool = g_thread_pool_new (remove_store, async_queue, tnum, FALSE, nullptr);
         if (!tpool) {
             seaf_warning ("Failed to create thread pool.\n");
             goto out;
@@ -1024,19 +1024,19 @@ delete_garbaged_repos (int dry_run, int thread_num)
                 task = g_new0 (RemoveTask, 1);
                 task->repo_id = repo_id;
                 task->remove_type = COMMIT;
-                g_thread_pool_push (tpool, task, NULL);
+                g_thread_pool_push (tpool, task, nullptr);
 
                 // Remove fs
                 task = g_new0 (RemoveTask, 1);
                 task->repo_id = repo_id;
                 task->remove_type = FS;
-                g_thread_pool_push (tpool, task, NULL);
+                g_thread_pool_push (tpool, task, nullptr);
 
                 // Remove block
                 task = g_new0 (RemoveTask, 1);
                 task->repo_id = repo_id;
                 task->remove_type = BLOCK;
-                g_thread_pool_push (tpool, task, NULL);
+                g_thread_pool_push (tpool, task, nullptr);
 
                 n_tasks += 3;
 
@@ -1119,15 +1119,15 @@ gc_core_run (GList *repo_id_list, const char *id_prefix,
 {
     GList *ptr;
     SeafRepo *repo;
-    GList *corrupt_repos = NULL;
-    GList *del_block_repos = NULL;
+    GList *corrupt_repos = nullptr;
+    GList *del_block_repos = nullptr;
     gboolean del_garbage = FALSE;
-    GAsyncQueue *async_queue = NULL;
-    GCRepoParam *param = NULL;
+    GAsyncQueue *async_queue = nullptr;
+    GCRepoParam *param = nullptr;
     int tnum;
-    GThreadPool *tpool = NULL;
+    GThreadPool *tpool = nullptr;
     int gc_repo_num = 0;
-    GCRepo *gc_repo = NULL;
+    GCRepo *gc_repo = nullptr;
     char *repo_id;
     gboolean online;
 
@@ -1153,7 +1153,7 @@ gc_core_run (GList *repo_id_list, const char *id_prefix,
     param->async_queue = async_queue;
 
     tnum = thread_num <= 0 ? MAX_THREADS : thread_num;
-    tpool = g_thread_pool_new (gc_repo_cb, param, tnum, FALSE, NULL);
+    tpool = g_thread_pool_new (gc_repo_cb, param, tnum, FALSE, nullptr);
     if (!tpool) {
         seaf_warning ("Failed to create thread pool, stop gc.\n");
         g_async_queue_unref (async_queue);
@@ -1168,7 +1168,7 @@ gc_core_run (GList *repo_id_list, const char *id_prefix,
             g_list_free (repo_id_list);
         repo_id_list = seaf_repo_manager_get_repo_id_list_by_prefix (seaf->repo_mgr, id_prefix);
         del_garbage = TRUE;
-    } else if (repo_id_list == NULL) {
+    } else if (repo_id_list == nullptr) {
         repo_id_list = seaf_repo_manager_get_repo_id_list (seaf->repo_mgr);
         del_garbage = TRUE;
     }
@@ -1191,7 +1191,7 @@ gc_core_run (GList *repo_id_list, const char *id_prefix,
         if (!repo->is_virtual) {
             gc_repo = g_new0 (GCRepo, 1);
             gc_repo->repo = repo;
-            g_thread_pool_push (tpool, gc_repo, NULL);
+            g_thread_pool_push (tpool, gc_repo, nullptr);
             gc_repo_num++;
         } else {
             seaf_repo_unref (repo);

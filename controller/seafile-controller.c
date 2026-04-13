@@ -28,29 +28,29 @@
 
 SeafileController *ctl;
 
-static char *controller_pidfile = NULL;
+static char *controller_pidfile = nullptr;
 
-char *bin_dir = NULL;
-char *installpath = NULL;
-char *topdir = NULL;
+char *bin_dir = nullptr;
+char *installpath = nullptr;
+char *topdir = nullptr;
 gboolean enabled_go_fileserver = FALSE;
 
-char *seafile_ld_library_path = NULL;
+char *seafile_ld_library_path = nullptr;
 
 static const char *short_opts = "hvftc:d:l:g:G:P:F:";
 static const struct option long_opts[] = {
-    { "help", no_argument, NULL, 'h', },
-    { "version", no_argument, NULL, 'v', },
-    { "foreground", no_argument, NULL, 'f', },
-    { "test", no_argument, NULL, 't', },
-    { "config-dir", required_argument, NULL, 'c', },
-    { "seafile-dir", required_argument, NULL, 'd', },
-    { "central-config-dir", required_argument, NULL, 'F' },
-    { "logdir", required_argument, NULL, 'l', },
-    { "ccnet-debug-level", required_argument, NULL, 'g' },
-    { "seafile-debug-level", required_argument, NULL, 'G' },
-    { "pidfile", required_argument, NULL, 'P' },
-    { NULL, 0, NULL, 0, },
+    { "help", no_argument, nullptr, 'h', },
+    { "version", no_argument, nullptr, 'v', },
+    { "foreground", no_argument, nullptr, 'f', },
+    { "test", no_argument, nullptr, 't', },
+    { "config-dir", required_argument, nullptr, 'c', },
+    { "seafile-dir", required_argument, nullptr, 'd', },
+    { "central-config-dir", required_argument, nullptr, 'F' },
+    { "logdir", required_argument, nullptr, 'l', },
+    { "ccnet-debug-level", required_argument, nullptr, 'g' },
+    { "seafile-debug-level", required_argument, nullptr, 'G' },
+    { "pidfile", required_argument, nullptr, 'P' },
+    { nullptr, 0, nullptr, 0, },
 };
 
 static void controller_exit (int code) __attribute__((noreturn));
@@ -189,9 +189,9 @@ start_seaf_server ()
         return -1;
 
     seaf_message ("starting seaf-server ...\n");
-    static char *logfile = NULL;
-    if (logfile == NULL) {
-        logfile = g_build_filename (ctl->logdir, "seafile.log", NULL);
+    static char *logfile = nullptr;
+    if (logfile == nullptr) {
+        logfile = g_build_filename (ctl->logdir, "seafile.log", nullptr);
     }
 
     char *argv[] = {
@@ -202,7 +202,7 @@ start_seaf_server ()
         "-l", logfile,
         "-P", ctl->pidfile[PID_SERVER],
         "-p", ctl->rpc_pipe_path,
-        NULL};
+        nullptr};
     int pid = spawn_process (argv, false);
     if (pid <= 0) {
         seaf_warning ("Failed to spawn seaf-server\n");
@@ -218,9 +218,9 @@ start_go_fileserver()
     if (!ctl->central_config_dir || !ctl->seafile_dir)
         return -1;
 
-    static char *logfile = NULL;
-    if (logfile == NULL) {
-        logfile = g_build_filename (ctl->logdir, "fileserver.log", NULL);
+    static char *logfile = nullptr;
+    if (logfile == nullptr) {
+        logfile = g_build_filename (ctl->logdir, "fileserver.log", nullptr);
     }
 
     char *argv[] = {
@@ -230,7 +230,7 @@ start_go_fileserver()
         "-l", logfile,
         "-p", ctl->rpc_pipe_path,
         "-P", ctl->pidfile[PID_FILESERVER],
-        NULL};
+        nullptr};
 
     seaf_message ("starting go-fileserver ...");
     int pid = spawn_process(argv, false);
@@ -244,8 +244,8 @@ start_go_fileserver()
 
 static const char *
 get_python_executable() {
-    static const char *python = NULL;
-    if (python != NULL) {
+    static const char *python = nullptr;
+    if (python != nullptr) {
         return python;
     }
 
@@ -256,15 +256,15 @@ get_python_executable() {
     int i;
     for (i = 0; i < G_N_ELEMENTS(try_list); i++) {
         char *binary = g_find_program_in_path (try_list[i]);
-        if (binary != NULL) {
+        if (binary != nullptr) {
             python = binary;
             break;
         }
     }
 
-    if (python == NULL) {
+    if (python == nullptr) {
         python = g_getenv ("PYTHON");
-        if (python == NULL) {
+        if (python == nullptr) {
             python = "python";
         }
     }
@@ -275,10 +275,10 @@ get_python_executable() {
 static void
 init_seafile_path ()
 {
-    GError *error = NULL;
+    GError *error = nullptr;
     char *binary = g_file_read_link (PROC_SELF_PATH, &error);
-    char *tmp = NULL;
-    if (error != NULL) {
+    char *tmp = nullptr;
+    if (error != nullptr) {
         seaf_warning ("failed to readlink: %s\n", error->message);
         return;
     }
@@ -297,39 +297,39 @@ init_seafile_path ()
 static void
 setup_python_path()
 {
-    static GList *path_list = NULL;
-    if (path_list != NULL) {
+    static GList *path_list = nullptr;
+    if (path_list != nullptr) {
         /* Only setup once */
         return;
     }
 
     /* Allow seafdav to access seahub_settings.py */
-    path_list = g_list_prepend (path_list, g_build_filename (topdir, "conf", NULL));
+    path_list = g_list_prepend (path_list, g_build_filename (topdir, "conf", nullptr));
 
     path_list = g_list_prepend (path_list,
-        g_build_filename (installpath, "seahub", NULL));
+        g_build_filename (installpath, "seahub", nullptr));
 
     path_list = g_list_prepend (path_list,
-        g_build_filename (installpath, "seahub/thirdpart", NULL));
+        g_build_filename (installpath, "seahub/thirdpart", nullptr));
 
     path_list = g_list_prepend (path_list,
-        g_build_filename (installpath, "seahub/seahub-extra", NULL));
+        g_build_filename (installpath, "seahub/seahub-extra", nullptr));
 
     path_list = g_list_prepend (path_list,
-        g_build_filename (installpath, "seahub/seahub-extra/thirdparts", NULL));
+        g_build_filename (installpath, "seahub/seahub-extra/thirdparts", nullptr));
 
     path_list = g_list_prepend (path_list,
-        g_build_filename (installpath, "seafile/lib/python3/site-packages", NULL));
+        g_build_filename (installpath, "seafile/lib/python3/site-packages", nullptr));
 
     path_list = g_list_prepend (path_list,
-        g_build_filename (installpath, "seafile/lib64/python3/site-packages", NULL));
+        g_build_filename (installpath, "seafile/lib64/python3/site-packages", nullptr));
 
     path_list = g_list_reverse (path_list);
 
     GList *ptr;
     GString *new_pypath = g_string_new (g_getenv("PYTHONPATH"));
 
-    for (ptr = path_list; ptr != NULL; ptr = ptr->next) {
+    for (ptr = path_list; ptr != nullptr; ptr = ptr->next) {
         const char *path = (char *)ptr->data;
 
         g_string_append_c (new_pypath, ':');
@@ -349,8 +349,8 @@ setup_env ()
     g_setenv ("SEAFILE_CENTRAL_CONF_DIR", ctl->central_config_dir, TRUE);
     g_setenv ("SEAFILE_RPC_PIPE_PATH", ctl->rpc_pipe_path, TRUE);
 
-    char *seahub_dir = g_build_filename (installpath, "seahub", NULL);
-    char *seafdav_conf = g_build_filename (ctl->central_config_dir, "seafdav.conf", NULL);
+    char *seahub_dir = g_build_filename (installpath, "seahub", nullptr);
+    char *seafdav_conf = g_build_filename (ctl->central_config_dir, "seafdav.conf", nullptr);
     g_setenv ("SEAHUB_DIR", seahub_dir, TRUE);
     g_setenv ("SEAFDAV_CONF", seafdav_conf, TRUE);
 
@@ -359,11 +359,11 @@ setup_env ()
 
 static int
 start_seafdav() {
-    static char *seafdav_log_file = NULL;
-    if (seafdav_log_file == NULL)
+    static char *seafdav_log_file = nullptr;
+    if (seafdav_log_file == nullptr)
         seafdav_log_file = g_build_filename (ctl->logdir,
                                              "seafdav.log",
-                                             NULL);
+                                             nullptr);
 
     SeafDavConfig conf = ctl->seafdav_config;
     char port[16];
@@ -381,7 +381,7 @@ start_seafdav() {
             "--port", port,
             "--host", conf.host,
             "-v",
-            NULL
+            nullptr
         };
         pid = spawn_process (argv, true);
     } else {
@@ -394,7 +394,7 @@ start_seafdav() {
             "--pid", ctl->pidfile[PID_SEAFDAV],
             "--port", port,
             "--host", conf.host,
-            NULL
+            nullptr
         };
         pid = spawn_process (argv, true);
     }
@@ -410,7 +410,7 @@ start_seafdav() {
 static void
 run_controller_loop ()
 {
-    GMainLoop *mainloop = g_main_loop_new (NULL, FALSE);
+    GMainLoop *mainloop = g_main_loop_new (nullptr, FALSE);
 
     g_main_loop_run (mainloop);
 }
@@ -443,17 +443,17 @@ need_restart (int which)
 static gboolean
 should_start_go_fileserver()
 {
-    char *seafile_conf = g_build_filename (ctl->central_config_dir, "seafile.conf", NULL);
+    char *seafile_conf = g_build_filename (ctl->central_config_dir, "seafile.conf", nullptr);
     GKeyFile *key_file = g_key_file_new ();
     gboolean ret = 0;
 
     if (!g_key_file_load_from_file (key_file, seafile_conf,
-                                    G_KEY_FILE_KEEP_COMMENTS, NULL)) {
+                                    G_KEY_FILE_KEEP_COMMENTS, nullptr)) {
         seaf_warning("Failed to load seafile.conf.\n");
         ret = FALSE;
         goto out;
     }
-    GError *err = NULL;
+    GError *err = nullptr;
     gboolean enabled;
     enabled = g_key_file_get_boolean(key_file, "fileserver", "use_go_fileserver", &err);
     if (err) {
@@ -469,8 +469,8 @@ should_start_go_fileserver()
     }
 
     if (ret) {
-        char *type = NULL;
-        type = g_key_file_get_string (key_file, "database", "type", NULL);
+        char *type = nullptr;
+        type = g_key_file_get_string (key_file, "database", "type", nullptr);
         if (type && strcasecmp (type, "sqlite") == 0) {
             seaf_message ("Use C fileserver because go fileserver does not support sqlite.");
             ret = FALSE;
@@ -514,7 +514,7 @@ static void
 start_process_monitor ()
 {
     ctl->check_process_timer = g_timeout_add (
-        CHECK_PROCESS_INTERVAL * 1000, check_process, NULL);
+        CHECK_PROCESS_INTERVAL * 1000, check_process, nullptr);
 }
 
 static int seaf_controller_start ();
@@ -532,7 +532,7 @@ stop_services ()
 static void
 init_pidfile_path (SeafileController *ctl)
 {
-    char *pid_dir = g_build_filename (topdir, "pids", NULL);
+    char *pid_dir = g_build_filename (topdir, "pids", nullptr);
     if (!g_file_test(pid_dir, G_FILE_TEST_EXISTS)) {
         if (g_mkdir(pid_dir, 0777) < 0) {
             seaf_warning("failed to create pid dir %s: %s", pid_dir, strerror(errno));
@@ -540,9 +540,9 @@ init_pidfile_path (SeafileController *ctl)
         }
     }
 
-    ctl->pidfile[PID_SERVER] = g_build_filename (pid_dir, "seaf-server.pid", NULL);
-    ctl->pidfile[PID_SEAFDAV] = g_build_filename (pid_dir, "seafdav.pid", NULL);
-    ctl->pidfile[PID_FILESERVER] = g_build_filename (pid_dir, "fileserver.pid", NULL);
+    ctl->pidfile[PID_SERVER] = g_build_filename (pid_dir, "seaf-server.pid", nullptr);
+    ctl->pidfile[PID_SEAFDAV] = g_build_filename (pid_dir, "seafdav.pid", nullptr);
+    ctl->pidfile[PID_FILESERVER] = g_build_filename (pid_dir, "fileserver.pid", nullptr);
 }
 
 static int
@@ -563,9 +563,9 @@ seaf_controller_init (SeafileController *ctl,
         return -1;
     }
 
-    if (logdir == NULL) {
+    if (logdir == nullptr) {
         char *topdir = g_path_get_dirname(config_dir);
-        logdir = g_build_filename (topdir, "logs", NULL);
+        logdir = g_build_filename (topdir, "logs", nullptr);
         if (checkdir_with_mkdir(logdir) < 0) {
             seaf_error ("failed to create log folder \"%s\": %s\n",
                         logdir, strerror(errno));
@@ -577,7 +577,7 @@ seaf_controller_init (SeafileController *ctl,
     ctl->central_config_dir = central_config_dir;
     ctl->config_dir = config_dir;
     ctl->seafile_dir = seafile_dir;
-    ctl->rpc_pipe_path = g_build_filename (installpath, "runtime", NULL);
+    ctl->rpc_pipe_path = g_build_filename (installpath, "runtime", nullptr);
     ctl->logdir = logdir;
 
     if (read_seafdav_config() < 0) {
@@ -660,7 +660,7 @@ sigint_handler (int signo)
 static void
 sigchld_handler (int signo)
 {
-    waitpid (-1, NULL, WNOHANG);
+    waitpid (-1, nullptr, WNOHANG);
 }
 
 static void
@@ -697,10 +697,10 @@ test_config (const char *central_config_dir,
              const char *seafile_dir)
 {
     char buf[1024];
-    GError *error = NULL;
+    GError *error = nullptr;
     int retcode = 0;
-    char *child_stdout = NULL;
-    char *child_stderr = NULL;
+    char *child_stdout = nullptr;
+    char *child_stderr = nullptr;
 
     snprintf (buf,
           sizeof(buf),
@@ -715,7 +715,7 @@ test_config (const char *central_config_dir,
                                &retcode,
                                &error);
 
-    if (error != NULL) {
+    if (error != nullptr) {
         seaf_error ("failed to run \"seaf-server -t\": %s\n",
                     error->message);
         exit (1);
@@ -741,18 +741,18 @@ static int
 read_seafdav_config()
 {
     int ret = 0;
-    char *seafdav_conf = NULL;
-    GKeyFile *key_file = NULL;
-    GError *error = NULL;
+    char *seafdav_conf = nullptr;
+    GKeyFile *key_file = nullptr;
+    GError *error = nullptr;
 
-    seafdav_conf = g_build_filename(ctl->central_config_dir, "seafdav.conf", NULL);
+    seafdav_conf = g_build_filename(ctl->central_config_dir, "seafdav.conf", nullptr);
     if (!g_file_test(seafdav_conf, G_FILE_TEST_EXISTS)) {
         goto out;
     }
 
     key_file = g_key_file_new ();
     if (!g_key_file_load_from_file (key_file, seafdav_conf,
-                                    G_KEY_FILE_KEEP_COMMENTS, NULL)) {
+                                    G_KEY_FILE_KEEP_COMMENTS, nullptr)) {
         seaf_warning("Failed to load seafdav.conf\n");
         ret = -1;
         goto out;
@@ -760,7 +760,7 @@ read_seafdav_config()
 
     /* enabled */
     ctl->seafdav_config.enabled = g_key_file_get_boolean(key_file, "WEBDAV", "enabled", &error);
-    if (error != NULL) {
+    if (error != nullptr) {
         if (error->code != G_KEY_FILE_ERROR_KEY_NOT_FOUND) {
             seaf_message ("Error when reading WEBDAV.enabled, use default value 'false'\n");
         }
@@ -775,7 +775,7 @@ read_seafdav_config()
 
     /* host */
     char *host = seaf_key_file_get_string (key_file, "WEBDAV", "host", &error);
-    if (error != NULL) {
+    if (error != nullptr) {
         g_clear_error(&error);
         ctl->seafdav_config.host = g_strdup("0.0.0.0");
     } else {
@@ -784,7 +784,7 @@ read_seafdav_config()
 
     /* port */
     ctl->seafdav_config.port = g_key_file_get_integer(key_file, "WEBDAV", "port", &error);
-    if (error != NULL) {
+    if (error != nullptr) {
         if (error->code != G_KEY_FILE_ERROR_KEY_NOT_FOUND) {
             seaf_message ("Error when reading WEBDAV.port, use deafult value 8080\n");
         }
@@ -793,7 +793,7 @@ read_seafdav_config()
     }
 
     ctl->seafdav_config.debug_mode = g_key_file_get_boolean (key_file, "WEBDAV", "debug", &error);
-    if (error != NULL) {
+    if (error != nullptr) {
         if (error->code != G_KEY_FILE_ERROR_KEY_NOT_FOUND) {
             seaf_message ("Error when reading WEBDAV.debug, use deafult value FALSE\n");
         }
@@ -819,12 +819,12 @@ out:
 static int
 init_syslog_config ()
 {
-    char *seafile_conf = g_build_filename (ctl->central_config_dir, "seafile.conf", NULL);
+    char *seafile_conf = g_build_filename (ctl->central_config_dir, "seafile.conf", nullptr);
     GKeyFile *key_file = g_key_file_new ();
     int ret = 0;
 
     if (!g_key_file_load_from_file (key_file, seafile_conf,
-                                    G_KEY_FILE_KEEP_COMMENTS, NULL)) {
+                                    G_KEY_FILE_KEEP_COMMENTS, nullptr)) {
         seaf_warning("Failed to load seafile.conf.\n");
         ret = -1;
         goto out;
@@ -848,9 +848,9 @@ int main (int argc, char **argv)
     }
 
     char *config_dir = DEFAULT_CONFIG_DIR;
-    char *central_config_dir = NULL;
-    char *seafile_dir = NULL;
-    char *logdir = NULL;
+    char *central_config_dir = nullptr;
+    char *seafile_dir = nullptr;
+    char *logdir = nullptr;
     char *ccnet_debug_level_str = "info";
     char *seafile_debug_level_str = "debug";
     int daemon_mode = 1;
@@ -858,7 +858,7 @@ int main (int argc, char **argv)
 
     int c;
     while ((c = getopt_long (argc, argv, short_opts,
-                             long_opts, NULL)) != EOF)
+                             long_opts, nullptr)) != EOF)
     {
         switch (c) {
         case 'h':
@@ -906,7 +906,7 @@ int main (int argc, char **argv)
     g_type_init();
 #endif
 #if !GLIB_CHECK_VERSION(2,32,0)
-    g_thread_init (NULL);
+    g_thread_init (nullptr);
 #endif
 
     if (!seafile_dir) {
@@ -932,7 +932,7 @@ int main (int argc, char **argv)
         controller_exit(1);
     }
 
-    char *logfile = g_build_filename (ctl->logdir, "controller.log", NULL);
+    char *logfile = g_build_filename (ctl->logdir, "controller.log", nullptr);
     if (seafile_log_init (logfile, ccnet_debug_level_str,
                           seafile_debug_level_str, "seafile-controller") < 0) {
         fprintf (stderr, "Failed to init log.\n");
@@ -979,11 +979,11 @@ int main (int argc, char **argv)
     }
 #endif /* !WIN32 */
 
-    if (controller_pidfile == NULL) {
+    if (controller_pidfile == nullptr) {
         controller_pidfile = g_strdup(g_getenv ("SEAFILE_PIDFILE"));
     }
 
-    if (controller_pidfile != NULL) {
+    if (controller_pidfile != nullptr) {
         if (write_controller_pidfile () < 0) {
             seaf_warning ("Failed to write pidfile %s\n", controller_pidfile);
             return -1;

@@ -18,7 +18,7 @@
 static CcnetEmailUser *get_user_from_ccnet (SearpcClient *client, const char *user)
 {
     return (CcnetEmailUser *)searpc_client_call__object (client,
-                                       "get_emailuser", CCNET_TYPE_EMAIL_USER, NULL,
+                                       "get_emailuser", CCNET_TYPE_EMAIL_USER, nullptr,
                                        1, "string", user);
 }
 
@@ -35,7 +35,7 @@ static int getattr_user(SeafileSession *seaf, const char *user, struct stat *stb
 {
     CcnetEmailUser *emailuser;
 
-    emailuser = ccnet_user_manager_get_emailuser (seaf->user_mgr, user, NULL);
+    emailuser = ccnet_user_manager_get_emailuser (seaf->user_mgr, user, nullptr);
     if (!emailuser) {
         return -ENOENT;
     }
@@ -52,11 +52,11 @@ static int getattr_repo(SeafileSession *seaf,
                         const char *user, const char *repo_id, const char *repo_path,
                         struct stat *stbuf)
 {
-    SeafRepo *repo = NULL;
+    SeafRepo *repo = nullptr;
     SeafBranch *branch;
-    SeafCommit *commit = NULL;
+    SeafCommit *commit = nullptr;
     guint32 mode = 0;
-    char *id = NULL;
+    char *id = nullptr;
     int ret = 0;
 
     repo = seaf_repo_manager_get_repo(seaf->repo_mgr, repo_id);
@@ -79,7 +79,7 @@ static int getattr_repo(SeafileSession *seaf,
     id = seaf_fs_manager_path_to_obj_id(seaf->fs_mgr,
                                         repo->store_id, repo->version,
                                         commit->root_id,
-                                        repo_path, &mode, NULL);
+                                        repo_path, &mode, nullptr);
     if (!id) {
         seaf_warning ("Path %s doesn't exist in repo %s.\n", repo_path, repo_id);
         ret = -ENOENT;
@@ -104,7 +104,7 @@ static int getattr_repo(SeafileSession *seaf,
                                                                      repo->store_id,
                                                                      repo->version,
                                                                      commit->root_id,
-                                                                     repo_path, NULL);
+                                                                     repo_path, nullptr);
             if (dirent && repo->version != 0)
                 stbuf->st_mtime = dirent->mtime;
 
@@ -128,7 +128,7 @@ static int getattr_repo(SeafileSession *seaf,
                                                                  repo->store_id,
                                                                  repo->version,
                                                                  commit->root_id,
-                                                                 repo_path, NULL);
+                                                                 repo_path, nullptr);
         if (dirent && repo->version != 0)
             stbuf->st_mtime = dirent->mtime;
 

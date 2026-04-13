@@ -39,24 +39,24 @@ check_group_permission_by_user (SeafRepoManager *mgr,
                                 const char *repo_id,
                                 const char *user_name)
 {
-    char *permission = NULL;
-    GList *groups = NULL, *p1;
+    char *permission = nullptr;
+    GList *groups = nullptr, *p1;
     CcnetGroup *group;
     int group_id;
     GString *sql;
 
     /* Get the groups this user belongs to. */
     groups = ccnet_group_manager_get_groups_by_user (seaf->group_mgr, user_name,
-                                                     1, NULL);
+                                                     1, nullptr);
     if (!groups) {
         goto out;
     }
 
     sql = g_string_new ("");
     g_string_printf (sql, "SELECT permission FROM RepoGroup WHERE repo_id = ? AND group_id IN (");
-    for (p1 = groups; p1 != NULL; p1 = p1->next) {
+    for (p1 = groups; p1 != nullptr; p1 = p1->next) {
         group = p1->data;
-        g_object_get (group, "id", &group_id, NULL);
+        g_object_get (group, "id", &group_id, nullptr);
 
         g_string_append_printf (sql, "%d", group_id);
         if (p1->next)
@@ -73,7 +73,7 @@ check_group_permission_by_user (SeafRepoManager *mgr,
     g_string_free (sql, TRUE);
 
 out:
-    for (p1 = groups; p1 != NULL; p1 = p1->next)
+    for (p1 = groups; p1 != nullptr; p1 = p1->next)
         g_object_unref ((GObject *)p1->data);
     g_list_free (groups);
     return permission;
@@ -89,17 +89,17 @@ check_repo_share_permission (SeafRepoManager *mgr,
     permission = seaf_share_manager_check_permission (seaf->share_mgr,
                                                       repo_id,
                                                       user_name);
-    if (permission != NULL)
+    if (permission != nullptr)
         return permission;
 
     permission = check_group_permission_by_user (mgr, repo_id, user_name);
-    if (permission != NULL)
+    if (permission != nullptr)
         return permission;
 
     if (!mgr->seaf->cloud_mode)
         return seaf_repo_manager_get_inner_pub_repo_perm (mgr, repo_id);
 
-    return NULL;
+    return nullptr;
 }
 
 // get dir perm from all dir perms in parent repo
@@ -109,7 +109,7 @@ get_dir_perm (GHashTable *perms, const char *path)
 {
     char *tmp = g_strdup (path);
     char *slash;
-    char *perm = NULL;
+    char *perm = nullptr;
 
     while (g_strcmp0 (tmp, "") != 0) {
         perm = g_hash_table_lookup (perms, tmp);
@@ -129,18 +129,18 @@ check_perm_on_parent_repo (const char *origin_repo_id,
                            const char *user,
                            const char *vpath)
 {
-    GHashTable *user_perms = NULL;
-    GHashTable *group_perms = NULL;
-    GList *groups = NULL;
+    GHashTable *user_perms = nullptr;
+    GHashTable *group_perms = nullptr;
+    GList *groups = nullptr;
     GList *iter;
-    char *perm = NULL;
+    char *perm = nullptr;
 
     user_perms = seaf_share_manager_get_shared_dirs_to_user (seaf->share_mgr,
                                                              origin_repo_id,
                                                              user);
 
     if (!user_perms) {
-        return NULL;
+        return nullptr;
     }
 
     if (g_hash_table_size (user_perms) > 0) {
@@ -153,9 +153,9 @@ check_perm_on_parent_repo (const char *origin_repo_id,
     g_hash_table_destroy (user_perms);
 
     groups = ccnet_group_manager_get_groups_by_user (seaf->group_mgr, user,
-                                                     1, NULL);
+                                                     1, nullptr);
     if (!groups) {
-        return NULL;
+        return nullptr;
     }
 
     group_perms = seaf_share_manager_get_shared_dirs_to_group (seaf->share_mgr,
@@ -167,7 +167,7 @@ check_perm_on_parent_repo (const char *origin_repo_id,
     g_list_free (groups);
 
     if (!group_perms) {
-        return NULL;
+        return nullptr;
     }
     if (g_hash_table_size (group_perms) > 0) {
         perm = get_dir_perm (group_perms, vpath);
@@ -184,8 +184,8 @@ check_virtual_repo_permission (SeafRepoManager *mgr,
                                const char *user,
                                const char *vpath)
 {
-    char *owner = NULL;
-    char *permission = NULL;
+    char *owner = nullptr;
+    char *permission = nullptr;
 
     /* If I'm the owner of origin repo, I have full access to sub-repos. */
     owner = seaf_repo_manager_get_repo_owner (mgr, origin_repo_id);
@@ -223,8 +223,8 @@ seaf_repo_manager_check_permission (SeafRepoManager *mgr,
                                     GError **error)
 {
     SeafVirtRepo *vinfo;
-    char *owner = NULL;
-    char *permission = NULL;
+    char *owner = nullptr;
+    char *permission = nullptr;
 
     /* This is a virtual repo.*/
     vinfo = seaf_repo_manager_get_virtual_repo_info (mgr, repo_id);
@@ -236,7 +236,7 @@ seaf_repo_manager_check_permission (SeafRepoManager *mgr,
     }
 
     owner = seaf_repo_manager_get_repo_owner (mgr, repo_id);
-    if (owner != NULL) {
+    if (owner != nullptr) {
         if (strcmp (owner, user) == 0)
             permission = g_strdup("rw");
         else
@@ -277,25 +277,25 @@ seaf_repo_manager_list_dir_with_perm (SeafRepoManager *mgr,
                                       GError **error)
 {
     SeafRepo *repo;
-    char *perm = NULL;
+    char *perm = nullptr;
     SeafDir *dir;
     SeafDirent *dent;
     SeafileDirent *d;
-    GList *res = NULL;
+    GList *res = nullptr;
     GList *p;
 
     perm = seaf_repo_manager_check_permission (mgr, repo_id, user, error);
     if (!perm) {
-        if (*error == NULL)
+        if (*error == nullptr)
             g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS, "Access denied");
-        return NULL;
+        return nullptr;
     }
 
     repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
     if (!repo) {
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS, "Bad repo id");
         g_free (perm);
-        return NULL;
+        return nullptr;
     }
 
     dir = seaf_fs_manager_get_seafdir (seaf->fs_mgr,
@@ -304,7 +304,7 @@ seaf_repo_manager_list_dir_with_perm (SeafRepoManager *mgr,
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_DIR_ID, "Bad dir id");
         seaf_repo_unref (repo);
         g_free (perm);
-        return NULL;
+        return nullptr;
     }
 
     dir->entries = g_list_sort (dir->entries, comp_dirent_func);
@@ -316,7 +316,7 @@ seaf_repo_manager_list_dir_with_perm (SeafRepoManager *mgr,
     int index = 0;
     gboolean is_shared;
     char *cur_path;
-    GHashTable *shared_sub_dirs = NULL;
+    GHashTable *shared_sub_dirs = nullptr;
 
     if (!repo->virtual_info) {
         char *repo_owner = seaf_repo_manager_get_repo_owner (seaf->repo_mgr, repo_id);
@@ -328,7 +328,7 @@ seaf_repo_manager_list_dir_with_perm (SeafRepoManager *mgr,
         g_free (repo_owner);
     }
 
-    for (p = dir->entries; p != NULL; p = p->next, index++) {
+    for (p = dir->entries; p != nullptr; p = p->next, index++) {
         if (index < offset) {
             continue;
         }
@@ -352,17 +352,17 @@ seaf_repo_manager_list_dir_with_perm (SeafRepoManager *mgr,
                           "size", dent->size,
                           "permission", perm,
                           "modifier", dent->modifier,
-                          NULL);
+                          nullptr);
 
         if (shared_sub_dirs && S_ISDIR(dent->mode)) {
             if (strcmp (dir_path, "/") == 0) {
-                cur_path = g_strconcat (dir_path, dent->name, NULL);
+                cur_path = g_strconcat (dir_path, dent->name, nullptr);
             } else {
-                cur_path = g_strconcat (dir_path, "/", dent->name, NULL);
+                cur_path = g_strconcat (dir_path, "/", dent->name, nullptr);
             }
             is_shared = g_hash_table_lookup (shared_sub_dirs, cur_path) ? TRUE : FALSE;
             g_free (cur_path);
-            g_object_set (d, "is_shared", is_shared, NULL);
+            g_object_set (d, "is_shared", is_shared, nullptr);
         }
         res = g_list_prepend (res, d);
     }

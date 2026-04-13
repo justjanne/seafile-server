@@ -19,7 +19,7 @@ seaf_cfg_manager_new (SeafileSession *session)
 {
     SeafCfgManager *mgr = g_new0 (SeafCfgManager, 1);
     if (!mgr)
-        return NULL;
+        return nullptr;
 
     mgr->config = session->config;
     mgr->db = session->db;
@@ -114,11 +114,11 @@ int
 seaf_cfg_manager_get_config_int (SeafCfgManager *mgr, const char *group, const char *key)
 {
     int ret;
-    char *invalid = NULL;
+    char *invalid = nullptr;
 
     char *value = seaf_cfg_manager_get_config (mgr, group, key);
     if (!value) {
-        GError *err = NULL;
+        GError *err = nullptr;
         ret = g_key_file_get_integer (mgr->config, group, key, &err);
         if (err) {
             ret = -1;
@@ -140,11 +140,11 @@ gint64
 seaf_cfg_manager_get_config_int64 (SeafCfgManager *mgr, const char *group, const char *key)
 {
     gint64 ret;
-    char *invalid = NULL;
+    char *invalid = nullptr;
 
     char *value = seaf_cfg_manager_get_config (mgr, group, key);
     if (!value) {
-        GError *err = NULL;
+        GError *err = nullptr;
         ret = g_key_file_get_int64(mgr->config, group, key, &err);
         if (err) {
             ret = -1;
@@ -169,7 +169,7 @@ seaf_cfg_manager_get_config_boolean (SeafCfgManager *mgr, const char *group, con
 
     char *value = seaf_cfg_manager_get_config (mgr, group, key);
     if (!value) {
-        GError *err = NULL;
+        GError *err = nullptr;
         ret = g_key_file_get_boolean(mgr->config, group, key, &err);
         if (err) {
             seaf_warning ("Config [%s:%s] not set, default is false.\n", group, key);
@@ -190,12 +190,12 @@ seaf_cfg_manager_get_config_boolean (SeafCfgManager *mgr, const char *group, con
 char *
 seaf_cfg_manager_get_config_string (SeafCfgManager *mgr, const char *group, const char *key)
 {
-    char *ret = NULL;
+    char *ret = nullptr;
 
     char *value = seaf_cfg_manager_get_config (mgr, group, key);
     if (!value) {
-        ret = g_key_file_get_string (mgr->config, group, key, NULL);
-        if (ret != NULL)
+        ret = g_key_file_get_string (mgr->config, group, key, nullptr);
+        if (ret != nullptr)
             ret = g_strstrip(ret);
     } else {
         ret = value;
@@ -212,7 +212,7 @@ seaf_cfg_manager_get_config (SeafCfgManager *mgr, const char *group, const char 
 
     char *value = seaf_db_statement_get_string(db, queries->get_seafile_conf_value,
         2, "string", group, "string", key);
-    if (value != NULL)
+    if (value != nullptr)
         value = g_strstrip(value);
 
     return value;

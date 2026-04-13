@@ -43,7 +43,7 @@ load_fileserver_config (SeafileSession *session)
 
     web_token_expire_time = g_key_file_get_integer (session->config,
                                                     "fileserver", "web_token_expire_time",
-                                                    NULL);
+                                                    nullptr);
     if (web_token_expire_time <= 0) {
         session->web_token_expire_time = 3600;
     } else {
@@ -55,7 +55,7 @@ load_fileserver_config (SeafileSession *session)
 
     max_index_processing_threads = g_key_file_get_integer (session->config,
                                                            "fileserver", "max_index_processing_threads",
-                                                           NULL);
+                                                           nullptr);
     if (max_index_processing_threads <= 0) {
         session->max_index_processing_threads = 3;
     } else {
@@ -68,7 +68,7 @@ load_fileserver_config (SeafileSession *session)
 
     fixed_block_size_mb = g_key_file_get_integer (session->config,
                                                   "fileserver", "fixed_block_size",
-                                                  NULL);
+                                                  nullptr);
     if (fixed_block_size_mb <= 0){
         session->fixed_block_size = DEFAULT_FIXED_BLOCK_SIZE;
     } else {
@@ -80,7 +80,7 @@ load_fileserver_config (SeafileSession *session)
 
     max_indexing_threads = g_key_file_get_integer (session->config,
                                                    "fileserver", "max_indexing_threads",
-                                                   NULL);
+                                                   nullptr);
     if (max_indexing_threads <= 0) {
         session->max_indexing_threads = 1;
     } else {
@@ -90,7 +90,7 @@ load_fileserver_config (SeafileSession *session)
     seaf_message ("fileserver: max_indexing_threads = %d\n",
                   session->max_indexing_threads);
 
-    GError *err = NULL;
+    GError *err = nullptr;
     max_upload_size = g_key_file_get_int64(session->config, "fileserver", "max_upload_size", &err);
     if (err) {
         max_upload_size = -1;
@@ -110,16 +110,16 @@ static int
 load_config (SeafileSession *session, const char *config_file_path)
 {
     int ret = 0;
-    GError *error = NULL;
-    GKeyFile *config = NULL;
-    const char *notif_server = NULL;
-    const char *enable_notif_server = NULL;
-    const char *private_key = NULL;
-    const char *site_root = NULL;
-    const char *log_to_stdout = NULL;
-    const char *node_name = NULL;
-    const char *use_go_fileserver = NULL;
-    const char *inner_service_url = NULL;
+    GError *error = nullptr;
+    GKeyFile *config = nullptr;
+    const char *notif_server = nullptr;
+    const char *enable_notif_server = nullptr;
+    const char *private_key = nullptr;
+    const char *site_root = nullptr;
+    const char *log_to_stdout = nullptr;
+    const char *node_name = nullptr;
+    const char *use_go_fileserver = nullptr;
+    const char *inner_service_url = nullptr;
 
     config = g_key_file_new ();
     if (!g_key_file_load_from_file (config, config_file_path,
@@ -133,11 +133,11 @@ load_config (SeafileSession *session, const char *config_file_path)
 
     session->cloud_mode = g_key_file_get_boolean (config,
                                                   "general", "cloud_mode",
-                                                  NULL);
+                                                  nullptr);
 
     session->go_fileserver = g_key_file_get_boolean (config,
                                                      "fileserver", "use_go_fileserver",
-                                                     NULL);
+                                                     nullptr);
 
     session->obj_cache = objcache_new ();
 
@@ -198,16 +198,16 @@ seafile_session_new(const char *central_config_dir,
                     const char *seafile_dir,
                     const char *ccnet_dir)
 {
-    char *abs_central_config_dir = NULL;
+    char *abs_central_config_dir = nullptr;
     char *abs_seafile_dir;
-    char *abs_ccnet_dir = NULL;
+    char *abs_ccnet_dir = nullptr;
     char *tmp_file_dir;
-    char *config_file_path = NULL;
-    SeafileSession *session = NULL;
+    char *config_file_path = nullptr;
+    SeafileSession *session = nullptr;
 
     abs_ccnet_dir = ccnet_expand_path (ccnet_dir);
     abs_seafile_dir = ccnet_expand_path (seafile_dir);
-    tmp_file_dir = g_build_filename (abs_seafile_dir, "tmpfiles", NULL);
+    tmp_file_dir = g_build_filename (abs_seafile_dir, "tmpfiles", nullptr);
     if (central_config_dir) {
         abs_central_config_dir = ccnet_expand_path (central_config_dir);
     }
@@ -232,7 +232,7 @@ seafile_session_new(const char *central_config_dir,
 
     config_file_path = g_build_filename(
         abs_central_config_dir ? abs_central_config_dir : abs_seafile_dir,
-        "seafile.conf", NULL);
+        "seafile.conf", nullptr);
 
     session = g_new0(SeafileSession, 1);
     session->seaf_dir = abs_seafile_dir;
@@ -347,7 +347,7 @@ onerror:
     free (abs_ccnet_dir);
     g_free (tmp_file_dir);
     g_free (session);
-    return NULL;    
+    return nullptr;
 }
 
 SeafileSession *
@@ -355,13 +355,13 @@ seafile_repair_session_new(const char *central_config_dir,
                            const char *seafile_dir,
                            const char *ccnet_dir)
 {
-    char *abs_central_config_dir = NULL;
+    char *abs_central_config_dir = nullptr;
     char *abs_seafile_dir;
-    char *abs_ccnet_dir = NULL;
+    char *abs_ccnet_dir = nullptr;
     char *tmp_file_dir;
     char *config_file_path;
     GKeyFile *config;
-    SeafileSession *session = NULL;
+    SeafileSession *session = nullptr;
     gboolean notif_enabled = FALSE;
     int notif_port = 8083;
     gboolean cluster_mode;
@@ -372,16 +372,16 @@ seafile_repair_session_new(const char *central_config_dir,
 
     abs_ccnet_dir = ccnet_expand_path (ccnet_dir);
     abs_seafile_dir = ccnet_expand_path (seafile_dir);
-    tmp_file_dir = g_build_filename (abs_seafile_dir, "tmpfiles", NULL);
+    tmp_file_dir = g_build_filename (abs_seafile_dir, "tmpfiles", nullptr);
     if (central_config_dir) {
         abs_central_config_dir = ccnet_expand_path (central_config_dir);
     }
 
     config_file_path = g_build_filename(
         abs_central_config_dir ? abs_central_config_dir : abs_seafile_dir,
-        "seafile.conf", NULL);
+        "seafile.conf", nullptr);
 
-    GError *error = NULL;
+    GError *error = nullptr;
     config = g_key_file_new ();
     if (!g_key_file_load_from_file (config, config_file_path, 
                                     G_KEY_FILE_NONE, &error)) {
@@ -436,7 +436,7 @@ onerror:
     free (abs_ccnet_dir);
     g_free (tmp_file_dir);
     g_free (session);
-    return NULL;
+    return nullptr;
 }
 
 int
@@ -571,7 +571,7 @@ copy_template_files_recursive (SeafileSession *session,
     const char *name;
     char *sub_path, *repo_sub_path;
     SeafStat st;
-    GError *error = NULL;
+    GError *error = nullptr;
     int rc;
 
     dir = g_dir_open (dir_path, 0, &error);
@@ -581,8 +581,8 @@ copy_template_files_recursive (SeafileSession *session,
         return;
     }
 
-    while ((name = g_dir_read_name(dir)) != NULL) {
-        sub_path = g_build_filename (dir_path, name, NULL);
+    while ((name = g_dir_read_name(dir)) != nullptr) {
+        sub_path = g_build_filename (dir_path, name, nullptr);
         if (seaf_stat (sub_path, &st) < 0) {
             seaf_warning ("Failed to stat %s: %s.\n", sub_path, strerror(errno));
             g_free (sub_path);
@@ -596,7 +596,7 @@ copy_template_files_recursive (SeafileSession *session,
                                               repo_dir_path,
                                               name,
                                               "System",
-                                              NULL);
+                                              nullptr);
             if (rc < 0)
                 seaf_warning ("Failed to add template file %s.\n", sub_path);
         } else if (S_ISDIR(st.st_mode)) {
@@ -605,14 +605,14 @@ copy_template_files_recursive (SeafileSession *session,
                                              repo_dir_path,
                                              name,
                                              "System",
-                                             NULL);
+                                             nullptr);
             if (rc < 0) {
                 seaf_warning ("Failed to add template dir %s.\n", sub_path);
                 g_free (sub_path);
                 continue;
             }
 
-            repo_sub_path = g_build_path ("/", repo_dir_path, name, NULL);
+            repo_sub_path = g_build_path ("/", repo_dir_path, name, nullptr);
             copy_template_files_recursive (session, repo_id,
                                            repo_sub_path, sub_path);
             g_free (repo_sub_path);
@@ -631,13 +631,13 @@ create_system_default_repo (void *data)
 
     /* If default repo is not set or doesn't exist, create a new one. */
     repo_id = get_system_default_repo_id (session);
-    if (repo_id != NULL) {
+    if (repo_id != nullptr) {
         SeafRepo *repo;
         repo = seaf_repo_manager_get_repo (session->repo_mgr, repo_id);
         if (!repo) {
             seaf_warning ("Failed to get system default repo. Create a new one.\n");
             del_system_default_repo_id (session);
-            seaf_repo_manager_del_repo (session->repo_mgr, repo_id, NULL);
+            seaf_repo_manager_del_repo (session->repo_mgr, repo_id, nullptr);
             g_free (repo_id);
         } else {
             seaf_repo_unref (repo);
@@ -650,7 +650,7 @@ create_system_default_repo (void *data)
                                                  "My Library Template",
                                                  "Template for creating 'My Library' for users",
                                                  "System",
-                                                 NULL, -1, NULL, NULL, NULL);
+                                                 nullptr, -1, nullptr, nullptr, nullptr);
     if (!repo_id) {
         seaf_warning ("Failed to create system default repo.\n");
         return data;
@@ -658,7 +658,7 @@ create_system_default_repo (void *data)
 
     set_system_default_repo_id (session, repo_id);
 
-    template_path = g_build_filename (session->seaf_dir, DEFAULT_TEMPLATE_DIR, NULL);
+    template_path = g_build_filename (session->seaf_dir, DEFAULT_TEMPLATE_DIR, nullptr);
     copy_template_files_recursive (session, repo_id, "/", template_path);
 
     g_free (repo_id);
@@ -679,5 +679,5 @@ schedule_create_system_default_repo (SeafileSession *session)
 
     ccnet_job_manager_schedule_job (session->job_mgr,
                                     create_system_default_repo,
-                                    NULL, session);
+                                    nullptr, session);
 }

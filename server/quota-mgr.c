@@ -63,12 +63,12 @@ seaf_quota_manager_new (struct _SeafileSession *session)
 {
     SeafQuotaManager *mgr = g_new0 (SeafQuotaManager, 1);
     if (!mgr)
-        return NULL;
+        return nullptr;
     mgr->session = session;
 
     mgr->calc_share_usage = g_key_file_get_boolean (session->config,
                                                     "quota", "calc_share_usage",
-                                                    NULL);
+                                                    nullptr);
 
     return mgr;
 }
@@ -237,7 +237,7 @@ get_num_shared_to (const char *user, const char *repo_id)
 {
     GHashTable *user_hash;
     int dummy;
-    GList *personal = NULL, *groups = NULL, *members = NULL, *p;
+    GList *personal = nullptr, *groups = nullptr, *members = nullptr, *p;
     gint n_shared_to = -1;
 
     /* seaf_debug ("Computing share usage for repo %s.\n", repo_id); */
@@ -247,7 +247,7 @@ get_num_shared_to (const char *user, const char *repo_id)
      * This also applies to two groups with overlapped members.
      * So we have to use a hash table to filter out duplicated users.
      */
-    user_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+    user_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
 
     /* First count personal share */
     personal = seaf_share_manager_list_shared_to (seaf->share_mgr, user, repo_id);
@@ -259,9 +259,9 @@ get_num_shared_to (const char *user, const char *repo_id)
 
     /* Then groups... */
     groups = seaf_repo_manager_get_groups_by_repo (seaf->repo_mgr,
-                                                   repo_id, NULL);
+                                                   repo_id, nullptr);
     for (p = groups; p; p = p->next) {
-        members = ccnet_group_manager_get_group_members (seaf->group_mgr, (int)(long)p->data, -1, -1, NULL);
+        members = ccnet_group_manager_get_group_members (seaf->group_mgr, (int)(long)p->data, -1, -1, nullptr);
         if (!members) {
             seaf_warning ("Cannot get member list for groupd %d.\n", (int)(long)p->data);
             goto out;
@@ -291,7 +291,7 @@ seaf_quota_manager_check_quota_with_delta (SeafQuotaManager *mgr,
 {
     SeafVirtRepo *vinfo;
     const char *r_repo_id = repo_id;
-    char *user = NULL;
+    char *user = nullptr;
     gint64 quota, usage;
     int ret = 0;
 
@@ -301,8 +301,8 @@ seaf_quota_manager_check_quota_with_delta (SeafQuotaManager *mgr,
         r_repo_id = vinfo->origin_repo_id;
 
     user = seaf_repo_manager_get_repo_owner (seaf->repo_mgr, r_repo_id);
-    if (user != NULL) {
-        if (g_strrstr (user, "dtable@seafile") != NULL)
+    if (user != nullptr) {
+        if (g_strrstr (user, "dtable@seafile") != nullptr)
             goto out;
         quota = seaf_quota_manager_get_user_quota (mgr, user);
     } else {
@@ -399,7 +399,7 @@ seaf_quota_manager_get_user_share_usage (SeafQuotaManager *mgr,
 
     repos = seaf_repo_manager_get_repo_ids_by_owner (seaf->repo_mgr, user);
 
-    for (p = repos; p != NULL; p = p->next) {
+    for (p = repos; p != nullptr; p = p->next) {
         repo_id = p->data;
         per_repo = repo_share_usage (user, repo_id);
         if (per_repo < 0) {
@@ -457,7 +457,7 @@ collect_user_and_usage (SeafDBRow *row, void *data)
     SeafileUserQuotaUsage *user_usage= g_object_new (SEAFILE_TYPE_USER_QUOTA_USAGE,
                                                      "user", user,
                                                      "usage", usage,
-                                                     NULL);
+                                                     nullptr);
     if (!user_usage)
         return FALSE;
 
@@ -469,8 +469,8 @@ collect_user_and_usage (SeafDBRow *row, void *data)
 GList *
 seaf_repo_quota_manager_list_user_quota_usage (SeafQuotaManager *mgr)
 {
-    GList *ret = NULL;
-    char *sql = NULL;
+    GList *ret = nullptr;
+    char *sql = nullptr;
 
     sql = "SELECT owner_id,SUM(size) FROM "
           "RepoOwner o LEFT JOIN VirtualRepo v ON o.repo_id=v.repo_id, "
@@ -483,7 +483,7 @@ seaf_repo_quota_manager_list_user_quota_usage (SeafQuotaManager *mgr)
                                        collect_user_and_usage,
                                        &ret, 0) < 0) {
         g_list_free_full (ret, g_object_unref);
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (ret);

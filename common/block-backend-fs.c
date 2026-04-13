@@ -57,9 +57,9 @@ block_backend_fs_open_block (BlockBackend *bend,
     int fd = -1;
     char *tmp_file;
 
-    g_return_val_if_fail (block_id != NULL, NULL);
-    g_return_val_if_fail (strlen(block_id) == 40, NULL);
-    g_return_val_if_fail (rw_type == BLOCK_READ || rw_type == BLOCK_WRITE, NULL);
+    g_return_val_if_fail (block_id != nullptr, nullptr);
+    g_return_val_if_fail (strlen(block_id) == 40, nullptr);
+    g_return_val_if_fail (rw_type == BLOCK_READ || rw_type == BLOCK_WRITE, nullptr);
 
     if (rw_type == BLOCK_READ) {
         char path[SEAF_PATH_MAX];
@@ -68,14 +68,14 @@ block_backend_fs_open_block (BlockBackend *bend,
         if (fd < 0) {
             ccnet_warning ("[block bend] failed to open block %s for read: %s\n",
                            block_id, strerror(errno));
-            return NULL;
+            return nullptr;
         }
     } else {
         fd = open_tmp_file (bend, block_id, &tmp_file);
         if (fd < 0) {
             ccnet_warning ("[block bend] failed to open block %s for write: %s\n",
                            block_id, strerror(errno));
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -235,7 +235,7 @@ block_backend_fs_stat_block (BlockBackend *bend,
     if (seaf_stat (path, &st) < 0) {
         seaf_warning ("[block bend] Failed to stat block %s:%s at %s: %s.\n",
                       store_id, block_id, path, strerror(errno));
-        return NULL;
+        return nullptr;
     }
     block_md = g_new0(BMetadata, 1);
     memcpy (block_md->id, block_id, 40);
@@ -254,7 +254,7 @@ block_backend_fs_stat_block_by_handle (BlockBackend *bend,
     if (seaf_fstat (handle->fd, &st) < 0) {
         seaf_warning ("[block bend] Failed to stat block %s:%s.\n",
                       handle->store_id, handle->block_id);
-        return NULL;
+        return nullptr;
     }
     block_md = g_new0(BMetadata, 1);
     memcpy (block_md->id, handle->block_id, 40);
@@ -271,9 +271,9 @@ block_backend_fs_foreach_block (BlockBackend *bend,
                                 void *user_data)
 {
     FsPriv *priv = bend->be_priv;
-    char *block_dir = NULL;
+    char *block_dir = nullptr;
     int dir_len;
-    GDir *dir1 = NULL, *dir2;
+    GDir *dir1 = nullptr, *dir2;
     const char *dname1, *dname2;
     char block_id[128];
     char path[SEAF_PATH_MAX], *pos;
@@ -281,13 +281,13 @@ block_backend_fs_foreach_block (BlockBackend *bend,
 
 #if defined MIGRATION
     if (version > 0)
-        block_dir = g_build_filename (priv->block_dir, store_id, NULL);
+        block_dir = g_build_filename (priv->block_dir, store_id, nullptr);
 #else
-    block_dir = g_build_filename (priv->block_dir, store_id, NULL);
+    block_dir = g_build_filename (priv->block_dir, store_id, nullptr);
 #endif
     dir_len = strlen (block_dir);
 
-    dir1 = g_dir_open (block_dir, 0, NULL);
+    dir1 = g_dir_open (block_dir, 0, nullptr);
     if (!dir1) {
         goto out;
     }
@@ -295,16 +295,16 @@ block_backend_fs_foreach_block (BlockBackend *bend,
     memcpy (path, block_dir, dir_len);
     pos = path + dir_len;
 
-    while ((dname1 = g_dir_read_name(dir1)) != NULL) {
+    while ((dname1 = g_dir_read_name(dir1)) != nullptr) {
         snprintf (pos, sizeof(path) - dir_len, "/%s", dname1);
 
-        dir2 = g_dir_open (path, 0, NULL);
+        dir2 = g_dir_open (path, 0, nullptr);
         if (!dir2) {
             seaf_warning ("Failed to open block dir %s.\n", path);
             continue;
         }
 
-        while ((dname2 = g_dir_read_name(dir2)) != NULL) {
+        while ((dname2 = g_dir_read_name(dir2)) != nullptr) {
             snprintf (block_id, sizeof(block_id), "%s%s", dname1, dname2);
             if (!process (store_id, version, block_id, user_data)) {
                 g_dir_close (dir2);
@@ -346,7 +346,7 @@ block_backend_fs_copy (BlockBackend *bend,
     }
 
 #ifdef WIN32
-    if (!CreateHardLink (dst_path, src_path, NULL)) {
+    if (!CreateHardLink (dst_path, src_path, nullptr)) {
         seaf_warning ("Failed to link %s to %s: %lu.\n",
                       src_path, dst_path, GetLastError());
         return -1;
@@ -367,23 +367,23 @@ static int
 block_backend_fs_remove_store (BlockBackend *bend, const char *store_id)
 {
     FsPriv *priv = bend->be_priv;
-    char *block_dir = NULL;
+    char *block_dir = nullptr;
     GDir *dir1, *dir2;
     const char *dname1, *dname2;
     char *path1, *path2;
 
-    block_dir = g_build_filename (priv->block_dir, store_id, NULL);
+    block_dir = g_build_filename (priv->block_dir, store_id, nullptr);
 
-    dir1 = g_dir_open (block_dir, 0, NULL);
+    dir1 = g_dir_open (block_dir, 0, nullptr);
     if (!dir1) {
         g_free (block_dir);
         return 0;
     }
 
-    while ((dname1 = g_dir_read_name(dir1)) != NULL) {
-        path1 = g_build_filename (block_dir, dname1, NULL);
+    while ((dname1 = g_dir_read_name(dir1)) != nullptr) {
+        path1 = g_build_filename (block_dir, dname1, nullptr);
 
-        dir2 = g_dir_open (path1, 0, NULL);
+        dir2 = g_dir_open (path1, 0, nullptr);
         if (!dir2) {
             seaf_warning ("Failed to open block dir %s.\n", path1);
             g_dir_close (dir1);
@@ -392,8 +392,8 @@ block_backend_fs_remove_store (BlockBackend *bend, const char *store_id)
             return -1;
         }
 
-        while ((dname2 = g_dir_read_name(dir2)) != NULL) {
-            path2 = g_build_filename (path1, dname2, NULL);
+        while ((dname2 = g_dir_read_name(dir2)) != nullptr) {
+            path2 = g_build_filename (path1, dname2, nullptr);
             g_unlink (path2);
             g_free (path2);
         }
@@ -466,7 +466,7 @@ block_backend_fs_new (const char *seaf_dir, const char *tmp_dir)
     priv = g_new0(FsPriv, 1);
     bend->be_priv = priv;
 
-    priv->block_dir = g_build_filename (seaf_dir, "storage", "blocks", NULL);
+    priv->block_dir = g_build_filename (seaf_dir, "storage", "blocks", nullptr);
     priv->block_dir_len = strlen (priv->block_dir);
 
     priv->tmp_dir = g_strdup (tmp_dir);
@@ -504,5 +504,5 @@ onerror:
     g_free (bend->be_priv);
     g_free (bend);
 
-    return NULL;
+    return nullptr;
 }

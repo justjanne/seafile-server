@@ -40,29 +40,29 @@ log_unprocessed_task_thread (void *arg);
 SizeScheduler *
 size_scheduler_new (SeafileSession *session)
 {
-    GError *error = NULL;
+    GError *error = nullptr;
     SizeScheduler *sched = g_new0 (SizeScheduler, 1);
     int sched_thread_num;
 
     if (!sched)
-        return NULL;
+        return nullptr;
 
     sched->priv = g_new0 (SizeSchedulerPriv, 1);
     if (!sched->priv) {
         g_free (sched);
-        return NULL;
+        return nullptr;
     }
 
     sched->priv->cache = session->obj_cache;
 
     sched->seaf = session;
 
-    sched_thread_num = g_key_file_get_integer (session->config, "scheduler", "size_sched_thread_num", NULL);
+    sched_thread_num = g_key_file_get_integer (session->config, "scheduler", "size_sched_thread_num", nullptr);
 
     if (sched_thread_num == 0)
         sched_thread_num = DEFAULT_SCHEDULE_THREAD_NUMBER;
 
-    sched->priv->compute_repo_size_thread_pool = g_thread_pool_new (compute_task, NULL,
+    sched->priv->compute_repo_size_thread_pool = g_thread_pool_new (compute_task, nullptr,
                                                                     sched_thread_num, FALSE, &error);
     if (!sched->priv->compute_repo_size_thread_pool) {
         if (error) {
@@ -74,7 +74,7 @@ size_scheduler_new (SeafileSession *session)
         g_clear_error (&error);
         g_free (sched->priv);
         g_free (sched);
-        return NULL;
+        return nullptr;
     }
 
     return sched;
@@ -83,7 +83,7 @@ size_scheduler_new (SeafileSession *session)
 int
 size_scheduler_start (SizeScheduler *scheduler)
 {
-    int ret = pthread_create (&scheduler->priv->thread_id, NULL, log_unprocessed_task_thread, scheduler);
+    int ret = pthread_create (&scheduler->priv->thread_id, nullptr, log_unprocessed_task_thread, scheduler);
     if (ret < 0) {
         seaf_warning ("Failed to create log unprocessed task thread.\n");
         return -1;
@@ -101,7 +101,7 @@ schedule_repo_size_computation (SizeScheduler *scheduler, const char *repo_id)
     job->sched = scheduler;
     memcpy (job->repo_id, repo_id, 37);
 
-    g_thread_pool_push (scheduler->priv->compute_repo_size_thread_pool, job, NULL);
+    g_thread_pool_push (scheduler->priv->compute_repo_size_thread_pool, job, nullptr);
 }
 
 #define PRINT_UNPROCESSED_TASKS_INTERVAL 30
@@ -121,7 +121,7 @@ void *log_unprocessed_task_thread (void *arg)
         sleep (PRINT_UNPROCESSED_TASKS_INTERVAL);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static void
@@ -256,7 +256,7 @@ create_old_repo_info (SeafDBRow *row, void *data)
 static RepoInfo*
 get_old_repo_info_from_db (SeafDB *db, const char *repo_id, gboolean *is_db_err)
 {
-    RepoInfo *info = NULL;
+    RepoInfo *info = nullptr;
     char *sql;
 
     switch (seaf_db_type (db)) {
@@ -276,7 +276,7 @@ get_old_repo_info_from_db (SeafDB *db, const char *repo_id, gboolean *is_db_err)
     default:
         seaf_warning("Unexpected database type.\n");
         *is_db_err = TRUE;
-        return NULL;
+        return nullptr;
     }
     int ret = seaf_db_statement_foreach_row (db, sql,
                                              create_old_repo_info, &info,
@@ -296,8 +296,8 @@ notify_repo_size_change (SizeScheduler *sched, const char *repo_id)
         return;
     }
 
-    json_t *obj = NULL;
-    char *msg = NULL;
+    json_t *obj = nullptr;
+    char *msg = nullptr;
 
     obj = json_object ();
 
@@ -317,15 +317,15 @@ compute_repo_size (void *vjob)
 {
     RepoSizeJob *job = vjob;
     SizeScheduler *sched = job->sched;
-    SeafRepo *repo = NULL;
-    SeafCommit *head = NULL;
-    SeafCommit *old_head = NULL;
-    GObject *file_count_info = NULL;
+    SeafRepo *repo = nullptr;
+    SeafCommit *head = nullptr;
+    SeafCommit *old_head = nullptr;
+    GObject *file_count_info = nullptr;
     gint64 size = 0;
     gint64 file_count = 0;
     int ret;
-    RepoInfo *info = NULL;
-    GError *error = NULL;
+    RepoInfo *info = nullptr;
+    GError *error = nullptr;
     gboolean is_db_err = FALSE;
 
     repo = seaf_repo_manager_get_repo (sched->seaf->repo_mgr, job->repo_id);
@@ -357,14 +357,14 @@ compute_repo_size (void *vjob)
     if (info && (info->file_count != 0) && old_head){
         gint64 change_size = 0;
         gint64 change_file_count = 0;
-        GList *diff_entries = NULL;
+        GList *diff_entries = nullptr;
         
         ret = diff_commits (old_head, head, &diff_entries, FALSE);
         if (ret < 0) {
             seaf_warning("[scheduler] failed to do diff.\n");
             goto out;
         }
-        GList *des = NULL;
+        GList *des = nullptr;
         for (des = diff_entries; des ; des = des->next){
             DiffEntry *diff_entry = des->data;
             if (diff_entry->status == DIFF_STATUS_DELETED){            
@@ -393,7 +393,7 @@ compute_repo_size (void *vjob)
             g_clear_error (&error);
             goto out;
         }
-        g_object_get (file_count_info, "file_count", &file_count, "size", &size, NULL);
+        g_object_get (file_count_info, "file_count", &file_count, "size", &size, nullptr);
         g_object_unref (file_count_info);
     }
 

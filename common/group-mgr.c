@@ -49,21 +49,21 @@ void ccnet_group_manager_start (CcnetGroupManager *manager)
 static CcnetDB *
 open_sqlite_db (CcnetGroupManager *manager)
 {
-    CcnetDB *db = NULL;
+    CcnetDB *db = nullptr;
     char *db_dir;
     char *db_path;
 
-    db_dir = g_build_filename (manager->session->ccnet_dir, "GroupMgr", NULL);
+    db_dir = g_build_filename (manager->session->ccnet_dir, "GroupMgr", nullptr);
     if (checkdir_with_mkdir(db_dir) < 0) {
         ccnet_error ("Cannot open db dir %s: %s\n", db_dir,
                      strerror(errno));
         g_free (db_dir);
-        return NULL;
+        return nullptr;
     }
     g_free (db_dir);
 
     db_path = g_build_filename (manager->session->ccnet_dir, "GroupMgr",
-                                "groupmgr.db", NULL);
+                                "groupmgr.db", nullptr);
     db = seaf_db_new_sqlite (db_path, DEFAULT_MAX_CONNECTIONS);
 
     g_free (db_path);
@@ -74,7 +74,7 @@ open_sqlite_db (CcnetGroupManager *manager)
 static int
 open_db (CcnetGroupManager *manager)
 {
-    CcnetDB *db = NULL;
+    CcnetDB *db = nullptr;
 
     switch (seaf_db_type(manager->session->ccnet_db)) {
     case SEAF_DB_TYPE_SQLITE:
@@ -173,7 +173,7 @@ create_group_common (CcnetGroupManager *mgr,
                 2, "int", group_id, "string", path_buf->str) < 0)
             goto error;
     } else if (parent_group_id > 0) {
-        char *path = NULL;
+        char *path = nullptr;
         seaf_db_trans_foreach_selected_row (trans, queries->get_group_structure_path,
             get_group_path_cb, &path,
             1, "int", parent_group_id);
@@ -217,7 +217,7 @@ int ccnet_group_manager_create_group (CcnetGroupManager *mgr,
 /*                           int org_id, */
 /*                           const char *group_name) */
 /* { */
-/*     GList *org_groups = NULL, *ptr; */
+/*     GList *org_groups = nullptr, *ptr; */
 /*     CcnetOrgManager *org_mgr = seaf->org_mgr; */
     
 /*     org_groups = ccnet_org_manager_get_org_groups (org_mgr, org_id, -1, -1); */
@@ -227,7 +227,7 @@ int ccnet_group_manager_create_group (CcnetGroupManager *mgr,
 /*     for (ptr = org_groups; ptr; ptr = ptr->next) { */
 /*         int group_id = (int)(long)ptr->data; */
 /*         CcnetGroup *group = ccnet_group_manager_get_group (mgr, group_id, */
-/*                                                            NULL); */
+/*                                                            nullptr); */
 /*         if (!group) */
 /*             continue; */
 
@@ -501,7 +501,7 @@ get_user_groups_cb (CcnetDBRow *row, void *data)
                           "timestamp", ts,
                           "source", "DB",
                           "parent_group_id", parent_group_id,
-                          NULL);
+                          nullptr);
 
     *plist = g_list_append (*plist, group);
 
@@ -514,8 +514,8 @@ ccnet_group_manager_get_ancestor_groups (CcnetGroupManager *mgr, int group_id)
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
-    CcnetGroup *group = NULL;
+    GList *ret = nullptr;
+    CcnetGroup *group = nullptr;
     GString *sql = g_string_new ("");
 
     char *path = seaf_db_statement_get_string (db, queries->get_group_structure_path,
@@ -527,12 +527,12 @@ ccnet_group_manager_get_ancestor_groups (CcnetGroupManager *mgr, int group_id)
             ccnet_warning ("Failed to get ancestor groups of group %d\n", group_id);
             g_string_free (sql, TRUE);
             g_free (path);
-            return NULL;
+            return nullptr;
         }
         g_string_free (sql, TRUE);
         g_free (path);
     } else { // group is not in structure, return itself.
-        group = ccnet_group_manager_get_group (mgr, group_id, NULL);
+        group = ccnet_group_manager_get_group (mgr, group_id, nullptr);
         if (group) {
             ret = g_list_prepend (ret, group);
         }
@@ -547,8 +547,8 @@ group_comp_func (gconstpointer a, gconstpointer b)
     CcnetGroup *g1 = (CcnetGroup *)a;
     CcnetGroup *g2 = (CcnetGroup *)b;
     int id_1 = 0, id_2 = 0;
-    g_object_get (g1, "id", &id_1, NULL);
-    g_object_get (g2, "id", &id_2, NULL);
+    g_object_get (g1, "id", &id_1, nullptr);
+    g_object_get (g2, "id", &id_2, nullptr);
 
     if (id_1 == id_2)
         return 0;
@@ -578,7 +578,7 @@ ccnet_group_manager_get_groups_by_user (CcnetGroupManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *groups = NULL, *ret = NULL;
+    GList *groups = nullptr, *ret = nullptr;
     GList *ptr;
     GString *sql = g_string_new ("");
     CcnetGroup *group;
@@ -587,7 +587,7 @@ ccnet_group_manager_get_groups_by_user (CcnetGroupManager *mgr,
     if (seaf_db_statement_foreach_row (db, queries->list_group_by_user,
             get_user_groups_cb, &groups,
             1, "string", user_name) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     if (!return_ancestors) {
@@ -601,8 +601,8 @@ ccnet_group_manager_get_groups_by_user (CcnetGroupManager *mgr,
     g_string_erase (sql, 0, -1);
     for (ptr = groups; ptr; ptr = ptr->next) {
         group = ptr->data;
-        g_object_get (group, "parent_group_id", &parent_group_id, NULL);
-        g_object_get (group, "id", &group_id, NULL);
+        g_object_get (group, "parent_group_id", &parent_group_id, nullptr);
+        g_object_get (group, "id", &group_id, nullptr);
         if (parent_group_id != 0) {
             if (g_strcmp0(sql->str, "") == 0)
                 g_string_append_printf (sql, "SELECT path FROM GroupStructure WHERE group_id IN (%d", group_id);
@@ -620,13 +620,13 @@ ccnet_group_manager_get_groups_by_user (CcnetGroupManager *mgr,
                                             get_group_paths_cb,
                                             paths, 0) < 0) {
             g_list_free_full (ret, g_object_unref);
-            ret = NULL;
+            ret = nullptr;
             goto out;
         }
         if (g_strcmp0(paths->str, "") == 0) {
             ccnet_warning ("Failed to get groups path for user %s\n", user_name);
             g_list_free_full (ret, g_object_unref);
-            ret = NULL;
+            ret = nullptr;
             goto out;
         }
 
@@ -638,7 +638,7 @@ ccnet_group_manager_get_groups_by_user (CcnetGroupManager *mgr,
                                         get_user_groups_cb,
                                         &ret, 0) < 0) {
             g_list_free_full (ret, g_object_unref);
-            ret = NULL;
+            ret = nullptr;
             goto out;
         }
     }
@@ -676,7 +676,7 @@ get_ccnetgroup_cb (CcnetDBRow *row, void *data)
                              "timestamp", ts,
                              "source", "DB",
                              "parent_group_id", parent_group_id,
-                             NULL);
+                             nullptr);
     g_free (creator_l);
 
     return FALSE;
@@ -689,12 +689,12 @@ ccnet_group_manager_get_child_groups (CcnetGroupManager *mgr, int group_id,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
+    GList *ret = nullptr;
 
     if (seaf_db_statement_foreach_row (db, queries->list_group_by_parent,
             get_user_groups_cb, &ret,
             1, "int", group_id) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return ret;
@@ -704,7 +704,7 @@ GList *
 ccnet_group_manager_get_descendants_groups(CcnetGroupManager *mgr, int group_id,
                                            GError **error)
 {
-    GList *ret = NULL;
+    GList *ret = nullptr;
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
@@ -719,7 +719,7 @@ ccnet_group_manager_get_descendants_groups(CcnetGroupManager *mgr, int group_id,
             3, "string", path_a->str, "string", path_b->str, "int", group_id) < 0) {
         g_string_free (path_a, TRUE);
         g_string_free (path_b, TRUE);
-        return NULL;
+        return nullptr;
     }
     g_string_free (path_a, TRUE);
     g_string_free (path_b, TRUE);
@@ -734,12 +734,12 @@ ccnet_group_manager_get_group (CcnetGroupManager *mgr, int group_id,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    CcnetGroup *ccnetgroup = NULL;
+    CcnetGroup *ccnetgroup = nullptr;
 
     if (seaf_db_statement_foreach_row (db, queries->get_group,
             get_ccnetgroup_cb, &ccnetgroup,
             1, "int", group_id) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return ccnetgroup;
@@ -760,9 +760,9 @@ get_ccnet_groupuser_cb (CcnetDBRow *row, void *data)
                                "group_id", group_id,
                                "user_name", user_l,
                                "is_staff", is_staff,
-                               NULL);
+                               nullptr);
     g_free (user_l);
-    if (group_user != NULL) {
+    if (group_user != nullptr) {
         *plist = g_list_prepend (*plist, group_user);
     }
     
@@ -779,7 +779,7 @@ ccnet_group_manager_get_group_members (CcnetGroupManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *group_users = NULL;
+    GList *group_users = nullptr;
     int rc;
     
     if (limit == -1) {
@@ -793,7 +793,7 @@ ccnet_group_manager_get_group_members (CcnetGroupManager *mgr,
     }
 
     if (rc < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (group_users);
@@ -807,7 +807,7 @@ ccnet_group_manager_get_members_with_prefix (CcnetGroupManager *mgr,
 {
     CcnetDB *db = mgr->priv->db;
     int db_type = seaf_db_type (db);
-    GList *group_users = NULL;
+    GList *group_users = nullptr;
     GList *ptr;
     CcnetGroup *group;
     GString *sql = g_string_new ("");
@@ -820,13 +820,13 @@ ccnet_group_manager_get_members_with_prefix (CcnetGroupManager *mgr,
         g_string_printf(sql, "SELECT group_id, user_name, is_staff FROM GroupUser "
                          "WHERE group_id IN (");
     }
-    GList *groups = ccnet_group_manager_get_descendants_groups(mgr, group_id, NULL);
+    GList *groups = ccnet_group_manager_get_descendants_groups(mgr, group_id, nullptr);
     if (!groups)
         g_string_append_printf(sql, "%d", group_id);
 
     for (ptr = groups; ptr; ptr = ptr->next) {
         group = ptr->data;
-        g_object_get(group, "id", &id, NULL);
+        g_object_get(group, "id", &id, nullptr);
         g_string_append_printf(sql, "%d", id);
         if (ptr->next)
             g_string_append_printf(sql, ", ");
@@ -839,7 +839,7 @@ ccnet_group_manager_get_members_with_prefix (CcnetGroupManager *mgr,
     if (seaf_db_statement_foreach_row (db, sql->str,
                                         get_ccnet_groupuser_cb, &group_users, 0) < 0) {
         g_string_free(sql, TRUE);
-        return NULL;
+        return nullptr;
     }
     g_string_free(sql, TRUE);
 
@@ -902,7 +902,7 @@ ccnet_group_manager_is_group_user (CcnetGroupManager *mgr,
         return exists ? 1 : 0;
 
     GList *ptr;
-    GList *groups = ccnet_group_manager_get_groups_by_user (mgr, user, TRUE, NULL);
+    GList *groups = ccnet_group_manager_get_groups_by_user (mgr, user, TRUE, nullptr);
     if (!groups)
         return 0;
 
@@ -910,7 +910,7 @@ ccnet_group_manager_is_group_user (CcnetGroupManager *mgr,
     int id;
     for (ptr = groups; ptr; ptr = ptr->next) {
         group = ptr->data;
-        g_object_get (group, "id", &id, NULL);
+        g_object_get (group, "id", &id, nullptr);
         if (group_id == id) {
             exists = TRUE;
             break;
@@ -945,7 +945,7 @@ get_all_ccnetgroups_cb (CcnetDBRow *row, void *data)
                                       "timestamp", ts,
                                       "source", "DB",
                                       "parent_group_id", parent_group_id,
-                                      NULL);
+                                      nullptr);
     g_free (creator_l);
 
     *plist = g_list_prepend (*plist, group);
@@ -959,7 +959,7 @@ ccnet_group_manager_get_top_groups (CcnetGroupManager *mgr,
                                     GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    GList *ret = NULL;
+    GList *ret = nullptr;
     GString *sql = g_string_new ("");
     int rc;
 
@@ -990,7 +990,7 @@ ccnet_group_manager_get_top_groups (CcnetGroupManager *mgr,
                                          get_all_ccnetgroups_cb, &ret, 0);
     g_string_free (sql, TRUE);
     if (rc < 0)
-        return NULL;
+        return nullptr;
 
     return g_list_reverse (ret);
 }
@@ -1000,7 +1000,7 @@ ccnet_group_manager_list_all_departments (CcnetGroupManager *mgr,
                                           GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    GList *ret = NULL;
+    GList *ret = nullptr;
     GString *sql = g_string_new ("");
     int rc;
     int db_type = seaf_db_type(db);
@@ -1024,7 +1024,7 @@ ccnet_group_manager_list_all_departments (CcnetGroupManager *mgr,
     g_string_free (sql, TRUE);
 
     if (rc < 0)
-        return NULL;
+        return nullptr;
 
     return g_list_reverse (ret);
 }
@@ -1034,7 +1034,7 @@ ccnet_group_manager_get_all_groups (CcnetGroupManager *mgr,
                                     int start, int limit, GError **error)
 {
     CcnetDB *db = mgr->priv->db;
-    GList *ret = NULL;
+    GList *ret = nullptr;
     GString *sql = g_string_new ("");
     int rc;
 
@@ -1072,7 +1072,7 @@ ccnet_group_manager_get_all_groups (CcnetGroupManager *mgr,
     g_string_free (sql, TRUE);
 
     if (rc < 0)
-        return NULL;
+        return nullptr;
 
     return g_list_reverse (ret);
 }
@@ -1104,7 +1104,7 @@ ccnet_group_manager_search_groups (CcnetGroupManager *mgr,
                                    int start, int limit)
 {
     CcnetDB *db = mgr->priv->db;
-    GList *ret = NULL;
+    GList *ret = nullptr;
     GString *sql = g_string_new ("");
 
     int rc;
@@ -1155,11 +1155,11 @@ ccnet_group_manager_search_groups (CcnetGroupManager *mgr,
     g_string_free (sql, TRUE);
 
     if (rc < 0) {
-        while (ret != NULL) {
+        while (ret != nullptr) {
             g_object_unref (ret->data);
             ret = g_list_delete_link (ret, ret);
         }
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (ret);
@@ -1174,7 +1174,7 @@ get_groups_members_cb (CcnetDBRow *row, void *data)
     char *user_l = g_ascii_strdown (user, -1);
     CcnetGroupUser *group_user = g_object_new (CCNET_TYPE_GROUP_USER,
                                                "user_name", user_l,
-                                               NULL);
+                                               nullptr);
     g_free (user_l);
     *users = g_list_append(*users, group_user);
 
@@ -1188,10 +1188,10 @@ ccnet_group_manager_get_groups_members (CcnetGroupManager *mgr, const char *grou
 {
     CcnetDB *db = mgr->priv->db;
     int db_type = seaf_db_type (db);
-    GList *ret = NULL;
+    GList *ret = nullptr;
     GString *sql = g_string_new ("");
     int i, group_id;
-    json_t *j_array = NULL, *j_obj;
+    json_t *j_array = nullptr, *j_obj;
     json_error_t j_error;
 
     if (db_type == SEAF_DB_TYPE_PGSQL) {
@@ -1203,7 +1203,7 @@ ccnet_group_manager_get_groups_members (CcnetGroupManager *mgr, const char *grou
     if (!j_array) {
         g_set_error (error, CCNET_DOMAIN, 0, "Bad args.");
         g_string_free (sql, TRUE);
-        return NULL;
+        return nullptr;
     }
     size_t id_num = json_array_size (j_array);
 
@@ -1214,7 +1214,7 @@ ccnet_group_manager_get_groups_members (CcnetGroupManager *mgr, const char *grou
             g_set_error (error, CCNET_DOMAIN, 0, "Bad args.");
             g_string_free (sql, TRUE);
             json_decref (j_array);
-            return NULL;
+            return nullptr;
         }
         g_string_append_printf (sql, "%d", group_id);
         if (i + 1 < id_num)
@@ -1238,7 +1238,7 @@ ccnet_group_manager_search_group_members (CcnetGroupManager *mgr,
 {
     CcnetDB *db = mgr->priv->db;
     int db_type = seaf_db_type (db);
-    GList *ret = NULL;
+    GList *ret = nullptr;
     char *sql;
     int rc;
 
@@ -1258,7 +1258,7 @@ ccnet_group_manager_search_group_members (CcnetGroupManager *mgr,
     g_free (db_patt);
     if (rc < 0) {
         g_list_free_full (ret, g_object_unref);
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (ret);

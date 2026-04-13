@@ -42,11 +42,11 @@ sqlite_db_start (SeafileSession *session)
 
     max_connections = g_key_file_get_integer (session->config,
                                               "database", "max_connections",
-                                              NULL);
+                                              nullptr);
     if (max_connections <= 0)
         max_connections = DEFAULT_MAX_CONNECTIONS;
 
-    db_path = g_build_filename (session->seaf_dir, SQLITE_DB_NAME, NULL);
+    db_path = g_build_filename (session->seaf_dir, SQLITE_DB_NAME, nullptr);
     session->db = seaf_db_new_sqlite (db_path, max_connections);
     if (!session->db) {
         seaf_warning ("Failed to start sqlite db.\n");
@@ -140,11 +140,11 @@ load_db_option_from_env (DBOption *option)
 static DBOption *
 load_db_option (SeafileSession *session)
 {
-    GError *error = NULL;
+    GError *error = nullptr;
     int ret = 0;
     DBOption *option = g_new0 (DBOption, 1);
 
-    option->host = seaf_key_file_get_string (session->config, "database", "host", NULL);
+    option->host = seaf_key_file_get_string (session->config, "database", "host", nullptr);
 
     option->port = g_key_file_get_integer (session->config, "database", "port", &error);
     if (error) {
@@ -152,21 +152,21 @@ load_db_option (SeafileSession *session)
         option->port = MYSQL_DEFAULT_PORT;
     }
 
-    option->user = seaf_key_file_get_string (session->config, "database", "user", NULL);
+    option->user = seaf_key_file_get_string (session->config, "database", "user", nullptr);
 
-    option->passwd = seaf_key_file_get_string (session->config, "database", "password", NULL);
+    option->passwd = seaf_key_file_get_string (session->config, "database", "password", nullptr);
 
-    option->seafile_db_name = seaf_key_file_get_string (session->config, "database", "db_name", NULL);
+    option->seafile_db_name = seaf_key_file_get_string (session->config, "database", "db_name", nullptr);
 
     option->use_ssl = g_key_file_get_boolean (session->config,
-                                      "database", "use_ssl", NULL);
+                                      "database", "use_ssl", nullptr);
 
     option->skip_verify = g_key_file_get_boolean (session->config,
-                                          "database", "skip_verify", NULL);
+                                          "database", "skip_verify", nullptr);
 
     if (option->use_ssl && !option->skip_verify) {
         option->ca_path = seaf_key_file_get_string (session->config,
-                                            "database", "ca_path", NULL);
+                                            "database", "ca_path", nullptr);
         if (!option->ca_path) {
             seaf_warning ("ca_path is required if use ssl and don't skip verify.\n");
             ret = -1;
@@ -175,7 +175,7 @@ load_db_option (SeafileSession *session)
     }
 
     option->charset = seaf_key_file_get_string (session->config,
-                                     "database", "connection_charset", NULL);
+                                     "database", "connection_charset", nullptr);
 
     option->max_connections = g_key_file_get_integer (session->config,
                                               "database", "max_connections",
@@ -220,7 +220,7 @@ load_db_option (SeafileSession *session)
 out:
     if (ret < 0) {
         db_option_free (option);
-        return NULL;
+        return nullptr;
     }
 
     return option;
@@ -229,7 +229,7 @@ out:
 static int
 mysql_db_start (SeafileSession *session)
 {
-    DBOption *option = NULL;
+    DBOption *option = nullptr;
 
     option = load_db_option (session);
     if (!option) {
@@ -238,7 +238,7 @@ mysql_db_start (SeafileSession *session)
     }
 
     session->db = seaf_db_new_mysql (option->host, option->port, option->user, option->passwd, option->seafile_db_name,
-                                     NULL, option->use_ssl, option->skip_verify, option->ca_path, option->charset, option->max_connections);
+                                     nullptr, option->use_ssl, option->skip_verify, option->ca_path, option->charset, option->max_connections);
     if (!session->db) {
         db_option_free (option);
         seaf_warning ("Failed to start mysql db.\n");
@@ -258,7 +258,7 @@ pgsql_db_start (SeafileSession *session)
 {
     char *host, *user, *passwd, *db, *unix_socket;
     unsigned int port;
-    GError *error = NULL;
+    GError *error = nullptr;
 
     host = seaf_key_file_get_string (session->config, "database", "host", &error);
     if (!host) {
@@ -294,7 +294,7 @@ pgsql_db_start (SeafileSession *session)
                                          "database", "unix_socket", &error);
 
     session->db = seaf_db_new_pgsql (host, port, user, passwd, db, unix_socket,
-                                     FALSE, FALSE, NULL, NULL,
+                                     FALSE, FALSE, nullptr, nullptr,
                                      DEFAULT_MAX_CONNECTIONS);
     if (!session->db) {
         seaf_warning ("Failed to start pgsql db.\n");
@@ -316,7 +316,7 @@ int
 load_database_config (SeafileSession *session)
 {
     char *type;
-    GError *error = NULL;
+    GError *error = nullptr;
     int ret = 0;
     gboolean create_tables = FALSE;
 
@@ -336,9 +336,9 @@ load_database_config (SeafileSession *session)
     }
 #endif
     if (ret == 0) {
-        if (g_key_file_has_key (session->config, "database", "create_tables", NULL))
+        if (g_key_file_has_key (session->config, "database", "create_tables", nullptr))
             create_tables = g_key_file_get_boolean (session->config,
-                                                    "database", "create_tables", NULL);
+                                                    "database", "create_tables", nullptr);
         session->create_tables = create_tables;
     }
 
@@ -352,7 +352,7 @@ ccnet_init_sqlite_database (SeafileSession *session)
 {
     char *db_path;
 
-    db_path = g_build_path ("/", session->ccnet_dir, CCNET_DB, NULL);
+    db_path = g_build_path ("/", session->ccnet_dir, CCNET_DB, nullptr);
     session->ccnet_db = seaf_db_new_sqlite (db_path, DEFAULT_MAX_CONNECTIONS);
     if (!session->ccnet_db) {
         seaf_warning ("Failed to open ccnet database.\n");
@@ -366,7 +366,7 @@ ccnet_init_sqlite_database (SeafileSession *session)
 static int
 ccnet_init_mysql_database (SeafileSession *session)
 {
-    DBOption *option = NULL;
+    DBOption *option = nullptr;
 
     option = load_db_option (session);
     if (!option) {
@@ -375,7 +375,7 @@ ccnet_init_mysql_database (SeafileSession *session)
     }
 
     session->ccnet_db = seaf_db_new_mysql (option->host, option->port, option->user, option->passwd, option->ccnet_db_name,
-                                           NULL, option->use_ssl, option->skip_verify, option->ca_path, option->charset, option->max_connections);
+                                           nullptr, option->use_ssl, option->skip_verify, option->ca_path, option->charset, option->max_connections);
     if (!session->ccnet_db) {
         db_option_free (option);
         seaf_warning ("Failed to open ccnet database.\n");
@@ -393,7 +393,7 @@ ccnet_init_mysql_database (SeafileSession *session)
 static int
 ccnet_init_pgsql_database (SeafileSession *session)
 {
-    DBOption *option = NULL;
+    DBOption *option = nullptr;
 
     option = load_db_option (session);
     if (!option) {
@@ -402,7 +402,7 @@ ccnet_init_pgsql_database (SeafileSession *session)
     }
 
     session->ccnet_db = seaf_db_new_pgsql (option->host, option->port, option->user, option->passwd, option->ccnet_db_name,
-                                           NULL, option->use_ssl, option->skip_verify, option->ca_path, option->charset, option->max_connections);
+                                           nullptr, option->use_ssl, option->skip_verify, option->ca_path, option->charset, option->max_connections);
     if (!session->ccnet_db) {
         db_option_free (option);
         seaf_warning ("Failed to open ccnet database.\n");
@@ -440,8 +440,8 @@ load_ccnet_database_config (SeafileSession *session)
     }
 #endif
     if (ret == 0) {
-        if (g_key_file_has_key (session->config, "database", "create_tables", NULL))
-            create_tables = g_key_file_get_boolean (session->config, "database", "create_tables", NULL);
+        if (g_key_file_has_key (session->config, "database", "create_tables", nullptr))
+            create_tables = g_key_file_get_boolean (session->config, "database", "create_tables", nullptr);
         session->ccnet_create_tables = create_tables;
     }
 
@@ -454,18 +454,18 @@ load_ccnet_database_config (SeafileSession *session)
 char *
 seaf_gen_notif_server_jwt (const char *repo_id, const char *username)
 {
-    char *jwt_token = NULL;
-    gint64 now = (gint64)time(NULL);
+    char *jwt_token = nullptr;
+    gint64 now = (gint64)time(nullptr);
 
-    jwt_t *jwt = NULL;
+    jwt_t *jwt = nullptr;
 
     if (!seaf->notif_server_private_key) {
         seaf_warning ("No private key is configured for generating jwt token\n");
-        return NULL;
+        return nullptr;
     }
 
     int ret = jwt_new (&jwt);
-    if (ret != 0 || jwt == NULL) {
+    if (ret != 0 || jwt == nullptr) {
         seaf_warning ("Failed to create jwt\n");
         goto out;
     }
@@ -502,21 +502,21 @@ out:
 char *
 seaf_parse_auth_token (const char *auth_token)
 {
-    char *token = NULL;
-    char **parts = NULL;
+    char *token = nullptr;
+    char **parts = nullptr;
 
     if (!auth_token) {
-        return NULL;
+        return nullptr;
     }
 
     parts = g_strsplit (auth_token, " ", 2);
     if (!parts) {
-        return NULL;
+        return nullptr;
     }
 
     if (g_strv_length (parts) < 2) {
         g_strfreev (parts);
-        return NULL;
+        return nullptr;
     }
 
     token = g_strdup(parts[1]);
@@ -536,7 +536,7 @@ split_filename (const char *filename, char **name, char **ext)
         *name = g_strndup (filename, dot - filename);
     } else {
         *name = g_strdup (filename);
-        *ext = NULL;
+        *ext = nullptr;
     }
 }
 
@@ -557,7 +557,7 @@ seaf_delete_repo_tokens (SeafRepo *repo)
 {
     int ret = 0;
     const char *template;
-    GList *token_list = NULL;
+    GList *token_list = nullptr;
     GList *ptr;
     GString *token_list_str = g_string_new ("");
     GString *sql = g_string_new ("");

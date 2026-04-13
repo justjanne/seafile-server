@@ -153,10 +153,10 @@ collect_repos (SeafDBRow *row, void *data)
                          "head_cmmt_id", commit_id,
                          "user", email_l,
                          "permission", permission,
-                         "is_virtual", (vrepo_id != NULL),
+                         "is_virtual", (vrepo_id != nullptr),
                          "size", size,
                          "status", status,
-                         NULL);
+                         nullptr);
     g_free (email_l);
 
     if (repo) {
@@ -166,9 +166,9 @@ collect_repos (SeafDBRow *row, void *data)
             g_object_set (repo, "store_id", origin_repo_id,
                           "origin_repo_id", origin_repo_id,
                           "origin_repo_name", origin_repo_name,
-                          "origin_path", origin_path, NULL);
+                          "origin_path", origin_path, nullptr);
         } else {
-            g_object_set (repo, "store_id", repo_id, NULL);
+            g_object_set (repo, "store_id", repo_id, nullptr);
         }
         if (repo_name) {
             g_object_set (repo, "name", repo_name,
@@ -177,10 +177,10 @@ collect_repos (SeafDBRow *row, void *data)
                           "last_modified", update_time,
                           "version", version,
                           "encrypted", is_encrypted,
-                          "last_modifier", last_modifier, NULL);
+                          "last_modifier", last_modifier, nullptr);
         }
         if (type) {
-            g_object_set (repo, "repo_type", type, NULL);
+            g_object_set (repo, "repo_type", type, nullptr);
         }
         *p_repos = g_list_prepend (*p_repos, repo);
     }
@@ -191,20 +191,20 @@ collect_repos (SeafDBRow *row, void *data)
 static void
 seaf_fill_repo_commit_if_not_in_db (GList **repos)
 {
-    char *repo_name = NULL;
-    char *last_modifier = NULL;
-    char *repo_id = NULL;
-    char *commit_id = NULL;
-    SeafileRepo *repo = NULL;
-    GList *p = NULL;
+    char *repo_name = nullptr;
+    char *last_modifier = nullptr;
+    char *repo_id = nullptr;
+    char *commit_id = nullptr;
+    SeafileRepo *repo = nullptr;
+    GList *p = nullptr;
 
     for (p = *repos; p;) {
         repo = p->data;
-        g_object_get (repo, "name", &repo_name, NULL);
-        g_object_get (repo, "last_modifier", &last_modifier, NULL);
+        g_object_get (repo, "name", &repo_name, nullptr);
+        g_object_get (repo, "last_modifier", &last_modifier, nullptr);
         if (!repo_name || !last_modifier) {
             g_object_get (repo, "repo_id", &repo_id,
-                          "head_cmmt_id", &commit_id, NULL);
+                          "head_cmmt_id", &commit_id, nullptr);
             SeafCommit *commit = seaf_commit_manager_get_commit_compatible (seaf->commit_mgr,
                                                                             repo_id, commit_id);
             if (!commit) {
@@ -226,7 +226,7 @@ seaf_fill_repo_commit_if_not_in_db (GList **repos)
                                     "version", commit->version,
                                     "encrypted", commit->encrypted,
                                     "last_modifier", commit->creator_name,
-                                    NULL);
+                                    nullptr);
 
                 /* Set to database */
                 set_repo_commit_to_db (repo_id, commit->repo_name, commit->ctime, commit->version,
@@ -251,7 +251,7 @@ seaf_share_manager_list_share_repos (SeafShareManager *mgr, const char *email,
                                      const char *type, int start, int limit,
                                      gboolean *db_err)
 {
-    GList *ret = NULL, *p;
+    GList *ret = nullptr, *p;
     char *sql;
 
     if (start == -1 && limit == -1) {
@@ -288,7 +288,7 @@ seaf_share_manager_list_share_repos (SeafShareManager *mgr, const char *email,
         } else {
             /* should never reach here */
             seaf_warning ("[share mgr] Wrong column type");
-            return NULL;
+            return nullptr;
         }
 
         if (seaf_db_statement_foreach_row (mgr->seaf->db, sql,
@@ -301,7 +301,7 @@ seaf_share_manager_list_share_repos (SeafShareManager *mgr, const char *email,
             g_list_free (ret);
             if (db_err)
                 *db_err = TRUE;
-            return NULL;
+            return nullptr;
         }
     }
     else {
@@ -340,7 +340,7 @@ seaf_share_manager_list_share_repos (SeafShareManager *mgr, const char *email,
         } else {
             /* should never reach here */
             seaf_warning ("[share mgr] Wrong column type");
-            return NULL;
+            return nullptr;
         }
 
         if (seaf_db_statement_foreach_row (mgr->seaf->db, sql,
@@ -354,7 +354,7 @@ seaf_share_manager_list_share_repos (SeafShareManager *mgr, const char *email,
             g_list_free (ret);
             if (db_err)
                 *db_err = TRUE;
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -381,7 +381,7 @@ seaf_share_manager_list_shared_to (SeafShareManager *mgr,
                                    const char *repo_id)
 {
     char *sql;
-    GList *ret = NULL;
+    GList *ret = nullptr;
 
     sql = "SELECT to_email FROM SharedRepo WHERE "
         "from_email=? AND repo_id=?";
@@ -390,7 +390,7 @@ seaf_share_manager_list_shared_to (SeafShareManager *mgr,
                                        2, "string", owner, "string", repo_id) < 0) {
         seaf_warning ("[share mgr] DB error when list shared to.\n");
         string_list_free (ret);
-        return NULL;
+        return nullptr;
     }
 
     return ret;
@@ -409,7 +409,7 @@ collect_repo_shared_to (SeafDBRow *row, void *data)
                                             "repo_id", repo_id,
                                             "user", email_down,
                                             "perm", perm,
-                                            NULL);
+                                            nullptr);
     *shared_to = g_list_prepend (*shared_to, uobj);
     g_free (email_down);
 
@@ -422,7 +422,7 @@ seaf_share_manager_list_repo_shared_to (SeafShareManager *mgr,
                                         const char *repo_id,
                                         GError **error)
 {
-    GList *shared_to = NULL;
+    GList *shared_to = nullptr;
     char *sql = "SELECT to_email, permission, repo_id FROM SharedRepo WHERE "
                 "from_email=? AND repo_id=?";
 
@@ -437,7 +437,7 @@ seaf_share_manager_list_repo_shared_to (SeafShareManager *mgr,
             g_object_unref (shared_to->data);
             shared_to = g_list_delete_link (shared_to, shared_to);
         }
-        return NULL;
+        return nullptr;
     }
 
     return shared_to;
@@ -455,7 +455,7 @@ collect_repo_shared_group (SeafDBRow *row, void *data)
                                              "repo_id", repo_id,
                                              "group_id", group_id,
                                              "perm", perm,
-                                             NULL);
+                                             nullptr);
     *shared_group = g_list_prepend (*shared_group, gobj);
 
     return TRUE;
@@ -467,7 +467,7 @@ seaf_share_manager_list_repo_shared_group (SeafShareManager *mgr,
                                            const char *repo_id,
                                            GError **error)
 {
-    GList *shared_group = NULL;
+    GList *shared_group = nullptr;
     char *sql = "SELECT group_id, permission, repo_id FROM RepoGroup WHERE "
                 "user_name=? AND repo_id=?";
 
@@ -482,7 +482,7 @@ seaf_share_manager_list_repo_shared_group (SeafShareManager *mgr,
             g_object_unref (shared_group->data);
             shared_group = g_list_delete_link (shared_group, shared_group);
         }
-        return NULL;
+        return nullptr;
     }
 
     return shared_group;
@@ -510,7 +510,7 @@ get_shared_dirs_to_group (SeafDBRow *row, void *data)
 
     char *prev_perm = g_hash_table_lookup (dirs, path);
     if (g_strcmp0 (perm, prev_perm) != 0 &&
-        (prev_perm == NULL || g_strcmp0 (prev_perm, "r") == 0)) {
+        (prev_perm == nullptr || g_strcmp0 (prev_perm, "r") == 0)) {
         g_hash_table_replace (dirs, g_strdup (path), g_strdup (perm));
     }
 
@@ -529,7 +529,7 @@ convert_group_list_to_str (GList *groups)
 
     for (; iter; iter = iter->next) {
         group = iter->data;
-        g_object_get (group, "id", &group_id, NULL);
+        g_object_get (group, "id", &group_id, nullptr);
         g_string_append_printf (group_ids, "%d,", group_id);
     }
     group_ids = g_string_erase (group_ids, group_ids->len - 1, 1);
@@ -556,7 +556,7 @@ seaf_share_manager_get_shared_dirs_to_user (SeafShareManager *mgr,
         seaf_warning ("Failed to get all shared folder perms "
                       "in parent repo %.8s for user %s.\n", orig_repo_id, to_email);
         g_hash_table_destroy (dirs);
-        return NULL;
+        return nullptr;
     }
 
     return dirs;
@@ -587,7 +587,7 @@ seaf_share_manager_get_shared_dirs_to_group (SeafShareManager *mgr,
         seaf_warning ("Failed to get all shared folder perm from parent repo %.8s "
                       "to all user groups.\n", orig_repo_id);
         g_hash_table_destroy (dirs);
-        return NULL;
+        return nullptr;
     }
 
     return dirs;
@@ -670,7 +670,7 @@ seaf_share_manager_get_shared_sub_dirs (SeafShareManager *mgr,
                                         const char *path)
 {
     GHashTable *sub_dirs = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                  g_free, NULL);
+                                                  g_free, nullptr);
     char *pattern;
     if (strcmp (path, "/") == 0) {
         pattern = g_strdup_printf("%s%%", path);
@@ -688,7 +688,7 @@ seaf_share_manager_get_shared_sub_dirs (SeafShareManager *mgr,
         g_free (pattern);
         seaf_warning ("Failed to get shared sub dirs from db.\n");
         g_hash_table_destroy (sub_dirs);
-        return NULL;
+        return nullptr;
     }
 
     ret = seaf_db_statement_foreach_row (mgr->seaf->db,
@@ -702,7 +702,7 @@ seaf_share_manager_get_shared_sub_dirs (SeafShareManager *mgr,
     if (ret < 0) {
         seaf_warning ("Failed to get shared sub dirs from db.\n");
         g_hash_table_destroy (sub_dirs);
-        return NULL;
+        return nullptr;
     }
 
     return sub_dirs;
@@ -747,19 +747,19 @@ seaf_get_shared_repo_by_path (SeafRepoManager *mgr,
                               GError **error)
 {
     char *sql;
-    char *real_repo_id = NULL;
-    GList *repo = NULL;
-    GObject *ret = NULL;
+    char *real_repo_id = nullptr;
+    GList *repo = nullptr;
+    GObject *ret = nullptr;
 
-    /* If path is NULL, 'repo_id' represents for the repo we want,
+    /* If path is nullptr, 'repo_id' represents for the repo we want,
      * otherwise, 'repo_id' represents for the origin repo,
      * find virtual repo by path first.
      */
-    if (path != NULL) {
-        real_repo_id = seaf_repo_manager_get_virtual_repo_id (mgr, repo_id, path, NULL);
+    if (path != nullptr) {
+        real_repo_id = seaf_repo_manager_get_virtual_repo_id (mgr, repo_id, path, nullptr);
         if (!real_repo_id) {
             seaf_warning ("Failed to get virtual repo_id by path %s, origin_repo: %s\n", path, repo_id);
-            return NULL;
+            return nullptr;
         }
     }
     if (!real_repo_id)
@@ -804,7 +804,7 @@ seaf_get_shared_repo_by_path (SeafRepoManager *mgr,
             g_list_free (repo);
             seaf_warning ("[share mgr] DB error when get shared repo "
                           "for %s, path:%s\n", shared_to, path);
-            return NULL;
+            return nullptr;
     }
     g_free (real_repo_id);
     if (repo) {
@@ -874,7 +874,7 @@ get_shared_users_cb (SeafDBRow *row, void *data)
                                             "repo_id", repo_id,
                                             "user", user,
                                             "perm", perm,
-                                            NULL);
+                                            nullptr);
     *users = g_list_append (*users, uobj);
 
     return TRUE;
@@ -885,7 +885,7 @@ seaf_share_manager_org_get_shared_users_by_repo (SeafShareManager* mgr,
                                                  int org_id,
                                                  const char *repo_id)
 {
-    GList *users = NULL;
+    GList *users = nullptr;
     char *sql = "SELECT repo_id, to_email, permission FROM OrgSharedRepo WHERE org_id=? AND "
                 "repo_id=?";
 
@@ -895,7 +895,7 @@ seaf_share_manager_org_get_shared_users_by_repo (SeafShareManager* mgr,
     if (ret < 0) {
         seaf_warning("Failed to get users by repo_id[%s], org_id[%d]\n",
                      repo_id, org_id);
-        return NULL;
+        return nullptr;
     }
 
     return users;
@@ -906,7 +906,7 @@ GList *
 seaf_share_manager_get_shared_users_by_repo(SeafShareManager* mgr,
                                             const char *repo_id)
 {
-    GList *users = NULL;
+    GList *users = nullptr;
     char *sql = "SELECT repo_id, to_email, permission FROM SharedRepo WHERE "
                 "repo_id=?";
 
@@ -915,7 +915,7 @@ seaf_share_manager_get_shared_users_by_repo(SeafShareManager* mgr,
                                              1, "string", repo_id);
     if (ret < 0) {
         seaf_warning("Failed to get users by repo_id[%s]\n", repo_id);
-        return NULL;
+        return nullptr;
     }
 
     return users;

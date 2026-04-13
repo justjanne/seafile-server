@@ -45,7 +45,7 @@ seaf_metric_manager_start (SeafMetricManager *mgr)
     pthread_t tid;
     int rc;
 
-    rc = pthread_create (&tid, NULL, publish_metrics, mgr);
+    rc = pthread_create (&tid, nullptr, publish_metrics, mgr);
     if (rc != 0) {
         seaf_warning ("Failed to create publish metrics worker thread: %s.\n",
                       strerror(rc));
@@ -88,8 +88,8 @@ static int
 publish_in_flight_request (SeafMetricManager *mgr)
 {
     int ret = 0;
-    json_t *obj = NULL;
-    char *msg = NULL;
+    json_t *obj = nullptr;
+    char *msg = nullptr;
     SeafMetricManagerPriv *priv = mgr->priv;
 
     obj = json_object ();
@@ -137,5 +137,5 @@ publish_metrics (void *data)
         sleep(PUBLISH_INTERVAL);
     }
 
-    return NULL;
+    return nullptr;
 }

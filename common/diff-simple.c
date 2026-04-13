@@ -25,7 +25,7 @@ diff_entry_new_from_dirent (char type, char status,
     char *path;
 
     hex_to_rawdata (dent->id, sha1, 20);
-    path = g_strconcat (basedir, dent->name, NULL);
+    path = g_strconcat (basedir, dent->name, nullptr);
 
     de->type = type;
     de->status = status;
@@ -124,7 +124,7 @@ diff_directories (int n, SeafDirent *dents[], const char *basedir, DiffOptions *
 
     memset (sub_dirs, 0, sizeof(sub_dirs[0])*n);
     for (i = 0; i < n; ++i) {
-        if (dents[i] != NULL && S_ISDIR(dents[i]->mode)) {
+        if (dents[i] != nullptr && S_ISDIR(dents[i]->mode)) {
             dir = seaf_fs_manager_get_seafdir (seaf->fs_mgr,
                                                opt->store_id,
                                                opt->version,
@@ -141,7 +141,7 @@ diff_directories (int n, SeafDirent *dents[], const char *basedir, DiffOptions *
         }
     }
 
-    char *new_basedir = g_strconcat (basedir, dirname, "/", NULL);
+    char *new_basedir = g_strconcat (basedir, dirname, "/", nullptr);
 
     ret = diff_trees_recursive (n, sub_dirs, new_basedir, opt);
 
@@ -169,17 +169,17 @@ diff_trees_recursive (int n, SeafDir *trees[],
         if (trees[i])
             ptrs[i] = trees[i]->entries;
         else
-            ptrs[i] = NULL;
+            ptrs[i] = nullptr;
     }
 
     while (1) {
-        first_name = NULL;
+        first_name = nullptr;
         memset (dents, 0, sizeof(dents[0])*n);
         done = TRUE;
 
         /* Find the "largest" name, assuming dirents are sorted. */
         for (i = 0; i < n; ++i) {
-            if (ptrs[i] != NULL) {
+            if (ptrs[i] != nullptr) {
                 done = FALSE;
                 dent = ptrs[i]->data;
                 if (!first_name)
@@ -196,7 +196,7 @@ diff_trees_recursive (int n, SeafDir *trees[],
          * Setup dir entries for all names that equal to first_name
          */
         for (i = 0; i < n; ++i) {
-            if (ptrs[i] != NULL) {
+            if (ptrs[i] != nullptr) {
                 dent = ptrs[i]->data;
                 if (strcmp(first_name, dent->name) == 0) {
                     dents[i] = dent;
@@ -336,7 +336,7 @@ int
 diff_commits (SeafCommit *commit1, SeafCommit *commit2, GList **results,
               gboolean fold_dir_diff)
 {
-    SeafRepo *repo = NULL;
+    SeafRepo *repo = nullptr;
     DiffOptions opt;
     const char *roots[2];
 
@@ -456,14 +456,14 @@ threeway_diff_dirs (int n, const char *basedir, SeafDirent *dirs[], void *vdata,
 int
 diff_merge (SeafCommit *merge, GList **results, gboolean fold_dir_diff)
 {
-    SeafRepo *repo = NULL;
+    SeafRepo *repo = nullptr;
     DiffOptions opt;
     const char *roots[3];
     SeafCommit *parent1, *parent2;
 
-    g_return_val_if_fail (*results == NULL, -1);
-    g_return_val_if_fail (merge->parent_id != NULL &&
-                          merge->second_parent_id != NULL,
+    g_return_val_if_fail (*results == nullptr, -1);
+    g_return_val_if_fail (merge->parent_id != nullptr &&
+                          merge->second_parent_id != nullptr,
                           -1);
 
     repo = seaf_repo_manager_get_repo (seaf->repo_mgr, merge->repo_id);
@@ -527,7 +527,7 @@ diff_merge_roots (const char *store_id, int version,
     DiffOptions opt;
     const char *roots[3];
 
-    g_return_val_if_fail (*results == NULL, -1);
+    g_return_val_if_fail (*results == nullptr, -1);
 
     DiffData data;
     memset (&data, 0, sizeof(data));
@@ -558,9 +558,9 @@ diff_merge_roots (const char *store_id, int version,
 void
 diff_resolve_renames (GList **diff_entries)
 {
-    GHashTable *deleted_files = NULL, *deleted_dirs = NULL;
+    GHashTable *deleted_files = nullptr, *deleted_dirs = nullptr;
     GList *p;
-    GList *added = NULL;
+    GList *added = nullptr;
     DiffEntry *de;
     unsigned char empty_sha1[20];
     unsigned int deleted_empty_count = 0, deleted_empty_dir_count = 0;
@@ -574,7 +574,7 @@ diff_resolve_renames (GList **diff_entries)
     deleted_files = g_hash_table_new (ccnet_sha1_hash, ccnet_sha1_equal);
 
     /* Count deleted and added entries of which content is empty. */
-    for (p = *diff_entries; p != NULL; p = p->next) {
+    for (p = *diff_entries; p != nullptr; p = p->next) {
         de = p->data;
         if (memcmp (de->sha1, empty_sha1, 20) == 0) {
             if (de->status == DIFF_STATUS_DELETED)
@@ -592,7 +592,7 @@ diff_resolve_renames (GList **diff_entries)
     check_empty_file = (deleted_empty_count == 1 && added_empty_count == 1);
 
     /* Collect all "deleted" entries. */
-    for (p = *diff_entries; p != NULL; p = p->next) {
+    for (p = *diff_entries; p != nullptr; p = p->next) {
         de = p->data;
         if (de->status == DIFF_STATUS_DELETED) {
             if (memcmp (de->sha1, empty_sha1, 20) == 0 &&
@@ -612,7 +612,7 @@ diff_resolve_renames (GList **diff_entries)
     }
 
     /* Collect all "added" entries into a separate list. */
-    for (p = *diff_entries; p != NULL; p = p->next) {
+    for (p = *diff_entries; p != nullptr; p = p->next) {
         de = p->data;
         if (de->status == DIFF_STATUS_ADDED) {
             if (memcmp (de->sha1, empty_sha1, 20) == 0 &&
@@ -635,7 +635,7 @@ diff_resolve_renames (GList **diff_entries)
      * the same content, we find a rename pair.
      */
     p = added;
-    while (p != NULL) {
+    while (p != nullptr) {
         GList *p_add, *p_del;
         DiffEntry *de_add, *de_del, *de_rename;
         int rename_status;
@@ -715,20 +715,20 @@ is_redundant_empty_dir (DiffEntry *de_dir, DiffEntry *de_file)
 void
 diff_resolve_empty_dirs (GList **diff_entries)
 {
-    GList *empty_dirs = NULL;
+    GList *empty_dirs = nullptr;
     GList *p, *dir, *file;
     DiffEntry *de, *de_dir, *de_file;
 
-    for (p = *diff_entries; p != NULL; p = p->next) {
+    for (p = *diff_entries; p != nullptr; p = p->next) {
         de = p->data;
         if (de->status == DIFF_STATUS_DIR_ADDED ||
             de->status == DIFF_STATUS_DIR_DELETED)
             empty_dirs = g_list_prepend (empty_dirs, p);
     }
 
-    for (dir = empty_dirs; dir != NULL; dir = dir->next) {
+    for (dir = empty_dirs; dir != nullptr; dir = dir->next) {
         de_dir = ((GList *)dir->data)->data;
-        for (file = *diff_entries; file != NULL; file = file->next) {
+        for (file = *diff_entries; file != nullptr; file = file->next) {
             de_file = file->data;
             if (is_redundant_empty_dir (de_dir, de_file)) {
                 *diff_entries = g_list_delete_link (*diff_entries, dir->data);
@@ -803,17 +803,17 @@ diff_results_to_description (GList *results)
 {
     GList *p;
     DiffEntry *de;
-    char *add_mod_file = NULL, *removed_file = NULL;
-    char *renamed_file = NULL, *renamed_dir = NULL;
-    char *new_dir = NULL, *removed_dir = NULL;
+    char *add_mod_file = nullptr, *removed_file = nullptr;
+    char *renamed_file = nullptr, *renamed_dir = nullptr;
+    char *new_dir = nullptr, *removed_dir = nullptr;
     int n_add_mod = 0, n_removed = 0, n_renamed = 0;
     int n_new_dir = 0, n_removed_dir = 0, n_renamed_dir = 0;
     GString *desc;
 
-    if (results == NULL)
-        return NULL;
+    if (results == nullptr)
+        return nullptr;
 
-    for (p = results; p != NULL; p = p->next) {
+    for (p = results; p != nullptr; p = p->next) {
         de = p->data;
         switch (de->status) {
         case DIFF_STATUS_ADDED:

@@ -161,10 +161,10 @@ seaf_passwd_manager_set_passwd (SeafPasswdManager *mgr,
                      "Incorrect password");
         return -1;
     }
-    crypt_key->expire_time = (guint64)time(NULL) + REAP_THRESHOLD;
+    crypt_key->expire_time = (guint64)time(nullptr) + REAP_THRESHOLD;
     crypt_key->enc_version = repo->enc_version;
 
-    hash_key = g_string_new (NULL);
+    hash_key = g_string_new (nullptr);
     g_string_printf (hash_key, "%s.%s", repo_id, user);
 
     /* g_debug ("[passwd mgr] Set passwd for %s\n", hash_key->str); */
@@ -185,7 +185,7 @@ seaf_passwd_manager_unset_passwd (SeafPasswdManager *mgr,
 {
     GString *hash_key;
 
-    hash_key = g_string_new (NULL);
+    hash_key = g_string_new (nullptr);
     g_string_printf (hash_key, "%s.%s", repo_id, user);
     g_hash_table_remove (mgr->priv->decrypt_keys, hash_key->str);
     g_string_free (hash_key, TRUE);
@@ -198,12 +198,12 @@ seaf_passwd_manager_is_passwd_set (SeafPasswdManager *mgr,
                                    const char *repo_id,
                                    const char *user)
 {
-    GString *key = g_string_new (NULL);
+    GString *key = g_string_new (nullptr);
     gboolean ret = FALSE;
 
     g_string_printf (key, "%s.%s", repo_id, user);
     /* g_debug ("[passwd mgr] check passwd for %s\n", key->str); */
-    if (g_hash_table_lookup (mgr->priv->decrypt_keys, key->str) != NULL)
+    if (g_hash_table_lookup (mgr->priv->decrypt_keys, key->str) != nullptr)
         ret = TRUE;
     g_string_free (key, TRUE);
 
@@ -220,7 +220,7 @@ seaf_passwd_manager_get_decrypt_key (SeafPasswdManager *mgr,
     SeafileCryptKey *ret;
     char key_hex[65], iv_hex[65];
 
-    hash_key = g_string_new (NULL);
+    hash_key = g_string_new (nullptr);
     g_string_printf (hash_key, "%s.%s", repo_id, user);
 
     /* g_debug ("[passwd mgr] get passwd for %s.\n", hash_key->str); */
@@ -228,7 +228,7 @@ seaf_passwd_manager_get_decrypt_key (SeafPasswdManager *mgr,
     crypt_key = g_hash_table_lookup (mgr->priv->decrypt_keys, hash_key->str);
     if (!crypt_key) {
         g_string_free (hash_key, TRUE);
-        return NULL;
+        return nullptr;
     }
 
     if (crypt_key->enc_version >= 2) {
@@ -240,7 +240,7 @@ seaf_passwd_manager_get_decrypt_key (SeafPasswdManager *mgr,
     }
 
     ret = seafile_crypt_key_new ();
-    g_object_set (ret, "key", key_hex, "iv", iv_hex, NULL);
+    g_object_set (ret, "key", key_hex, "iv", iv_hex, nullptr);
 
     g_string_free (hash_key, TRUE);
     return ret;
@@ -256,7 +256,7 @@ seaf_passwd_manager_get_decrypt_key_raw (SeafPasswdManager *mgr,
     GString *hash_key;
     DecryptKey *crypt_key;
 
-    hash_key = g_string_new (NULL);
+    hash_key = g_string_new (nullptr);
     g_string_printf (hash_key, "%s.%s", repo_id, user);
 
     crypt_key = g_hash_table_lookup (mgr->priv->decrypt_keys, hash_key->str);
@@ -284,7 +284,7 @@ reap_expired_passwd (void *vmgr)
     GHashTableIter iter;
     gpointer key, value;
     DecryptKey *crypt_key;
-    guint64 now = (guint64)time(NULL);
+    guint64 now = (guint64)time(nullptr);
 
     g_hash_table_iter_init (&iter, mgr->priv->decrypt_keys);
     while (g_hash_table_iter_next (&iter, &key, &value)) {

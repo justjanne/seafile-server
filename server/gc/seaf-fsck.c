@@ -8,25 +8,25 @@
 
 #include "utils.h"
 
-static char *ccnet_dir = NULL;
-static char *seafile_dir = NULL;
-static char *central_config_dir = NULL;
+static char *ccnet_dir = nullptr;
+static char *seafile_dir = nullptr;
+static char *central_config_dir = nullptr;
 
 SeafileSession *seaf;
 
 static const char *short_opts = "hvft:c:d:rE:F:sS";
 static const struct option long_opts[] = {
-    { "help", no_argument, NULL, 'h', },
-    { "version", no_argument, NULL, 'v', },
-    { "force", no_argument, NULL, 'f', },
-    { "repair", no_argument, NULL, 'r', },
-    { "threads", required_argument, NULL, 't', },
-    { "export", required_argument, NULL, 'E', },
-    { "config-file", required_argument, NULL, 'c', },
-    { "central-config-dir", required_argument, NULL, 'F' },
-    { "seafdir", required_argument, NULL, 'd', },
-    { "shallow", no_argument, NULL, 's', },
-    { "check-file-size", no_argument, NULL, 'S' },
+    { "help", no_argument, nullptr, 'h', },
+    { "version", no_argument, nullptr, 'v', },
+    { "force", no_argument, nullptr, 'f', },
+    { "repair", no_argument, nullptr, 'r', },
+    { "threads", required_argument, nullptr, 't', },
+    { "export", required_argument, nullptr, 'E', },
+    { "config-file", required_argument, nullptr, 'c', },
+    { "central-config-dir", required_argument, nullptr, 'F' },
+    { "seafdir", required_argument, nullptr, 'd', },
+    { "shallow", no_argument, nullptr, 's', },
+    { "check-file-size", no_argument, nullptr, 'S' },
     { 0, 0, 0, 0, },
 };
 
@@ -42,15 +42,15 @@ static char **
 get_argv_utf8 (int *argc)
 {
     int i = 0;
-    char **argv = NULL;
-    const wchar_t *cmdline = NULL;
-    wchar_t **argv_w = NULL;
+    char **argv = nullptr;
+    const wchar_t *cmdline = nullptr;
+    wchar_t **argv_w = nullptr;
 
     cmdline = GetCommandLineW();
     argv_w = CommandLineToArgvW (cmdline, argc);
     if (!argv_w) {
         printf("failed to CommandLineToArgvW(), GLE=%lu\n", GetLastError());
-        return NULL;
+        return nullptr;
     }
 
     argv = (char **)malloc (sizeof(char*) * (*argc));
@@ -95,7 +95,7 @@ main(int argc, char *argv[])
     gboolean force = FALSE;
     gboolean check_integrity = TRUE;
     gboolean check_file_size = FALSE;
-    char *export_path = NULL;
+    char *export_path = nullptr;
     int max_thread_num = 0;
 
 #ifdef WIN32
@@ -105,7 +105,7 @@ main(int argc, char *argv[])
     ccnet_dir = DEFAULT_CONFIG_DIR;
 
     while ((c = getopt_long(argc, argv,
-                short_opts, long_opts, NULL)) != EOF) {
+                short_opts, long_opts, nullptr)) != EOF) {
         switch (c) {
         case 'h':
             usage();
@@ -155,8 +155,8 @@ main(int argc, char *argv[])
         exit (1);
     }
 
-    if (seafile_dir == NULL)
-        seafile_dir = g_build_filename (ccnet_dir, "seafile-data", NULL);
+    if (seafile_dir == nullptr)
+        seafile_dir = g_build_filename (ccnet_dir, "seafile-data", nullptr);
 
 #ifdef __linux__
     uid_t current_user, seafile_user;
@@ -169,13 +169,13 @@ main(int argc, char *argv[])
 #endif
 
     seaf = seafile_session_new(central_config_dir, seafile_dir, ccnet_dir,
-                               export_path == NULL);
+                               export_path == nullptr);
     if (!seaf) {
         seaf_warning ("Failed to create seafile session.\n");
         exit (1);
     }
 
-    GList *repo_id_list = NULL;
+    GList *repo_id_list = nullptr;
     int i;
     for (i = optind; i < argc; i++)
         repo_id_list = g_list_append (repo_id_list, g_strdup(argv[i]));

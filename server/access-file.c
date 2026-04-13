@@ -154,7 +154,7 @@ static struct file_type_map ftmap[] = {
     { "psd", "image/vnd.adobe.photoshop" },
     { "webp", "image/webp" },
     { "jfif", "image/jpeg" },
-    { NULL, NULL },
+    { nullptr, nullptr },
 };
 
 static void
@@ -250,7 +250,7 @@ write_block_data_cb (struct bufferevent *bev, void *ctx)
         /* We've read up the data of this block, finish. */
         seaf_block_manager_close_block (seaf->block_mgr, handle);
         seaf_block_manager_block_handle_free (seaf->block_mgr, handle);
-        data->handle = NULL;
+        data->handle = nullptr;
 
         /* Recover evhtp's callbacks */
         bev->readcb = data->saved_read_cb;
@@ -332,8 +332,8 @@ next:
         /* We've read up the data of this block, finish or try next block. */
         seaf_block_manager_close_block (seaf->block_mgr, handle);
         seaf_block_manager_block_handle_free (seaf->block_mgr, handle);
-        data->handle = NULL;
-        if (data->crypt != NULL) {
+        data->handle = nullptr;
+        if (data->crypt != nullptr) {
             EVP_CIPHER_CTX_free (data->ctx);
             data->enc_init = FALSE;
         }
@@ -366,7 +366,7 @@ next:
     }
 
     /* OK, we've got some data to send. */
-    if (data->crypt != NULL) {
+    if (data->crypt != nullptr) {
         char *dec_out;
         int dec_out_len = -1;
         struct evbuffer *tmp_buf;
@@ -517,13 +517,13 @@ parse_content_type(const char *filename)
     char *p;
     int i;
 
-    if ((p = strrchr(filename, '.')) == NULL)
-        return NULL;
+    if ((p = strrchr(filename, '.')) == nullptr)
+        return nullptr;
     p++;
 
     char *lower = g_utf8_strdown (p, strlen(p));
 
-    for (i = 0; ftmap[i].suffix != NULL; i++) {
+    for (i = 0; ftmap[i].suffix != nullptr; i++) {
         if (strcmp(lower, ftmap[i].suffix) == 0) {
             g_free (lower);
             return ftmap[i].type;
@@ -531,7 +531,7 @@ parse_content_type(const char *filename)
     }
 
     g_free (lower);
-    return NULL;
+    return nullptr;
 }
 
 static gboolean
@@ -558,26 +558,26 @@ do_file(evhtp_request_t *req, SeafRepo *repo, const char *file_id,
         SeafileCryptKey *crypt_key, const char *user)
 {
     Seafile *file;
-    char *type = NULL;
+    char *type = nullptr;
     char file_size[255];
-    gchar *content_type = NULL;
+    gchar *content_type = nullptr;
     char cont_filename[SEAF_PATH_MAX];
     char *key_hex, *iv_hex;
     unsigned char enc_key[32], enc_iv[16];
-    SeafileCrypt *crypt = NULL;
+    SeafileCrypt *crypt = nullptr;
     SendfileData *data;
     char *policy = "sandbox";
 
     file = seaf_fs_manager_get_seafile(seaf->fs_mgr,
                                        repo->store_id, repo->version, file_id);
-    if (file == NULL)
+    if (file == nullptr)
         return -1;
 
-    if (crypt_key != NULL) {
+    if (crypt_key != nullptr) {
         g_object_get (crypt_key,
                       "key", &key_hex,
                       "iv", &iv_hex,
-                      NULL);
+                      nullptr);
         if (repo->enc_version == 1)
             hex_to_rawdata (key_hex, enc_key, 16);
         else
@@ -593,9 +593,9 @@ do_file(evhtp_request_t *req, SeafRepo *repo, const char *file_id,
                                               "*", 1, 1));
 
     type = parse_content_type(filename);
-    if (type != NULL) {
+    if (type != nullptr) {
         if (strstr(type, "text")) {
-            content_type = g_strjoin("; ", type, "charset=gbk", NULL);
+            content_type = g_strjoin("; ", type, "charset=gbk", nullptr);
         } else {
             content_type = g_strdup (type);
         }
@@ -619,7 +619,7 @@ do_file(evhtp_request_t *req, SeafRepo *repo, const char *file_id,
     evhtp_headers_add_header (req->headers_out,
                               evhtp_header_new("Content-Length", file_size, 1, 1));
 
-    char *esc_filename = g_uri_escape_string(filename, NULL, FALSE);
+    char *esc_filename = g_uri_escape_string(filename, nullptr, FALSE);
     if (strcmp(operation, "download") == 0 ||
         strcmp(operation, "download-link") == 0) {
         /* Safari doesn't support 'utf8', 'utf-8' is compatible with most of browsers. */
@@ -674,7 +674,7 @@ do_file(evhtp_request_t *req, SeafRepo *repo, const char *file_id,
     data->saved_event_cb = bev->errorcb;
     data->saved_cb_arg = bev->cbarg;
     bufferevent_setcb (bev,
-                       NULL,
+                       nullptr,
                        write_data_cb,
                        my_event_cb,
                        data);
@@ -694,7 +694,7 @@ static BlockHandle *
 get_start_block_handle (const char *store_id, int version, Seafile *file,
                         guint64 start, int *blk_idx)
 {
-    BlockHandle *handle = NULL;
+    BlockHandle *handle = nullptr;
     BlockMetadata *bmd;
     char *blkid;
     guint64 tolsize = 0;
@@ -706,7 +706,7 @@ get_start_block_handle (const char *store_id, int version, Seafile *file,
         bmd = seaf_block_manager_stat_block(seaf->block_mgr, store_id,
                                             version, blkid);
         if (!bmd)
-            return NULL;
+            return nullptr;
 
         if (start < tolsize + bmd->size) {
             g_free (bmd);
@@ -718,14 +718,14 @@ get_start_block_handle (const char *store_id, int version, Seafile *file,
 
     /* beyond the file size */
     if (i == file->n_blocks)
-        return NULL;
+        return nullptr;
 
     handle = seaf_block_manager_open_block(seaf->block_mgr,
                                            store_id, version,
                                            blkid, BLOCK_READ);
     if (!handle) {
         seaf_warning ("Failed to open block %s:%s.\n", store_id, blkid);
-        return NULL;
+        return nullptr;
     }
 
     /* trim the offset in a block */
@@ -750,7 +750,7 @@ get_start_block_handle (const char *store_id, int version, Seafile *file,
 err:
     seaf_block_manager_close_block(seaf->block_mgr, handle);
     seaf_block_manager_block_handle_free (seaf->block_mgr, handle);
-    return NULL;
+    return nullptr;
 }
 
 static void
@@ -812,7 +812,7 @@ next:
     } else if (n == 0) {
         seaf_block_manager_close_block (seaf->block_mgr, data->handle);
         seaf_block_manager_block_handle_free (seaf->block_mgr, data->handle);
-        data->handle = NULL;
+        data->handle = nullptr;
         ++data->blk_idx;
         goto next;
     }
@@ -915,8 +915,8 @@ static void
 set_resp_disposition (evhtp_request_t *req, const char *operation,
                       const char *filename)
 {
-    char *cont_filename = NULL;
-    char *esc_filename = g_uri_escape_string(filename, NULL, FALSE);
+    char *cont_filename = nullptr;
+    char *esc_filename = g_uri_escape_string(filename, nullptr, FALSE);
 
     if (strcmp(operation, "download") == 0) {
         cont_filename = g_strdup_printf("attachment;filename*=utf-8''%s;filename=\"%s\"",
@@ -939,14 +939,14 @@ do_file_range (evhtp_request_t *req, SeafRepo *repo, const char *file_id,
                const char *user)
 {
     Seafile *file;
-    SendFileRangeData *data = NULL;
+    SendFileRangeData *data = nullptr;
     guint64 start;
     guint64 end;
     char *policy = "sandbox";
 
     file = seaf_fs_manager_get_seafile(seaf->fs_mgr,
                                        repo->store_id, repo->version, file_id);
-    if (file == NULL)
+    if (file == nullptr)
         return -1;
 
     /* If it's an empty file, send an empty reply. */
@@ -970,11 +970,11 @@ do_file_range (evhtp_request_t *req, SeafRepo *repo, const char *file_id,
     evhtp_headers_add_header (req->headers_out,
                               evhtp_header_new ("Accept-Ranges", "bytes", 0, 0));
 
-    char *content_type = NULL;
+    char *content_type = nullptr;
     char *type = parse_content_type (filename);
-    if (type != NULL) {
+    if (type != nullptr) {
         if (strstr(type, "text")) {
-            content_type = g_strjoin("; ", type, "charset=gbk", NULL);
+            content_type = g_strjoin("; ", type, "charset=gbk", nullptr);
         } else {
             content_type = g_strdup (type);
         }
@@ -1037,7 +1037,7 @@ do_file_range (evhtp_request_t *req, SeafRepo *repo, const char *file_id,
     data->saved_event_cb = bev->errorcb;
     data->saved_cb_arg = bev->cbarg;
     bufferevent_setcb (bev,
-                       NULL,
+                       nullptr,
                        write_file_range_cb,
                        file_range_event_cb,
                        data);
@@ -1077,7 +1077,7 @@ start_download_zip_file (evhtp_request_t *req, const char *token,
             evhtp_header_new("Content-Length", file_size, 1, 1));
 
     char *zippath = g_strdup_printf("%s.zip", zipname);
-    char *esc_zippath = g_uri_escape_string(zippath, NULL, FALSE);
+    char *esc_zippath = g_uri_escape_string(zippath, nullptr, FALSE);
 
     snprintf(cont_filename, SEAF_PATH_MAX,
              "attachment;filename*=utf-8''%s;filename=\"%s\"", esc_zippath, zippath);
@@ -1115,7 +1115,7 @@ start_download_zip_file (evhtp_request_t *req, const char *token,
     data->saved_event_cb = bev->errorcb;
     data->saved_cb_arg = bev->cbarg;
     bufferevent_setcb (bev,
-                       NULL,
+                       nullptr,
                        write_dir_data_cb,
                        my_dir_event_cb,
                        data);
@@ -1156,14 +1156,14 @@ set_no_cache (evhtp_request_t *req, gboolean private_cache)
 static gboolean
 can_use_cached_content (evhtp_request_t *req)
 {
-    if (evhtp_kv_find (req->headers_in, "If-Modified-Since") != NULL) {
+    if (evhtp_kv_find (req->headers_in, "If-Modified-Since") != nullptr) {
         evhtp_send_reply (req, EVHTP_RES_NOTMOD);
         return TRUE;
     }
 
     char http_date[256];
     evhtp_kv_t *kv;
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
 
     /* Set Last-Modified header if the client gets this file
      * for the first time. So that the client will set
@@ -1190,16 +1190,16 @@ static void
 access_zip_cb (evhtp_request_t *req, void *arg)
 {
     char *token;
-    SeafileWebAccess *info = NULL;
-    char *info_str = NULL;
-    json_t *info_obj = NULL;
+    SeafileWebAccess *info = nullptr;
+    char *info_str = nullptr;
+    json_t *info_obj = nullptr;
     json_error_t jerror;
-    char *filename = NULL;
-    char *repo_id = NULL;
-    char *user = NULL;
+    char *filename = nullptr;
+    char *repo_id = nullptr;
+    char *user = nullptr;
     char *zip_file_path;
-    char *token_type = NULL;
-    const char *error = NULL;
+    char *token_type = nullptr;
+    const char *error = nullptr;
     int error_code;
 
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
@@ -1219,7 +1219,7 @@ access_zip_cb (evhtp_request_t *req, void *arg)
         goto out;
     }
 
-    g_object_get (info, "obj_id", &info_str, NULL);
+    g_object_get (info, "obj_id", &info_str, nullptr);
     if (!info_str) {
         seaf_warning ("Invalid obj_id for token: %s.\n", token);
         error = "Internal server error\n";
@@ -1240,10 +1240,10 @@ access_zip_cb (evhtp_request_t *req, void *arg)
         filename = g_strdup (json_object_get_string_member (info_obj, "dir_name"));
     } else if (json_object_has_member (info_obj, "file_list")) {
         // Download multi
-        time_t now = time(NULL);
+        time_t now = time(nullptr);
         char date_str[11];
         strftime(date_str, sizeof(date_str), "%Y-%m-%d", localtime(&now));
-        filename = g_strconcat (MULTI_DOWNLOAD_FILE_PREFIX, date_str, NULL);
+        filename = g_strconcat (MULTI_DOWNLOAD_FILE_PREFIX, date_str, nullptr);
     } else {
         seaf_warning ("No dir_name or file_list in obj_id for token: %s.\n", token);
         error = "Internal server error\n";
@@ -1253,7 +1253,7 @@ access_zip_cb (evhtp_request_t *req, void *arg)
 
     zip_file_path = zip_download_mgr_get_zip_file_path (seaf->zip_download_mgr, token);
     if (!zip_file_path) {
-        g_object_get (info, "repo_id", &repo_id, NULL);
+        g_object_get (info, "repo_id", &repo_id, nullptr);
         seaf_warning ("Failed to get zip file path for %s in repo %.8s, token:[%s].\n",
                       filename, repo_id, token);
         error = "Internal server error\n";
@@ -1267,9 +1267,9 @@ access_zip_cb (evhtp_request_t *req, void *arg)
         goto out;
     }
 
-    g_object_get (info, "username", &user, NULL);
-    g_object_get (info, "repo_id", &repo_id, NULL);
-    g_object_get (info, "op", &token_type, NULL);
+    g_object_get (info, "username", &user, nullptr);
+    g_object_get (info, "repo_id", &repo_id, nullptr);
+    g_object_get (info, "op", &token_type, nullptr);
     int ret = start_download_zip_file (req, token, filename, zip_file_path, repo_id, user, token_type);
     if (ret < 0) {
         seaf_warning ("Failed to start download zip file: %s for token: %s", filename, token);
@@ -1305,14 +1305,14 @@ static void
 access_zip_link_cb (evhtp_request_t *req, void *arg)
 {
     char *token;
-    char *user = NULL;
+    char *user = nullptr;
     char *zip_file_path;
     char *zip_file_name;
-    const char *repo_id = NULL;
-    const char *task_id = NULL;
-    const char *error = NULL;
+    const char *repo_id = nullptr;
+    const char *task_id = nullptr;
+    const char *error = nullptr;
     int error_code;
-    SeafileShareLinkInfo *info = NULL;
+    SeafileShareLinkInfo *info = nullptr;
 
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     if (g_strv_length (parts) != 2) {
@@ -1385,20 +1385,20 @@ out:
 static void
 access_cb(evhtp_request_t *req, void *arg)
 {
-    SeafRepo *repo = NULL;
-    char *error = NULL;
-    char *token = NULL;
-    char *filename = NULL;
-    char *dec_filename = NULL;
-    const char *repo_id = NULL;
-    const char *data = NULL;
-    const char *operation = NULL;
-    const char *user = NULL;
-    const char *byte_ranges = NULL;
+    SeafRepo *repo = nullptr;
+    char *error = nullptr;
+    char *token = nullptr;
+    char *filename = nullptr;
+    char *dec_filename = nullptr;
+    const char *repo_id = nullptr;
+    const char *data = nullptr;
+    const char *operation = nullptr;
+    const char *user = nullptr;
+    const char *byte_ranges = nullptr;
     int error_code = EVHTP_RES_BADREQ;
 
-    SeafileCryptKey *key = NULL;
-    SeafileWebAccess *webaccess = NULL;
+    SeafileCryptKey *key = nullptr;
+    SeafileWebAccess *webaccess = nullptr;
 
     /* Skip the first '/'. */
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
@@ -1412,7 +1412,7 @@ access_cb(evhtp_request_t *req, void *arg)
     filename = parts[2];
 
     // The filename is url-encoded.
-    dec_filename = g_uri_unescape_string(filename, NULL);
+    dec_filename = g_uri_unescape_string(filename, nullptr);
 
     webaccess = seaf_web_at_manager_query_access_token (seaf->web_at_mgr, token);
     if (!webaccess) {
@@ -1478,9 +1478,9 @@ access_cb(evhtp_request_t *req, void *arg)
 success:
     g_free (dec_filename);
     g_strfreev (parts);
-    if (repo != NULL)
+    if (repo != nullptr)
         seaf_repo_unref (repo);
-    if (key != NULL)
+    if (key != nullptr)
         g_object_unref (key);
     if (webaccess)
         g_object_unref (webaccess);
@@ -1490,11 +1490,11 @@ success:
 on_error:
     g_free (dec_filename);
     g_strfreev (parts);
-    if (repo != NULL)
+    if (repo != nullptr)
         seaf_repo_unref (repo);
-    if (key != NULL)
+    if (key != nullptr)
         g_object_unref (key);
-    if (webaccess != NULL)
+    if (webaccess != nullptr)
         g_object_unref (webaccess);
 
     evbuffer_add_printf(req->buffer_out, "%s\n", error);
@@ -1504,27 +1504,27 @@ on_error:
 static void
 access_v2_cb(evhtp_request_t *req, void *arg)
 {
-    SeafRepo *repo = NULL;
-    char *error_str = NULL;
-    char *err_msg = NULL;
-    char *token = NULL;
-    char *user = NULL;
-    char *dec_path = NULL;
-    char *rpath = NULL;
-    char *filename = NULL;
-    char *file_id = NULL;
-    char *ip_addr = NULL;
-    const char *repo_id = NULL;
-    const char *path = NULL;
-    const char *operation = NULL;
-    const char *byte_ranges = NULL;
-    const char *auth_token = NULL;
-    const char *cookie = NULL;
-    const char *user_agent = NULL;
+    SeafRepo *repo = nullptr;
+    char *error_str = nullptr;
+    char *err_msg = nullptr;
+    char *token = nullptr;
+    char *user = nullptr;
+    char *dec_path = nullptr;
+    char *rpath = nullptr;
+    char *filename = nullptr;
+    char *file_id = nullptr;
+    char *ip_addr = nullptr;
+    const char *repo_id = nullptr;
+    const char *path = nullptr;
+    const char *operation = nullptr;
+    const char *byte_ranges = nullptr;
+    const char *auth_token = nullptr;
+    const char *cookie = nullptr;
+    const char *user_agent = nullptr;
     int error_code = EVHTP_RES_BADREQ;
 
-    SeafileCryptKey *key = NULL;
-    GError *error = NULL;
+    SeafileCryptKey *key = nullptr;
+    GError *error = nullptr;
 
     /* Skip the first '/'. */
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 4);
@@ -1541,7 +1541,7 @@ access_v2_cb(evhtp_request_t *req, void *arg)
         error_str = "No file path\n";
         goto out;
     }
-    dec_path = g_uri_unescape_string(path, NULL);
+    dec_path = g_uri_unescape_string(path, nullptr);
     rpath = format_dir_path (dec_path);
     filename = g_path_get_basename (rpath);
 
@@ -1641,9 +1641,9 @@ out:
     g_free (filename);
     g_free (file_id);
     g_free (ip_addr);
-    if (repo != NULL)
+    if (repo != nullptr)
         seaf_repo_unref (repo);
-    if (key != NULL)
+    if (key != nullptr)
         g_object_unref (key);
 
     if (error_code != EVHTP_RES_OK) {
@@ -1667,7 +1667,7 @@ do_block(evhtp_request_t *req, SeafRepo *repo, const char *user, const char *fil
 
     file = seaf_fs_manager_get_seafile(seaf->fs_mgr,
                                        repo->store_id, repo->version, file_id);
-    if (file == NULL)
+    if (file == nullptr)
         return -1;
 
     for (i = 0; i < file->n_blocks; i++) {
@@ -1729,7 +1729,7 @@ do_block(evhtp_request_t *req, SeafRepo *repo, const char *user, const char *fil
     data->saved_cb_arg = bev->cbarg;
     data->bsize = bsize;
     bufferevent_setcb (bev,
-                       NULL,
+                       nullptr,
                        write_block_data_cb,
                        my_block_event_cb,
                        data);
@@ -1747,18 +1747,18 @@ do_block(evhtp_request_t *req, SeafRepo *repo, const char *user, const char *fil
 static void
 access_blks_cb(evhtp_request_t *req, void *arg)
 {
-    SeafRepo *repo = NULL;
-    char *error = NULL;
-    char *token = NULL;
-    char *blkid = NULL;
-    const char *repo_id = NULL;
-    const char *id = NULL;
-    const char *operation = NULL;
-    const char *user = NULL;
+    SeafRepo *repo = nullptr;
+    char *error = nullptr;
+    char *token = nullptr;
+    char *blkid = nullptr;
+    const char *repo_id = nullptr;
+    const char *id = nullptr;
+    const char *operation = nullptr;
+    const char *user = nullptr;
     int error_code = EVHTP_RES_BADREQ;
 
-    char *repo_role = NULL;
-    SeafileWebAccess *webaccess = NULL;
+    char *repo_role = nullptr;
+    SeafileWebAccess *webaccess = nullptr;
 
     /* Skip the first '/'. */
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
@@ -1809,7 +1809,7 @@ access_blks_cb(evhtp_request_t *req, void *arg)
 
 success:
     g_strfreev (parts);
-    if (repo != NULL)
+    if (repo != nullptr)
         seaf_repo_unref (repo);
     g_free (repo_role);
     g_object_unref (webaccess);
@@ -1818,10 +1818,10 @@ success:
 
 on_error:
     g_strfreev (parts);
-    if (repo != NULL)
+    if (repo != nullptr)
         seaf_repo_unref (repo);
     g_free (repo_role);
-    if (webaccess != NULL)
+    if (webaccess != nullptr)
         g_object_unref (webaccess);
 
     evbuffer_add_printf(req->buffer_out, "%s\n", error);
@@ -1831,24 +1831,24 @@ on_error:
 static void
 access_link_cb(evhtp_request_t *req, void *arg)
 {
-    SeafRepo *repo = NULL;
-    char *error_str = NULL;
-    char *token = NULL;
-    char *rpath = NULL;
-    char *filename = NULL;
-    char *file_id = NULL;
-    char *user = NULL;
-    char *norm_file_path = NULL;
-    const char *repo_id = NULL;
-    const char *file_path = NULL;
-    const char *share_type = NULL;
-    const char *byte_ranges = NULL;
-    const char *operation = NULL;
+    SeafRepo *repo = nullptr;
+    char *error_str = nullptr;
+    char *token = nullptr;
+    char *rpath = nullptr;
+    char *filename = nullptr;
+    char *file_id = nullptr;
+    char *user = nullptr;
+    char *norm_file_path = nullptr;
+    const char *repo_id = nullptr;
+    const char *file_path = nullptr;
+    const char *share_type = nullptr;
+    const char *byte_ranges = nullptr;
+    const char *operation = nullptr;
     int error_code = EVHTP_RES_BADREQ;
 
-    SeafileCryptKey *key = NULL;
-    SeafileShareLinkInfo *info = NULL;
-    GError *error = NULL;
+    SeafileCryptKey *key = nullptr;
+    SeafileShareLinkInfo *info = nullptr;
+    GError *error = nullptr;
 
     if (!seaf->seahub_pk) {
         seaf_warning ("No seahub private key is configured.\n");
@@ -1876,7 +1876,7 @@ access_link_cb(evhtp_request_t *req, void *arg)
 
     const char *cookie = evhtp_kv_find (req->headers_in, "Cookie");
     int status = HTTP_OK;
-    char *err_msg = NULL;
+    char *err_msg = nullptr;
     info = http_tx_manager_query_share_link_info (token, cookie, "file", ip_addr, user_agent, &status, &err_msg);
     if (!info) {
         g_strfreev (parts);
@@ -1975,11 +1975,11 @@ out:
     g_free (rpath);
     g_free (filename);
     g_free (file_id);
-    if (repo != NULL)
+    if (repo != nullptr)
         seaf_repo_unref (repo);
-    if (key != NULL)
+    if (key != nullptr)
         g_object_unref (key);
-    if (info != NULL)
+    if (info != nullptr)
         g_object_unref (info);
 
     if (error_code != EVHTP_RES_OK) {
@@ -1997,22 +1997,22 @@ json_to_dirent_list (SeafRepo *repo, const char *parent_dir, const char *dirents
     int i;
     int len;
     const char *tmp_file_name;
-    char *file_name = NULL;
-    GList *dirent_list = NULL, *p = NULL;
+    char *file_name = nullptr;
+    GList *dirent_list = nullptr, *p = nullptr;
     SeafDir *dir;
     SeafDirent *dirent;
-    GError *error = NULL;
+    GError *error = nullptr;
 
     array = json_loadb (dirents, strlen(dirents), 0, &jerror);
     if (!array) {
         seaf_warning ("Failed to parse download data: %s.\n", jerror.text);
-        return NULL;
+        return nullptr;
     }
     len = json_array_size (array);
     if (len == 0) {
         seaf_warning ("Invalid download data, miss download file name.\n");
         json_decref (array);
-        return NULL;
+        return nullptr;
     }
 
     dir = seaf_fs_manager_get_seafdir_by_path (seaf->fs_mgr, repo->store_id,
@@ -2027,7 +2027,7 @@ json_to_dirent_list (SeafRepo *repo, const char *parent_dir, const char *dirents
                           parent_dir, repo->store_id);
         }
         json_decref (array);
-        return NULL;
+        return nullptr;
     }
 
     GHashTable *dirent_hash = g_hash_table_new(g_str_hash, g_str_equal);
@@ -2039,11 +2039,11 @@ json_to_dirent_list (SeafRepo *repo, const char *parent_dir, const char *dirents
     for (i = 0; i < len; i++) {
         tmp_file_name = json_string_value (json_array_get (array, i));
         file_name = normalize_utf8_path(tmp_file_name);
-        if (strcmp (file_name, "") == 0 || strchr (file_name, '/') != NULL) {
+        if (strcmp (file_name, "") == 0 || strchr (file_name, '/') != nullptr) {
             seaf_warning ("Invalid download file name: %s.\n", file_name);
             if (dirent_list) {
                 g_list_free_full (dirent_list, (GDestroyNotify)seaf_dirent_free);
-                dirent_list = NULL;
+                dirent_list = nullptr;
             }
             g_free (file_name);
             break;
@@ -2055,7 +2055,7 @@ json_to_dirent_list (SeafRepo *repo, const char *parent_dir, const char *dirents
                            file_name, parent_dir, repo->store_id);
             if (dirent_list) {
                 g_list_free_full (dirent_list, (GDestroyNotify)seaf_dirent_free);
-                dirent_list = NULL;
+                dirent_list = nullptr;
             }
             g_free (file_name);
             break;
@@ -2076,8 +2076,8 @@ json_to_dirent_list (SeafRepo *repo, const char *parent_dir, const char *dirents
 static char *
 get_form_field (const char *body_str, const char *field_name)
 {
-    char * value = NULL;
-    char * result = NULL;
+    char * value = nullptr;
+    char * result = nullptr;
     char * start = strstr(body_str, field_name);
     // find pos of start
     if (start) {
@@ -2086,16 +2086,16 @@ get_form_field (const char *body_str, const char *field_name)
 
         // find pos of '&'
         char * end = strchr(start, '&');
-        if (end == NULL) {
+        if (end == nullptr) {
             end = start + strlen(start);
         }
 
         value = g_strndup(start, end - start);
     }
     if (!value) {
-        return NULL;
+        return nullptr;
     }
-    result = g_uri_unescape_string (value, NULL);
+    result = g_uri_unescape_string (value, nullptr);
     g_free (value);
     return result;
 }
@@ -2105,27 +2105,27 @@ get_form_field (const char *body_str, const char *field_name)
 static void
 access_dir_link_cb(evhtp_request_t *req, void *arg)
 {
-    SeafRepo *repo = NULL;
-    char *error_str = NULL;
-    char *token = NULL;
-    char *r_parent_dir = NULL;
-    char *fullpath = NULL;
-    char *file_id = NULL;
-    char *filename = NULL;
-    char *norm_parent_dir = NULL;
-    char *norm_path = NULL;
-    char *user = NULL;
-    char *tmp_parent_dir = NULL;
-    char *dirents = NULL;
-    const char *repo_id = NULL;
-    const char *parent_dir = NULL;
+    SeafRepo *repo = nullptr;
+    char *error_str = nullptr;
+    char *token = nullptr;
+    char *r_parent_dir = nullptr;
+    char *fullpath = nullptr;
+    char *file_id = nullptr;
+    char *filename = nullptr;
+    char *norm_parent_dir = nullptr;
+    char *norm_path = nullptr;
+    char *user = nullptr;
+    char *tmp_parent_dir = nullptr;
+    char *dirents = nullptr;
+    const char *repo_id = nullptr;
+    const char *parent_dir = nullptr;
     const char *path= NULL;
-    const char *byte_ranges = NULL;
+    const char *byte_ranges = nullptr;
     int error_code = EVHTP_RES_BADREQ;
 
-    SeafileCryptKey *key = NULL;
-    SeafileShareLinkInfo *info = NULL;
-    GError *error = NULL;
+    SeafileCryptKey *key = nullptr;
+    SeafileShareLinkInfo *info = nullptr;
+    GError *error = nullptr;
 
     if (!seaf->seahub_pk) {
         seaf_warning ("No seahub private key is configured.\n");
@@ -2149,7 +2149,7 @@ access_dir_link_cb(evhtp_request_t *req, void *arg)
             goto on_error;
         }
         char *task_id = parts[3];
-        char *progress = zip_download_mgr_query_zip_progress (seaf->zip_download_mgr, task_id, NULL);
+        char *progress = zip_download_mgr_query_zip_progress (seaf->zip_download_mgr, task_id, nullptr);
         if (!progress) {
             error_str = "No zip progress\n";
             goto on_error;
@@ -2212,7 +2212,7 @@ access_dir_link_cb(evhtp_request_t *req, void *arg)
             goto on_error;
         }
 
-        char *task_id = NULL;
+        char *task_id = nullptr;
         if (g_list_length(dirent_list) == 1) {
             task_id = zip_download_mgr_start_zip_task_v2 (seaf->zip_download_mgr, repo_id, "download-dir-link", user, dirent_list);
         } else {
@@ -2241,7 +2241,7 @@ access_dir_link_cb(evhtp_request_t *req, void *arg)
     norm_parent_dir = normalize_utf8_path (parent_dir);
     norm_path = normalize_utf8_path (path);
     r_parent_dir = format_dir_path (norm_parent_dir);
-    fullpath = g_build_filename(r_parent_dir, norm_path, NULL);
+    fullpath = g_build_filename(r_parent_dir, norm_path, nullptr);
     filename = g_path_get_basename (fullpath);
 
     file_id = seaf_fs_manager_get_seafile_id_by_path (seaf->fs_mgr, repo->store_id, repo->version, repo->root_id, fullpath, &error);
@@ -2293,9 +2293,9 @@ success:
     g_free (fullpath);
     g_free (filename);
     g_free (file_id);
-    if (repo != NULL)
+    if (repo != nullptr)
         seaf_repo_unref (repo);
-    if (key != NULL)
+    if (key != nullptr)
         g_object_unref (key);
     if (info)
         g_object_unref (info);
@@ -2313,11 +2313,11 @@ on_error:
     g_free (fullpath);
     g_free (filename);
     g_free (file_id);
-    if (repo != NULL)
+    if (repo != nullptr)
         seaf_repo_unref (repo);
-    if (key != NULL)
+    if (key != nullptr)
         g_object_unref (key);
-    if (info != NULL)
+    if (info != nullptr)
         g_object_unref (info);
 
     evbuffer_add_printf(req->buffer_out, "%s\n", error_str);
@@ -2344,11 +2344,11 @@ request_finish_cb (evhtp_request_t *req, void *arg)
 static evhtp_res
 access_headers_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
 {
-    RequestInfo *info = NULL;
+    RequestInfo *info = nullptr;
     info = g_new0 (RequestInfo, 1);
     info->url_path = g_strdup (req->uri->path->full);
 
-    gettimeofday (&info->start, NULL);
+    gettimeofday (&info->start, nullptr);
 
     seaf_metric_manager_in_flight_request_inc (seaf->metric_mgr);
     evhtp_set_hook (&req->hooks, evhtp_hook_on_request_fini, (evhtp_hook) request_finish_cb, info);
@@ -2362,20 +2362,20 @@ access_file_init (evhtp_t *htp)
 {
     evhtp_callback_t *cb;
 
-    cb = evhtp_set_regex_cb (htp, "^/files/.*", access_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/files/.*", access_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, nullptr);
 
-    cb = evhtp_set_regex_cb (htp, "^/blks/.*", access_blks_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/blks/.*", access_blks_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, nullptr);
 
-    cb = evhtp_set_regex_cb (htp, "^/zip/.*", access_zip_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/zip/.*", access_zip_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, nullptr);
 
-    cb = evhtp_set_regex_cb (htp, "^/f/.*", access_link_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
-    //evhtp_set_regex_cb (htp, "^/d/.*", access_dir_link_cb, NULL);
-    cb = evhtp_set_regex_cb (htp, "^/repos/[\\da-z]{8}-[\\da-z]{4}-[\\da-z]{4}-[\\da-z]{4}-[\\da-z]{12}/files/.*", access_v2_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
+    cb = evhtp_set_regex_cb (htp, "^/f/.*", access_link_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, nullptr);
+    //evhtp_set_regex_cb (htp, "^/d/.*", access_dir_link_cb, nullptr);
+    cb = evhtp_set_regex_cb (htp, "^/repos/[\\da-z]{8}-[\\da-z]{4}-[\\da-z]{4}-[\\da-z]{4}-[\\da-z]{12}/files/.*", access_v2_cb, nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, nullptr);
 
     return 0;
 }

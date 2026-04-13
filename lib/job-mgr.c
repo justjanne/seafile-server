@@ -75,10 +75,10 @@ job_thread_create (CcnetJob *job)
         return -1;
     }
 
-    g_thread_pool_push (job->manager->thread_pool, job, NULL);
+    g_thread_pool_push (job->manager->thread_pool, job, nullptr);
 
 #ifndef UNIT_TEST
-    event_once (job->pipefd[0], EV_READ, job_done_cb, job, NULL);
+    event_once (job->pipefd[0], EV_READ, job_done_cb, job, nullptr);
 #endif
 
     return 0;
@@ -106,12 +106,12 @@ ccnet_job_manager_new (int max_threads)
 
     mgr = g_new0 (CcnetJobManager, 1);
     mgr->jobs = g_hash_table_new_full (g_direct_hash, g_direct_equal,
-                                       NULL, (GDestroyNotify)ccnet_job_free);
+                                       nullptr, (GDestroyNotify)ccnet_job_free);
     mgr->thread_pool = g_thread_pool_new (job_thread_wrapper,
-                                          NULL,
+                                          nullptr,
                                           max_threads,
                                           FALSE,
-                                          NULL);
+                                          nullptr);
     /* g_thread_pool_set_max_unused_threads (MAX_IDLE_THREADS); */
 
     return mgr;

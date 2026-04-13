@@ -17,12 +17,12 @@
 
 #include "seaf-fuse.h"
 
-SeafileSession *seaf = NULL;
+SeafileSession *seaf = nullptr;
 
 static char *parse_repo_id (const char *repo_id_name)
 {
     if (strlen(repo_id_name) < 36)
-        return NULL;
+        return nullptr;
     return g_strndup(repo_id_name, 36);
 }
 
@@ -40,9 +40,9 @@ int parse_fuse_path (const char *path,
     int n;
     int ret = 0;
 
-    *user = NULL;
-    *repo_id = NULL;
-    *repo_path = NULL;
+    *user = nullptr;
+    *repo_id = nullptr;
+    *repo_path = nullptr;
 
     if (*path == '/')
         ++path;
@@ -59,7 +59,7 @@ int parse_fuse_path (const char *path,
         break;
     case 2:
         *repo_id = parse_repo_id(tokens[1]);
-        if (*repo_id == NULL) {
+        if (*repo_id == nullptr) {
             ret = -1;
             break;
         }
@@ -68,7 +68,7 @@ int parse_fuse_path (const char *path,
         break;
     case 3:
         *repo_id = parse_repo_id(tokens[1]);
-        if (*repo_id == NULL) {
+        if (*repo_id == nullptr) {
             ret = -1;
             break;
         }
@@ -91,8 +91,8 @@ static int seaf_fuse_readdir(const char *path, void *buf,
                              fuse_fill_dir_t filler, off_t offset,
                              struct fuse_file_info *info)
 {
-    filler(buf, ".", NULL, 0);
-    filler(buf, "..", NULL, 0);
+    filler(buf, ".", nullptr, 0);
+    filler(buf, "..", nullptr, 0);
 
     return do_readdir(seaf, path, buf, filler, offset, info);
 }
@@ -101,9 +101,9 @@ static int seaf_fuse_open(const char *path, struct fuse_file_info *info)
 {
     int n_parts;
     char *user, *repo_id, *repo_path;
-    SeafRepo *repo = NULL;
-    SeafBranch *branch = NULL;
-    SeafCommit *commit = NULL;
+    SeafRepo *repo = nullptr;
+    SeafBranch *branch = nullptr;
+    SeafCommit *commit = nullptr;
     guint32 mode = 0;
     int ret = 0;
 
@@ -143,7 +143,7 @@ static int seaf_fuse_open(const char *path, struct fuse_file_info *info)
     char *id = seaf_fs_manager_path_to_obj_id(seaf->fs_mgr,
                                               repo->store_id, repo->version,
                                               commit->root_id,
-                                              repo_path, &mode, NULL);
+                                              repo_path, &mode, nullptr);
     if (!id) {
         seaf_warning ("Path %s doesn't exist in repo %s.\n", repo_path, repo_id);
         ret = -ENOENT;
@@ -168,11 +168,11 @@ static int seaf_fuse_read(const char *path, char *buf, size_t size,
 {
     int n_parts;
     char *user, *repo_id, *repo_path;
-    SeafRepo *repo = NULL;
-    SeafBranch *branch = NULL;
-    SeafCommit *commit = NULL;
-    Seafile *file = NULL;
-    char *file_id = NULL;
+    SeafRepo *repo = nullptr;
+    SeafBranch *branch = nullptr;
+    SeafCommit *commit = nullptr;
+    Seafile *file = nullptr;
+    char *file_id = nullptr;
     int ret = 0;
 
     /* Now we only support read-only mode */
@@ -211,7 +211,7 @@ static int seaf_fuse_read(const char *path, char *buf, size_t size,
     file_id = seaf_fs_manager_get_seafile_id_by_path(seaf->fs_mgr,
                                                      repo->store_id, repo->version,
                                                      commit->root_id,
-                                                     repo_path, NULL);
+                                                     repo_path, nullptr);
     if (!file_id) {
         seaf_warning ("Path %s doesn't exist in repo %s.\n", repo_path, repo_id);
         ret = -ENOENT;
@@ -280,18 +280,18 @@ static struct fuse_operations seaf_fuse_ops = {
 int main(int argc, char *argv[])
 {
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
-    const char *debug_str = NULL;
+    const char *debug_str = nullptr;
     char *config_dir = DEFAULT_CONFIG_DIR;
-    char *central_config_dir = NULL;
-    char *seafile_dir = NULL;
-    char *logfile = NULL;
+    char *central_config_dir = nullptr;
+    char *seafile_dir = nullptr;
+    char *logfile = nullptr;
     char *ccnet_debug_level_str = "info";
     char *seafile_debug_level_str = "debug";
     int ret;
 
     memset(&options, 0, sizeof(struct options));
 
-    if (fuse_opt_parse(&args, &options, seaf_fuse_opts, NULL) == -1) {
+    if (fuse_opt_parse(&args, &options, seaf_fuse_opts, nullptr) == -1) {
         seaf_warning("Parse argument Failed\n");
         exit(1);
     }
@@ -309,12 +309,12 @@ int main(int argc, char *argv[])
     seafile_debug_set_flags_string(debug_str);
 
     if (!options.seafile_dir)
-        seafile_dir = g_build_filename(config_dir, "seafile", NULL);
+        seafile_dir = g_build_filename(config_dir, "seafile", nullptr);
     else
         seafile_dir = options.seafile_dir;
 
     if (!options.log_file)
-        logfile = g_build_filename(seafile_dir, "seaf-fuse.log", NULL);
+        logfile = g_build_filename(seafile_dir, "seaf-fuse.log", nullptr);
     else
         logfile = options.log_file;
 
@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
 
     set_syslog_config (seaf->config);
 
-    ret = fuse_main(args.argc, args.argv, &seaf_fuse_ops, NULL);
+    ret = fuse_main(args.argc, args.argv, &seaf_fuse_ops, nullptr);
     fuse_opt_free_args(&args);
     return ret;
 }

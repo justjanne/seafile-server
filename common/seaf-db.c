@@ -66,7 +66,7 @@ init_conn_pool_common (int max_connections)
 {
     DBConnPool *pool = g_new0(DBConnPool, 1);
     pool->connections = g_ptr_array_sized_new (max_connections);
-    pthread_mutex_init (&pool->lock, NULL);
+    pthread_mutex_init (&pool->lock, nullptr);
     pool->max_connections = max_connections;
 
     return pool;
@@ -131,8 +131,8 @@ static DBConnection *
 mysql_conn_pool_get_connection (SeafDB *db)
 {
     DBConnPool *pool = db->pool;
-    DBConnection *conn = NULL;
-    DBConnection *d_conn = NULL;
+    DBConnection *conn = nullptr;
+    DBConnection *d_conn = nullptr;
 
     if (pool->max_connections == 0) {
         conn = mysql_db_get_connection (db);
@@ -155,7 +155,7 @@ mysql_conn_pool_get_connection (SeafDB *db)
         conn->is_available = FALSE;
         conn->delete_pending = TRUE;
     }
-    conn = NULL;
+    conn = nullptr;
     if (size < pool->max_connections) {
         conn = mysql_db_get_connection (db);
         if (conn) {
@@ -210,8 +210,8 @@ static void *
 mysql_conn_keepalive (void *arg)
 {
     DBConnPool *pool = arg;
-    DBConnection *conn = NULL;
-    DBConnection *d_conn = NULL;
+    DBConnection *conn = nullptr;
+    DBConnection *d_conn = nullptr;
     char *sql = "SELECT 1;";
     int rc = 0;
     va_list args;
@@ -223,7 +223,7 @@ mysql_conn_keepalive (void *arg)
         for (i = 0; i < size; ++i) {
             conn = g_ptr_array_index (pool->connections, i);
             if (conn->is_available) {
-                rc = db_ops.execute_sql (conn, sql, 0, args, NULL);
+                rc = db_ops.execute_sql (conn, sql, 0, args, nullptr);
                 if (rc < 0) {
                     conn->is_available = FALSE;
                     conn->delete_pending = TRUE;
@@ -247,7 +247,7 @@ mysql_conn_keepalive (void *arg)
         sleep (KEEPALIVE_INTERVAL);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 SeafDB *
@@ -267,7 +267,7 @@ seaf_db_new_mysql (const char *host,
 
     db = mysql_db_new (host, port, user, passwd, db_name, unix_socket, use_ssl, skip_verify, ca_path, charset);
     if (!db)
-        return NULL;
+        return nullptr;
     db->type = SEAF_DB_TYPE_MYSQL;
 
     db_ops.get_connection = mysql_conn_pool_get_connection;
@@ -283,10 +283,10 @@ seaf_db_new_mysql (const char *host,
     db->pool = init_conn_pool_common (max_connections);
 
     pthread_t tid;
-    int ret = pthread_create (&tid, NULL, mysql_conn_keepalive, db->pool);
+    int ret = pthread_create (&tid, nullptr, mysql_conn_keepalive, db->pool);
     if (ret != 0) {
         seaf_warning ("Failed to create mysql connection keepalive thread.\n");
-        return NULL;
+        return nullptr;
     }
     pthread_detach (tid);
 
@@ -338,8 +338,8 @@ static DBConnection *
 pgsql_conn_pool_get_connection (SeafDB *db)
 {
     DBConnPool *pool = db->pool;
-    DBConnection *conn = NULL;
-    DBConnection *d_conn = NULL;
+    DBConnection *conn = nullptr;
+    DBConnection *d_conn = nullptr;
 
     if (pool->max_connections == 0) {
         conn = pgsql_db_get_connection (db);
@@ -362,7 +362,7 @@ pgsql_conn_pool_get_connection (SeafDB *db)
         conn->is_available = FALSE;
         conn->delete_pending = TRUE;
     }
-    conn = NULL;
+    conn = nullptr;
     if (size < pool->max_connections) {
         conn = pgsql_db_get_connection (db);
         if (conn) {
@@ -429,7 +429,7 @@ seaf_db_new_pgsql (const char *host,
 
     db = pgsql_db_new (host, port, user, passwd, db_name, unix_socket, use_ssl, skip_verify, ca_path, charset);
     if (!db)
-        return NULL;
+        return nullptr;
     db->type = SEAF_DB_TYPE_PGSQL;
 
     db_ops.get_connection = pgsql_conn_pool_get_connection;
@@ -480,7 +480,7 @@ seaf_db_new_sqlite (const char *db_path, int max_connections)
 
     db = sqlite_db_new (db_path);
     if (!db)
-        return NULL;
+        return nullptr;
     db->type = SEAF_DB_TYPE_SQLITE;
 
     db_ops.get_connection = sqlite_db_get_connection;
@@ -544,7 +544,7 @@ seaf_db_foreach_selected_row (SeafDB *db, const char *sql,
 const char *
 seaf_db_row_get_column_text (SeafDBRow *row, guint32 idx)
 {
-    g_return_val_if_fail (idx < db_ops.row_get_column_count(row), NULL);
+    g_return_val_if_fail (idx < db_ops.row_get_column_count(row), nullptr);
 
     return db_ops.row_get_column_string (row, idx);
 }
@@ -628,7 +628,7 @@ seaf_db_statement_exists (SeafDB *db, const char *sql, gboolean *db_err, int n, 
 
         va_list args;
         va_start (args, n);
-        n_rows = db_ops.query_foreach_row (conn, sql, NULL, NULL, n, args, &retry);
+        n_rows = db_ops.query_foreach_row (conn, sql, nullptr, nullptr, n, args, &retry);
         va_end (args);
 
         db_ops.release_connection(conn, n_rows < 0);
@@ -773,7 +773,7 @@ get_string_cb (SeafDBRow *row, void *data)
 char *
 seaf_db_statement_get_string (SeafDB *db, const char *sql, int n, ...)
 {
-    char *ret = NULL;
+    char *ret = nullptr;
     int rc = -1;
     int retry_count = 0;
 
@@ -781,7 +781,7 @@ seaf_db_statement_get_string (SeafDB *db, const char *sql, int n, ...)
         gboolean retry = FALSE;
         DBConnection *conn = db_ops.get_connection (db);
         if (!conn)
-            return NULL;
+            return nullptr;
 
         va_list args;
         va_start (args, n);
@@ -805,13 +805,13 @@ seaf_db_statement_get_string (SeafDB *db, const char *sql, int n, ...)
 SeafDBTrans *
 seaf_db_begin_transaction (SeafDB *db)
 {
-    SeafDBTrans *trans = NULL;
+    SeafDBTrans *trans = nullptr;
     DBConnection *conn = db_ops.get_connection(db);
     if (!conn) {
         return trans;
     }
 
-    if (db_ops.execute_sql_no_stmt (conn, "BEGIN", NULL) < 0) {
+    if (db_ops.execute_sql_no_stmt (conn, "BEGIN", nullptr) < 0) {
         db_ops.release_connection (conn, TRUE);
         return trans;
     }
@@ -834,7 +834,7 @@ seaf_db_commit (SeafDBTrans *trans)
 {
     DBConnection *conn = trans->conn;
 
-    if (db_ops.execute_sql_no_stmt (conn, "COMMIT", NULL) < 0) {
+    if (db_ops.execute_sql_no_stmt (conn, "COMMIT", nullptr) < 0) {
         trans->need_close = TRUE;
         return -1;
     }
@@ -847,7 +847,7 @@ seaf_db_rollback (SeafDBTrans *trans)
 {
     DBConnection *conn = trans->conn;
 
-    if (db_ops.execute_sql_no_stmt (conn, "ROLLBACK", NULL) < 0) {
+    if (db_ops.execute_sql_no_stmt (conn, "ROLLBACK", nullptr) < 0) {
         trans->need_close = TRUE;
         return -1;
     }
@@ -862,7 +862,7 @@ seaf_db_trans_query (SeafDBTrans *trans, const char *sql, int n, ...)
 
     va_list args;
     va_start (args, n);
-    ret = db_ops.execute_sql (trans->conn, sql, n, args, NULL);
+    ret = db_ops.execute_sql (trans->conn, sql, n, args, nullptr);
     va_end (args);
 
     if (ret < 0)
@@ -881,7 +881,7 @@ seaf_db_trans_check_for_existence (SeafDBTrans *trans,
 
     va_list args;
     va_start (args, n);
-    n_rows = db_ops.query_foreach_row (trans->conn, sql, NULL, NULL, n, args, NULL);
+    n_rows = db_ops.query_foreach_row (trans->conn, sql, nullptr, nullptr, n, args, nullptr);
     va_end (args);
 
     if (n_rows < 0) {
@@ -903,7 +903,7 @@ seaf_db_trans_foreach_selected_row (SeafDBTrans *trans, const char *sql,
 
     va_list args;
     va_start (args, n);
-    ret = db_ops.query_foreach_row (trans->conn, sql, callback, data, n, args, NULL);
+    ret = db_ops.query_foreach_row (trans->conn, sql, callback, data, n, args, nullptr);
     va_end (args);
 
     if (ret < 0)
@@ -974,7 +974,7 @@ mysql_db_new (const char *host,
     db->ca_path = g_strdup(ca_path);
     db->charset = g_strdup(charset);
 
-    mysql_library_init (0, NULL, NULL);
+    mysql_library_init (0, nullptr, nullptr);
 
     return (SeafDB *)db;
 }
@@ -986,13 +986,13 @@ mysql_db_get_connection (SeafDB *vdb)
     int conn_timeout = 1;
     int read_write_timeout = 5;
     MYSQL *db_conn;
-    MySQLDBConnection *conn = NULL;
+    MySQLDBConnection *conn = nullptr;
     int ssl_mode;
 
-    db_conn = mysql_init (NULL);
+    db_conn = mysql_init (nullptr);
     if (!db_conn) {
         seaf_warning ("Failed to init mysql connection object.\n");
-        return NULL;
+        return nullptr;
     }
 
     if (db->use_ssl && !db->skip_verify) {
@@ -1048,7 +1048,7 @@ mysql_db_get_connection (SeafDB *vdb)
                             db->unix_socket, CLIENT_MULTI_STATEMENTS)) {
         seaf_warning ("Failed to connect to MySQL: %s\n", mysql_error(db_conn));
         mysql_close (db_conn);
-        return NULL;
+        return nullptr;
     }
 
     conn = g_new0 (MySQLDBConnection, 1);
@@ -1098,7 +1098,7 @@ _prepare_stmt_mysql (MYSQL *db, const char *sql, gboolean *retry)
     stmt = mysql_stmt_init (db);
     if (!stmt) {
         seaf_warning ("mysql_stmt_init failed.\n");
-        return NULL;
+        return nullptr;
     }
 
     if (mysql_stmt_prepare (stmt, sql, strlen(sql)) != 0) {
@@ -1109,7 +1109,7 @@ _prepare_stmt_mysql (MYSQL *db, const char *sql, gboolean *retry)
         }
         seaf_warning ("Failed to prepare sql %s: %s\n", sql, mysql_stmt_error(stmt));
         mysql_stmt_close (stmt);
-        return NULL;
+        return nullptr;
     }
 
     return stmt;
@@ -1171,8 +1171,8 @@ mysql_db_execute_sql (DBConnection *vconn, const char *sql, int n, va_list args,
 {
     MySQLDBConnection *conn = (MySQLDBConnection *)vconn;
     MYSQL *db = conn->db_conn;
-    MYSQL_STMT *stmt = NULL;
-    MYSQL_BIND *params = NULL;
+    MYSQL_STMT *stmt = nullptr;
+    MYSQL_BIND *params = nullptr;
     int ret = 0;
 
     stmt = _prepare_stmt_mysql (db, sql, retry);
@@ -1235,8 +1235,8 @@ mysql_db_query_foreach_row (DBConnection *vconn, const char *sql,
 {
     MySQLDBConnection *conn = (MySQLDBConnection *)vconn;
     MYSQL *db = conn->db_conn;
-    MYSQL_STMT *stmt = NULL;
-    MYSQL_BIND *params = NULL;
+    MYSQL_STMT *stmt = nullptr;
+    MYSQL_BIND *params = nullptr;
     MySQLDBRow row;
     int err_code;
     int nrows = 0;
@@ -1374,10 +1374,10 @@ mysql_db_row_get_column_string (SeafDBRow *vrow, int i)
     MySQLDBRow *row = (MySQLDBRow *)vrow;
 
     if (*(row->results[i].is_null)) {
-        return NULL;
+        return nullptr;
     }
 
-    char *ret = NULL;
+    char *ret = nullptr;
     unsigned long real_length = *(row->results[i].length);
     /* If column size is larger then allocated buffer size, re-allocate a new buffer
      * and fetch the column directly.
@@ -1390,7 +1390,7 @@ mysql_db_row_get_column_string (SeafDBRow *vrow, int i)
         row->new_binds[i].is_null = g_new0 (my_bool, 1);
         if (mysql_stmt_fetch_column (row->stmt, &row->new_binds[i], i, 0) != 0) {
             seaf_warning ("Faield to fetch column: %s\n", mysql_stmt_error(row->stmt));
-            return NULL;
+            return nullptr;
         }
 
         ret = row->new_binds[i].buffer;
@@ -1512,7 +1512,7 @@ pgsql_db_get_connection (SeafDB *vdb)
 {
     PGSQLDB *db = (PGSQLDB *)vdb;
     PGconn *db_conn;
-    PGSQLDBConnection *conn = NULL;
+    PGSQLDBConnection *conn = nullptr;
     char conninfo[1024];
     int len = 0;
 
@@ -1539,7 +1539,7 @@ pgsql_db_get_connection (SeafDB *vdb)
     if (PQstatus(db_conn) != CONNECTION_OK) {
         seaf_warning ("Failed to connect to PostgreSQL: %s\n", PQerrorMessage(db_conn));
         PQfinish (db_conn);
-        return NULL;
+        return nullptr;
     }
 
     conn = g_new0 (PGSQLDBConnection, 1);
@@ -1564,7 +1564,7 @@ pgsql_db_release_connection (DBConnection *vconn)
 static char *
 _replace_question_marks (const char *sql)
 {
-    GString *res = g_string_new (NULL);
+    GString *res = g_string_new (nullptr);
     const char *p = sql;
     int count = 1;
     gboolean in_quote = FALSE;
@@ -1606,7 +1606,7 @@ pgsql_db_execute_sql (DBConnection *vconn, const char *sql, int n, va_list args,
 {
     PGSQLDBConnection *conn = (PGSQLDBConnection *)vconn;
     PGresult *res;
-    const char **params = NULL;
+    const char **params = nullptr;
     int i;
     int ret = 0;
 
@@ -1632,7 +1632,7 @@ pgsql_db_execute_sql (DBConnection *vconn, const char *sql, int n, va_list args,
     /* Replace ? with $1, $2, ... for PostgreSQL */
     char *pgsql_sql = _replace_question_marks (sql);
 
-    res = PQexecParams (conn->db_conn, pgsql_sql, n, NULL, params, NULL, NULL, 0);
+    res = PQexecParams (conn->db_conn, pgsql_sql, n, nullptr, params, nullptr, nullptr, 0);
     if (PQresultStatus(res) != PGRES_COMMAND_OK && PQresultStatus(res) != PGRES_TUPLES_OK) {
         seaf_warning ("Failed to execute sql %s: %s\n", pgsql_sql, PQerrorMessage(conn->db_conn));
         ret = -1;
@@ -1661,7 +1661,7 @@ pgsql_db_query_foreach_row (DBConnection *vconn, const char *sql,
 {
     PGSQLDBConnection *conn = (PGSQLDBConnection *)vconn;
     PGresult *res;
-    const char **params = NULL;
+    const char **params = nullptr;
     int i;
     int nrows = 0;
 
@@ -1686,7 +1686,7 @@ pgsql_db_query_foreach_row (DBConnection *vconn, const char *sql,
 
     char *pgsql_sql = _replace_question_marks (sql);
 
-    res = PQexecParams (conn->db_conn, pgsql_sql, n, NULL, params, NULL, NULL, 0);
+    res = PQexecParams (conn->db_conn, pgsql_sql, n, nullptr, params, nullptr, nullptr, 0);
     if (PQresultStatus(res) != PGRES_TUPLES_OK) {
         seaf_warning ("Failed to execute query %s: %s\n", pgsql_sql, PQerrorMessage(conn->db_conn));
         nrows = -1;
@@ -1727,7 +1727,7 @@ pgsql_db_row_get_column_string (SeafDBRow *vrow, int i)
     PGSQLDBRow *row = (PGSQLDBRow *)vrow;
 
     if (PQgetisnull(row->res, row->curr_row, i))
-        return NULL;
+        return nullptr;
 
     return PQgetvalue (row->res, row->curr_row, i);
 }
@@ -1815,8 +1815,8 @@ wait_for_unlock_notify(sqlite3 *db)
 {
     UnlockNotification un;
     un.fired = 0;
-    pthread_mutex_init (&un.mutex, NULL);
-    pthread_cond_init (&un.cond, NULL);
+    pthread_mutex_init (&un.mutex, nullptr);
+    pthread_cond_init (&un.cond, nullptr);
 
     int rc = sqlite3_unlock_notify(db, unlock_notify_cb, (void *)&un);
 
@@ -1898,11 +1898,11 @@ sqlite_db_get_connection (SeafDB *vdb)
     const char *errmsg;
     SQLiteDBConnection *conn;
 
-    result = sqlite3_open_v2 (db->db_path, &db_conn, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_SHAREDCACHE, NULL);
+    result = sqlite3_open_v2 (db->db_path, &db_conn, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_SHAREDCACHE, nullptr);
     if (result != SQLITE_OK) {
         errmsg = sqlite3_errmsg(db_conn);
         seaf_warning ("Failed to open sqlite db: %s\n", errmsg ? errmsg : "no error given");
-        return NULL;
+        return nullptr;
     }
 
     conn = g_new0 (SQLiteDBConnection, 1);
@@ -1928,10 +1928,10 @@ static int
 sqlite_db_execute_sql_no_stmt (DBConnection *vconn, const char *sql, gboolean *retry)
 {
     SQLiteDBConnection *conn = (SQLiteDBConnection *)vconn;
-    char *errmsg = NULL;
+    char *errmsg = nullptr;
     int rc;
 
-    rc = sqlite3_blocking_exec (conn->db_conn, sql, NULL, NULL, &errmsg);
+    rc = sqlite3_blocking_exec (conn->db_conn, sql, nullptr, nullptr, &errmsg);
     if (rc != SQLITE_OK) {
         seaf_warning ("sqlite3_exec failed %s: %s", sql, errmsg ? errmsg : "no error given");
         if (errmsg)
@@ -1986,7 +1986,7 @@ sqlite_db_execute_sql (DBConnection *vconn, const char *sql, int n, va_list args
     int rc;
     int ret = 0;
 
-    rc = sqlite3_blocking_prepare_v2 (db, sql, -1, &stmt, NULL);
+    rc = sqlite3_blocking_prepare_v2 (db, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
         seaf_warning ("sqlite3_prepare_v2 failed %s: %s", sql, sqlite3_errmsg(db));
         return -1;
@@ -2028,7 +2028,7 @@ sqlite_db_query_foreach_row (DBConnection *vconn, const char *sql,
     int rc;
     int nrows = 0;
 
-    rc = sqlite3_blocking_prepare_v2 (db, sql, -1, &stmt, NULL);
+    rc = sqlite3_blocking_prepare_v2 (db, sql, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
         seaf_warning ("sqlite3_prepare_v2 failed %s: %s", sql, sqlite3_errmsg(db));
         return -1;

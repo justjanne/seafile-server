@@ -17,23 +17,23 @@ seafile_session_new(const char *central_config_dir,
                     const char *ccnet_dir,
                     gboolean need_db)
 {
-    char *abs_central_config_dir = NULL;
+    char *abs_central_config_dir = nullptr;
     char *abs_seafile_dir;
     char *abs_ccnet_dir;
     char *tmp_file_dir;
     char *config_file_path;
     struct stat st;
     GKeyFile *config;
-    SeafileSession *session = NULL;
+    SeafileSession *session = nullptr;
 
     abs_seafile_dir = ccnet_expand_path (seafile_dir);
     abs_ccnet_dir = ccnet_expand_path (ccnet_dir);
-    tmp_file_dir = g_build_filename (abs_seafile_dir, "tmpfiles", NULL);
+    tmp_file_dir = g_build_filename (abs_seafile_dir, "tmpfiles", nullptr);
     if (central_config_dir) {
         abs_central_config_dir = ccnet_expand_path (central_config_dir);
     }
     const char *confdir = abs_central_config_dir ? abs_central_config_dir : abs_seafile_dir;
-    config_file_path = g_build_filename(confdir, "seafile.conf", NULL);
+    config_file_path = g_build_filename(confdir, "seafile.conf", nullptr);
 
     if (g_stat(confdir, &st) < 0 || !S_ISDIR(st.st_mode)) {
         seaf_warning ("Config dir dir %s does not exist\n",
@@ -53,7 +53,7 @@ seafile_session_new(const char *central_config_dir,
         goto onerror;
     }
 
-    GError *error = NULL;
+    GError *error = nullptr;
     config = g_key_file_new ();
     if (!g_key_file_load_from_file (config, config_file_path, 
                                     G_KEY_FILE_NONE, &error)) {
@@ -102,5 +102,5 @@ onerror:
     g_free (tmp_file_dir);
     g_free (config_file_path);
     g_free (session);
-    return NULL;    
+    return nullptr;
 }

@@ -97,7 +97,7 @@ remove_dent_from_dir (ChangeSetDir *dir, const char *dname)
     char *key;
 
     if (g_hash_table_lookup_extended (dir->dents, dname,
-                                      (gpointer*)&key, NULL)) {
+                                      (gpointer*)&key, nullptr)) {
         g_hash_table_steal (dir->dents, dname);
         g_free (key);
     }
@@ -151,7 +151,7 @@ compare_dents (gconstpointer a, gconstpointer b)
 static SeafDir *
 changeset_dir_to_seaf_dir (ChangeSetDir *dir)
 {
-    GList *dents = NULL, *seaf_dents = NULL;
+    GList *dents = nullptr, *seaf_dents = nullptr;
     GList *ptr;
     ChangeSetDirent *dent;
     SeafDirent *seaf_dent;
@@ -167,7 +167,7 @@ changeset_dir_to_seaf_dir (ChangeSetDir *dir)
     seaf_dents = g_list_sort (seaf_dents, compare_dents);
 
     /* seaf_dir_new() computes the dir id. */
-    seaf_dir = seaf_dir_new (NULL, seaf_dents, dir->version);
+    seaf_dir = seaf_dir_new (nullptr, seaf_dents, dir->version);
 
     g_list_free (dents);
     return seaf_dir;
@@ -178,8 +178,8 @@ changeset_dir_to_seaf_dir (ChangeSetDir *dir)
 ChangeSet *
 changeset_new (const char *repo_id, SeafDir *dir)
 {
-    ChangeSetDir *changeset_dir = NULL;
-    ChangeSet *changeset = NULL;
+    ChangeSetDir *changeset_dir = nullptr;
+    ChangeSet *changeset = nullptr;
 
     changeset_dir = seaf_dir_to_changeset_dir (dir);
     if (!changeset_dir)
@@ -213,8 +213,8 @@ delete_from_tree (ChangeSet *changeset,
     char **parts, *dname;
     int n, i;
     ChangeSetDir *dir;
-    ChangeSetDirent *dent, *ret = NULL;
-    ChangeSetDirent *parent_dent = NULL;
+    ChangeSetDirent *dent, *ret = nullptr;
+    ChangeSetDirent *parent_dent = nullptr;
     SeafDir *seaf_dir;
 
     *parent_empty = FALSE;
@@ -238,7 +238,7 @@ delete_from_tree (ChangeSet *changeset,
                 ret = dent;
                 // update parent dir mtime when delete dirs locally.
                 if (parent_dent) {
-                    parent_dent->mtime = time (NULL);
+                    parent_dent->mtime = time (nullptr);
                 }
                 break;
             }
@@ -267,7 +267,7 @@ delete_from_tree (ChangeSet *changeset,
                 ret = dent;
                 // update parent dir mtime when delete files locally.
                 if (parent_dent) {
-                    parent_dent->mtime = time (NULL);
+                    parent_dent->mtime = time (nullptr);
                 }
                 break;
             }
@@ -329,7 +329,7 @@ commit_tree_recursive (const char *repo_id, ChangeSetDir *dir)
     gpointer key, value;
     char *new_id;
     SeafDir *seaf_dir;
-    char *ret = NULL;
+    char *ret = nullptr;
 
     g_hash_table_iter_init (&iter, dir->dents);
     while (g_hash_table_iter_next (&iter, &key, &value)) {
@@ -337,7 +337,7 @@ commit_tree_recursive (const char *repo_id, ChangeSetDir *dir)
         if (dent->subdir) {
             new_id = commit_tree_recursive (repo_id, dent->subdir);
             if (!new_id)
-                return NULL;
+                return nullptr;
 
             memcpy (dent->id, new_id, 40);
             g_free (new_id);

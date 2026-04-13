@@ -10,7 +10,7 @@ object_list_new ()
 {
     ObjectList *ol = g_new0 (ObjectList, 1);
 
-    ol->obj_hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+    ol->obj_hash = g_hash_table_new_full (g_str_hash, g_str_equal, nullptr, nullptr);
     ol->obj_ids = g_ptr_array_new_with_free_func (g_free);
 
     return ol;

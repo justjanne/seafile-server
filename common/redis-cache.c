@@ -76,15 +76,15 @@ redis_connection_new (const char *host, const char *passwd, int port)
             seaf_warning ("Can't allocate redis context\n");
         }
         g_free (conn);
-        return NULL;
+        return nullptr;
     }
 
     if (redis_auth (conn, passwd) < 0) {
         redisFree (conn->ac);
         g_free (conn);
-        return NULL;
+        return nullptr;
     }
-    conn->ctime = (gint64)time(NULL);
+    conn->ctime = (gint64)time(nullptr);
 
     return conn;
 }
@@ -109,14 +109,14 @@ redis_connection_pool_new (const char *host, int port, int max_connections)
     pool->port = port;
     pool->connections = g_ptr_array_sized_new (max_connections);
     pool->max_connections = max_connections;
-    pthread_mutex_init (&pool->lock, NULL);
+    pthread_mutex_init (&pool->lock, nullptr);
     return pool;
 }
 
 static RedisConnection *
 redis_connection_pool_get_connection (RedisConnectionPool *pool, const char *passwd)
 {
-    RedisConnection *conn = NULL;
+    RedisConnection *conn = nullptr;
 
     if (pool->max_connections == 0) {
         conn = redis_connection_new (pool->host, passwd, pool->port);
@@ -134,7 +134,7 @@ redis_connection_pool_get_connection (RedisConnectionPool *pool, const char *pas
         conn->is_available = FALSE;
         goto out;
     }
-    conn = NULL;
+    conn = nullptr;
     if (size < pool->max_connections) {
         conn = redis_connection_new (pool->host, passwd, pool->port);
         if (conn) {
@@ -178,7 +178,7 @@ void *
 redis_cache_get_object (ObjCache *cache, const char *obj_id, size_t *len)
 {
     RedisConnection *conn;
-    char *object = NULL;
+    char *object = nullptr;
     redisReply *reply;
     RedisPriv *priv = cache->priv;
     RedisConnectionPool *pool = priv->redis_pool;
@@ -186,7 +186,7 @@ redis_cache_get_object (ObjCache *cache, const char *obj_id, size_t *len)
     conn = redis_connection_pool_get_connection (pool, priv->passwd);
     if (!conn) {
         seaf_warning ("Failed to get redis connection to host %s.\n", cache->host);
-        return NULL;
+        return nullptr;
     }
 
     reply = redisCommand(conn->ac, "GET %s", obj_id);

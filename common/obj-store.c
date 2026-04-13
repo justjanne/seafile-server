@@ -23,13 +23,13 @@ seaf_obj_store_new (SeafileSession *seaf, const char *obj_type)
     SeafObjStore *store = g_new0 (SeafObjStore, 1);
 
     if (!store)
-        return NULL;
+        return nullptr;
 
     store->bend = obj_backend_fs_new (seaf->seaf_dir, obj_type);
     if (!store->bend) {
         seaf_warning ("[Object store] Failed to load backend.\n");
         g_free (store);
-        return NULL;
+        return nullptr;
     }
 
     return store;

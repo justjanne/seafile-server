@@ -20,24 +20,24 @@ seafile_session_new(const char *central_config_dir,
                     const char *seafile_dir,
                     const char *ccnet_dir)
 {
-    char *abs_central_config_dir = NULL;
+    char *abs_central_config_dir = nullptr;
     char *abs_seafile_dir;
-    char *abs_ccnet_dir = NULL;
+    char *abs_ccnet_dir = nullptr;
     char *tmp_file_dir;
     char *config_file_path;
     struct stat st;
     GKeyFile *config;
-    SeafileSession *session = NULL;
+    SeafileSession *session = nullptr;
 
     abs_ccnet_dir = ccnet_expand_path (ccnet_dir);
     abs_seafile_dir = ccnet_expand_path (seafile_dir);
-    tmp_file_dir = g_build_filename(abs_seafile_dir, "tmpfiles", NULL);
+    tmp_file_dir = g_build_filename(abs_seafile_dir, "tmpfiles", nullptr);
     if (central_config_dir) {
         abs_central_config_dir = ccnet_expand_path (central_config_dir);
     }
     config_file_path = g_build_filename(
         abs_central_config_dir ? abs_central_config_dir : abs_seafile_dir,
-        "seafile.conf", NULL);
+        "seafile.conf", nullptr);
 
     if (g_stat(abs_seafile_dir, &st) < 0 || !S_ISDIR(st.st_mode)) {
         seaf_warning ("Seafile data dir %s does not exist and is unable to create\n",
@@ -57,7 +57,7 @@ seafile_session_new(const char *central_config_dir,
         goto onerror;
     }
 
-    GError *error = NULL;
+    GError *error = nullptr;
     config = g_key_file_new ();
     if (!g_key_file_load_from_file (config, config_file_path, 
                                     G_KEY_FILE_NONE, &error)) {
@@ -74,7 +74,7 @@ seafile_session_new(const char *central_config_dir,
     session->tmp_file_dir = tmp_file_dir;
     session->config = config;
     session->excluded_users = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                     g_free, NULL);
+                                                     g_free, nullptr);
 
     if (load_database_config (session) < 0) {
         seaf_warning ("Failed to load database config.\n");
@@ -119,7 +119,7 @@ onerror:
     free (abs_seafile_dir);
     free (abs_ccnet_dir);
     g_free (session);
-    return NULL;    
+    return nullptr;
 }
 
 static int
@@ -129,7 +129,7 @@ read_excluded_users (SeafileSession *session)
     int l, i;
     char *hash_value;
 
-    users = seaf_key_file_get_string (session->config, "fuse", "excluded_users", NULL);
+    users = seaf_key_file_get_string (session->config, "fuse", "excluded_users", nullptr);
     if (!users)
         return 0;
 

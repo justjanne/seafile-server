@@ -120,10 +120,10 @@ obj_backend_riak_new (const char *host,
     else if (strcmp (write_policy, "all") == 0)
         priv->n_write = RIAK_ALL;
     else
-        g_return_val_if_reached (NULL);
+        g_return_val_if_reached (nullptr);
 
     priv->conn_pool = g_queue_new ();
-    pthread_mutex_init (&priv->lock, NULL);
+    pthread_mutex_init (&priv->lock, nullptr);
 
     bend->read = obj_backend_riak_read;
     bend->write = obj_backend_riak_write;
@@ -142,7 +142,7 @@ obj_backend_riak_new (const char *host,
                       const char *write_policy)
 {
     seaf_warning ("Riak backend is not enabled.\n");
-    return NULL;
+    return nullptr;
 }
 
 #endif  /* RIAK_BACKEND */

@@ -157,7 +157,7 @@ ccnet_net_bind_tcp (int port, int nonblock)
 
     snprintf (buf, sizeof(buf), "%d", port);
 
-    if ( (n = getaddrinfo(NULL, buf, &hints, &res) ) != 0) {
+    if ( (n = getaddrinfo(nullptr, buf, &hints, &res) ) != 0) {
         ccnet_warning ("getaddrinfo fails: %s\n", gai_strerror(n));
         return -1;
     }
@@ -185,11 +185,11 @@ ccnet_net_bind_tcp (int port, int nonblock)
             break;          /* success */
 
         close(sockfd);      /* bind error - close and try next one */
-    } while ( (res = res->ai_next) != NULL);
+    } while ( (res = res->ai_next) != nullptr);
 
     freeaddrinfo (ressave);
 
-    if (res == NULL) {
+    if (res == nullptr) {
         ccnet_warning ("bind fails: %s\n", strerror(errno));
         return -1;
     }
@@ -242,7 +242,7 @@ ccnet_net_make_socket_blocking(evutil_socket_t fd)
 #else
 	{
 		int flags;
-		if ((flags = fcntl(fd, F_GETFL, NULL)) < 0) {
+		if ((flags = fcntl(fd, F_GETFL, nullptr)) < 0) {
 			ccnet_warning ("fcntl(%d, F_GETFL)", fd);
 			return -1;
 		}
@@ -332,8 +332,8 @@ sock_ntop(const struct sockaddr *sa, socklen_t salen)
     case AF_INET: {
         struct sockaddr_in  *sin = (struct sockaddr_in *) sa;
 
-        if (evutil_inet_ntop(AF_INET, &sin->sin_addr, str, sizeof(str)) == NULL)
-            return(NULL);
+        if (evutil_inet_ntop(AF_INET, &sin->sin_addr, str, sizeof(str)) == nullptr)
+            return(nullptr);
         return(str);
     }
 
@@ -341,8 +341,8 @@ sock_ntop(const struct sockaddr *sa, socklen_t salen)
     case AF_INET6: {
         struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) sa;
 
-        if (evutil_inet_ntop(AF_INET6, &sin6->sin6_addr, str, sizeof(str) - 1) == NULL)
-            return(NULL);
+        if (evutil_inet_ntop(AF_INET6, &sin6->sin6_addr, str, sizeof(str) - 1) == nullptr)
+            return(nullptr);
         return (str);
     }
 #endif
@@ -368,7 +368,7 @@ sock_ntop(const struct sockaddr *sa, socklen_t salen)
                  sa->sa_family, salen);
         return(str);
     }
-    return (NULL);
+    return (nullptr);
 }
 
 int
@@ -454,9 +454,9 @@ udp_client (const char *host, const char *serv,
 		sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 		if (sockfd >= 0)
 			break;		/* success */
-	} while ( (res = res->ai_next) != NULL);
+	} while ( (res = res->ai_next) != nullptr);
 
-	if (res == NULL) {	/* errno set from final socket() */
+	if (res == nullptr) {	/* errno set from final socket() */
 		ccnet_warning ("udp_client error for %s, %s", host, serv);
         freeaddrinfo (ressave);
         return -1;
@@ -507,7 +507,7 @@ mcast_join(evutil_socket_t sockfd, const struct sockaddr *grp, socklen_t grplen,
                       WSAGetLastError());
         return -1;
     }
-    sockm = WSAJoinLeaf (sockfd, grp, grplen, NULL, NULL, NULL, NULL, JL_BOTH);
+    sockm = WSAJoinLeaf (sockfd, grp, grplen, nullptr, nullptr, nullptr, nullptr, JL_BOTH);
     if (sockm == INVALID_SOCKET) {
         ccnet_warning("Fail to join multicast group, LastError=%d\n",
                       WSAGetLastError());
@@ -524,7 +524,7 @@ create_multicast_sock (struct sockaddr *sasend, socklen_t salen)
     evutil_socket_t     recvfd;
     struct sockaddr    *sarecv;
 
-    recvfd = WSASocket (AF_INET, SOCK_DGRAM, 0, NULL, 0,
+    recvfd = WSASocket (AF_INET, SOCK_DGRAM, 0, nullptr, 0,
                         WSA_FLAG_MULTIPOINT_C_LEAF|WSA_FLAG_MULTIPOINT_D_LEAF
                         |WSA_FLAG_OVERLAPPED);
     if (recvfd < 0) {
@@ -552,7 +552,7 @@ create_multicast_sock (struct sockaddr *sasend, socklen_t salen)
     }
     free (sarecv);
 
-    if (mcast_join(recvfd, sasend, salen, NULL, 0) < 0) {
+    if (mcast_join(recvfd, sasend, salen, nullptr, 0) < 0) {
         ccnet_warning ("mcast_join error: %s\n", strerror(errno));
         return -1;
     }
@@ -568,7 +568,7 @@ mcast_join(evutil_socket_t sockfd, const struct sockaddr *grp, socklen_t grplen,
 	struct group_req req;
 	if (ifindex > 0) {
 		req.gr_interface = ifindex;
-	} else if (ifname != NULL) {
+	} else if (ifname != nullptr) {
 		if ( (req.gr_interface = if_nametoindex(ifname)) == 0) {
 			errno = ENXIO;	/* i/f name not found */
 			return(-1);
@@ -596,12 +596,12 @@ mcast_join(evutil_socket_t sockfd, const struct sockaddr *grp, socklen_t grplen,
 			   sizeof(struct in_addr));
 
 		if (ifindex > 0) {
-			if (if_indextoname(ifindex, ifreq.ifr_name) == NULL) {
+			if (if_indextoname(ifindex, ifreq.ifr_name) == nullptr) {
 				errno = ENXIO;	/* i/f index not found */
 				return(-1);
 			}
 			goto doioctl;
-		} else if (ifname != NULL) {
+		} else if (ifname != nullptr) {
 			strncpy(ifreq.ifr_name, ifname, IFNAMSIZ);
 doioctl:
 			if (ioctl(sockfd, SIOCGIFADDR, &ifreq) < 0)
@@ -631,7 +631,7 @@ doioctl:
 
 		if (ifindex > 0) {
 			mreq6.ipv6mr_interface = ifindex;
-		} else if (ifname != NULL) {
+		} else if (ifname != nullptr) {
 			if ( (mreq6.ipv6mr_interface = if_nametoindex(ifname)) == 0) {
 				errno = ENXIO;	/* i/f name not found */
 				return(-1);
@@ -680,7 +680,7 @@ create_multicast_sock (struct sockaddr *sasend, socklen_t salen)
     }
     free (sarecv);
 
-    if (mcast_join(recvfd, sasend, salen, NULL, 0) < 0) {
+    if (mcast_join(recvfd, sasend, salen, nullptr, 0) < 0) {
         ccnet_warning ("mcast_join error: %s\n", strerror(errno));
         return -1;
     }

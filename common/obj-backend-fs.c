@@ -59,7 +59,7 @@ obj_backend_fs_read (ObjBackend *bend,
 {
     char path[SEAF_PATH_MAX];
     gsize tmp_len;
-    GError *error = NULL;
+    GError *error = nullptr;
 
     id_to_path (bend->priv, obj_id, path, repo_id, version);
 
@@ -114,7 +114,7 @@ fsync_obj_contents (int fd)
     /* OS X: fcntl() is required to flush disk cache, fsync() only
      * flushes operating system cache.
      */
-    if (fcntl (fd, F_FULLFSYNC, NULL) < 0) {
+    if (fcntl (fd, F_FULLFSYNC, nullptr) < 0) {
         seaf_warning ("Failed to fsync: %s.\n", strerror(errno));
         return -1;
     }
@@ -196,8 +196,8 @@ out:
 #endif
 
 #ifdef WIN32
-    wchar_t *w_tmp_path = g_utf8_to_utf16 (tmp_path, -1, NULL, NULL, NULL);
-    wchar_t *w_obj_path = g_utf8_to_utf16 (obj_path, -1, NULL, NULL, NULL);
+    wchar_t *w_tmp_path = g_utf8_to_utf16 (tmp_path, -1, nullptr, nullptr, nullptr);
+    wchar_t *w_obj_path = g_utf8_to_utf16 (obj_path, -1, nullptr, nullptr, nullptr);
     int ret = 0;
 
     if (!MoveFileExW (w_tmp_path, w_obj_path,
@@ -355,9 +355,9 @@ obj_backend_fs_foreach_obj (ObjBackend *bend,
                             void *user_data)
 {
     FsPriv *priv = bend->priv;
-    char *obj_dir = NULL;
+    char *obj_dir = nullptr;
     int dir_len;
-    GDir *dir1 = NULL, *dir2;
+    GDir *dir1 = nullptr, *dir2;
     const char *dname1, *dname2;
     char obj_id[128];
     char path[SEAF_PATH_MAX], *pos;
@@ -365,13 +365,13 @@ obj_backend_fs_foreach_obj (ObjBackend *bend,
 
 #if defined MIGRATION || defined SEAFILE_CLIENT
     if (version > 0)
-        obj_dir = g_build_filename (priv->obj_dir, repo_id, NULL);
+        obj_dir = g_build_filename (priv->obj_dir, repo_id, nullptr);
 #else
-    obj_dir = g_build_filename (priv->obj_dir, repo_id, NULL);
+    obj_dir = g_build_filename (priv->obj_dir, repo_id, nullptr);
 #endif
     dir_len = strlen (obj_dir);
 
-    dir1 = g_dir_open (obj_dir, 0, NULL);
+    dir1 = g_dir_open (obj_dir, 0, nullptr);
     if (!dir1) {
         goto out;
     }
@@ -379,16 +379,16 @@ obj_backend_fs_foreach_obj (ObjBackend *bend,
     memcpy (path, obj_dir, dir_len);
     pos = path + dir_len;
 
-    while ((dname1 = g_dir_read_name(dir1)) != NULL) {
+    while ((dname1 = g_dir_read_name(dir1)) != nullptr) {
         snprintf (pos, sizeof(path) - dir_len, "/%s", dname1);
 
-        dir2 = g_dir_open (path, 0, NULL);
+        dir2 = g_dir_open (path, 0, nullptr);
         if (!dir2) {
             seaf_warning ("Failed to open object dir %s.\n", path);
             continue;
         }
 
-        while ((dname2 = g_dir_read_name(dir2)) != NULL) {
+        while ((dname2 = g_dir_read_name(dir2)) != nullptr) {
             snprintf (obj_id, sizeof(obj_id), "%s%s", dname1, dname2);
             if (!process (repo_id, version, obj_id, user_data)) {
                 g_dir_close (dir2);
@@ -430,7 +430,7 @@ obj_backend_fs_copy (ObjBackend *bend,
     }
 
 #ifdef WIN32
-    if (!CreateHardLink (dst_path, src_path, NULL)) {
+    if (!CreateHardLink (dst_path, src_path, nullptr)) {
         seaf_warning ("Failed to link %s to %s: %lu.\n",
                       src_path, dst_path, GetLastError());
         return -1;
@@ -451,23 +451,23 @@ static int
 obj_backend_fs_remove_store (ObjBackend *bend, const char *store_id)
 {
     FsPriv *priv = bend->priv;
-    char *obj_dir = NULL;
+    char *obj_dir = nullptr;
     GDir *dir1, *dir2;
     const char *dname1, *dname2;
     char *path1, *path2;
 
-    obj_dir = g_build_filename (priv->obj_dir, store_id, NULL);
+    obj_dir = g_build_filename (priv->obj_dir, store_id, nullptr);
 
-    dir1 = g_dir_open (obj_dir, 0, NULL);
+    dir1 = g_dir_open (obj_dir, 0, nullptr);
     if (!dir1) {
         g_free (obj_dir);
         return 0;
     }
 
-    while ((dname1 = g_dir_read_name(dir1)) != NULL) {
-        path1 = g_build_filename (obj_dir, dname1, NULL);
+    while ((dname1 = g_dir_read_name(dir1)) != nullptr) {
+        path1 = g_build_filename (obj_dir, dname1, nullptr);
 
-        dir2 = g_dir_open (path1, 0, NULL);
+        dir2 = g_dir_open (path1, 0, nullptr);
         if (!dir2) {
             seaf_warning ("Failed to open obj dir %s.\n", path1);
             g_dir_close (dir1);
@@ -476,8 +476,8 @@ obj_backend_fs_remove_store (ObjBackend *bend, const char *store_id)
             return -1;
         }
 
-        while ((dname2 = g_dir_read_name(dir2)) != NULL) {
-            path2 = g_build_filename (path1, dname2, NULL);
+        while ((dname2 = g_dir_read_name(dir2)) != nullptr) {
+            path2 = g_build_filename (path1, dname2, nullptr);
             g_unlink (path2);
             g_free (path2);
         }
@@ -504,7 +504,7 @@ obj_backend_fs_new (const char *seaf_dir, const char *obj_type)
     priv = g_new0(FsPriv, 1);
     bend->priv = priv;
 
-    priv->obj_dir = g_build_filename (seaf_dir, "storage", obj_type, NULL);
+    priv->obj_dir = g_build_filename (seaf_dir, "storage", obj_type, nullptr);
     priv->dir_len = strlen (priv->obj_dir);
 
     if (g_mkdir_with_parents (priv->obj_dir, 0777) < 0) {
@@ -528,5 +528,5 @@ onerror:
     g_free (priv);
     g_free (bend);
 
-    return NULL;
+    return nullptr;
 }

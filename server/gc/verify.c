@@ -131,7 +131,7 @@ verify_virtual_repos (VerifyData *data)
 
     data->traverse_base_commit = TRUE;
 
-    GList *vrepo_ids = NULL, *ptr;
+    GList *vrepo_ids = nullptr, *ptr;
     char *repo_id;
     SeafVirtRepo *vinfo;
     int ret = 0;
@@ -193,7 +193,7 @@ verify_repo (SeafRepo *repo)
     data.repo = repo;
     data.truncate_time = seaf_repo_manager_get_repo_truncate_time (repo->manager,
                                                                    repo->id);
-    data.exist_blocks = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+    data.exist_blocks = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
     ret = seaf_block_manager_foreach_block (seaf->block_mgr,
                                             repo->store_id, repo->version,
                                             collect_exist_blocks,
@@ -206,13 +206,13 @@ verify_repo (SeafRepo *repo)
     }
 
     branches = seaf_branch_manager_get_branch_list (seaf->branch_mgr, repo->id);
-    if (branches == NULL) {
+    if (branches == nullptr) {
         seaf_warning ("[GC] Failed to get branch list of repo %s.\n", repo->id);
         g_hash_table_destroy (data.exist_blocks);
         return -1;
     }
 
-    for (ptr = branches; ptr != NULL; ptr = ptr->next) {
+    for (ptr = branches; ptr != nullptr; ptr = ptr->next) {
         branch = ptr->data;
         gboolean res = seaf_commit_manager_traverse_commit_tree (seaf->commit_mgr,
                                                                  repo->id,
@@ -247,14 +247,14 @@ verify_repo (SeafRepo *repo)
 int
 verify_repos (GList *repo_id_list)
 {
-    if (repo_id_list == NULL)
+    if (repo_id_list == nullptr)
         repo_id_list = seaf_repo_manager_get_repo_id_list (seaf->repo_mgr);
 
     GList *ptr;
     SeafRepo *repo;
     int ret = 0;
 
-    for (ptr = repo_id_list; ptr != NULL; ptr = ptr->next) {
+    for (ptr = repo_id_list; ptr != nullptr; ptr = ptr->next) {
         repo = seaf_repo_manager_get_repo_ex (seaf->repo_mgr, (const gchar *)ptr->data);
 
         g_free (ptr->data);

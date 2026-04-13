@@ -35,7 +35,7 @@ seaf_branch_new (const char *name, const char *repo_id, const char *commit_id)
 void
 seaf_branch_free (SeafBranch *branch)
 {
-    if (branch == NULL) return;
+    if (branch == nullptr) return;
     g_free (branch->name);
     g_free (branch);
 }
@@ -179,7 +179,7 @@ static void
 publish_repo_update_event (const char *repo_id, const char *commit_id)
 {
     json_t *msg = json_object ();
-    char *msg_str = NULL;
+    char *msg_str = nullptr;
 
     json_object_set_new (msg, "msg_type", json_string("repo-update"));
     json_object_set_new (msg, "repo_id", json_string(repo_id));
@@ -195,9 +195,9 @@ publish_repo_update_event (const char *repo_id, const char *commit_id)
 static void
 notify_repo_update (const char *repo_id, const char *commit_id)
 {
-    json_t *event = NULL;
-    json_t *content = NULL;
-    char *msg = NULL;
+    json_t *event = nullptr;
+    json_t *content = nullptr;
+    char *msg = nullptr;
 
     event = json_object ();
     content = json_object ();
@@ -255,7 +255,7 @@ seaf_branch_manager_test_and_update_branch (SeafBranchManager *mgr,
     SeafDBTrans *trans;
     char *sql;
     char commit_id[41] = { 0 };
-    char *gc_id = NULL;
+    char *gc_id = nullptr;
 
     if (check_gc)
         *gc_conflict = FALSE;
@@ -361,11 +361,11 @@ real_get_branch (SeafBranchManager *mgr,
             get_branch, commit_id,
             2, "string", name, "string", repo_id) < 0) {
         seaf_warning ("[branch mgr] DB error when get branch %s.\n", name);
-        return NULL;
+        return nullptr;
     }
 
     if (commit_id[0] == 0)
-        return NULL;
+        return nullptr;
 
     return seaf_branch_new (name, repo_id, commit_id);
 }
@@ -426,13 +426,13 @@ seaf_branch_manager_get_branch_list (SeafBranchManager *mgr,
     SeafDB *db = mgr->seaf->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    GList *ret = NULL;
+    GList *ret = nullptr;
 
     if (seaf_db_statement_foreach_row (db, queries->get_branch,
             get_branches, &ret,
             1, "string", repo_id) < 0) {
         seaf_warning ("[branch mgr] DB error when get branch list.\n");
-        return NULL;
+        return nullptr;
     }
 
     return ret;

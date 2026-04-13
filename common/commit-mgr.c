@@ -70,8 +70,8 @@ seaf_commit_new (const char *commit_id,
 {
     SeafCommit *commit;
 
-    g_return_val_if_fail (repo_id != NULL, NULL);
-    g_return_val_if_fail (root_id != NULL && creator_id != NULL, NULL);
+    g_return_val_if_fail (repo_id != nullptr, nullptr);
+    g_return_val_if_fail (root_id != nullptr && creator_id != nullptr, nullptr);
 
     commit = g_new0 (SeafCommit, 1);
 
@@ -90,11 +90,11 @@ seaf_commit_new (const char *commit_id,
     
     if (ctime == 0) {
         /* TODO: use more precise timer */
-        commit->ctime = (gint64)time(NULL);
+        commit->ctime = (gint64)time(nullptr);
     } else
         commit->ctime = ctime;
 
-    if (commit_id == NULL)
+    if (commit_id == nullptr)
         compute_commit_id (commit);
     else {
         memcpy (commit->commit_id, commit_id, 40);
@@ -144,7 +144,7 @@ seaf_commit_from_data (const char *id, char *data, gsize len)
                 seaf_warning ("Failed to load commit json: %s.\n", jerror.text);
             else
                 seaf_warning ("Failed to load commit json.\n");
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -251,7 +251,7 @@ seaf_commit_manager_del_commit (SeafCommitManager *mgr,
                                 int version,
                                 const char *id)
 {
-    g_return_if_fail (id != NULL);
+    g_return_if_fail (id != nullptr);
 
 #if 0
     commit = g_hash_table_lookup(mgr->priv->commit_cache, id);
@@ -281,7 +281,7 @@ seaf_commit_manager_get_commit (SeafCommitManager *mgr,
 
 #if 0
     commit = g_hash_table_lookup (mgr->priv->commit_cache, id);
-    if (commit != NULL) {
+    if (commit != nullptr) {
         seaf_commit_ref (commit);
         return commit;
     }
@@ -289,7 +289,7 @@ seaf_commit_manager_get_commit (SeafCommitManager *mgr,
 
     commit = load_commit (mgr, repo_id, version, id);
     if (!commit)
-        return NULL;
+        return nullptr;
 
     /* add_commit_to_cache (mgr, commit); */
 
@@ -301,7 +301,7 @@ seaf_commit_manager_get_commit_compatible (SeafCommitManager *mgr,
                                            const char *repo_id,
                                            const char *id)
 {
-    SeafCommit *commit = NULL;
+    SeafCommit *commit = nullptr;
 
     /* First try version 1 layout. */
     commit = seaf_commit_manager_get_commit (mgr, repo_id, 1, id);
@@ -333,7 +333,7 @@ insert_parent_commit (GList **list, GHashTable *hash,
     SeafCommit *p;
     char *key;
 
-    if (g_hash_table_lookup (hash, parent_id) != NULL)
+    if (g_hash_table_lookup (hash, parent_id) != nullptr)
         return 0;
 
     p = seaf_commit_manager_get_commit (seaf->commit_mgr,
@@ -348,7 +348,7 @@ insert_parent_commit (GList **list, GHashTable *hash,
 
     *list = g_list_insert_sorted_with_data (*list, p,
                                            compare_commit_by_time,
-                                           NULL);
+                                           nullptr);
 
     key = g_strdup (parent_id);
     g_hash_table_replace (hash, key, key);
@@ -368,12 +368,12 @@ seaf_commit_manager_traverse_commit_tree_with_limit (SeafCommitManager *mgr,
                                                      gboolean skip_errors)
 {
     SeafCommit *commit;
-    GList *list = NULL;
+    GList *list = nullptr;
     GHashTable *commit_hash;
     gboolean ret = TRUE;
 
     /* A hash table for recording id of traversed commits. */
-    commit_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+    commit_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
 
     commit = seaf_commit_manager_get_commit (mgr, repo_id, version, head);
     if (!commit) {
@@ -384,7 +384,7 @@ seaf_commit_manager_traverse_commit_tree_with_limit (SeafCommitManager *mgr,
 
     list = g_list_insert_sorted_with_data (list, commit,
                                            compare_commit_by_time,
-                                           NULL);
+                                           nullptr);
 
     char *key = g_strdup (commit->commit_id);
     g_hash_table_replace (commit_hash, key, key);
@@ -475,7 +475,7 @@ traverse_commit_tree_common (SeafCommitManager *mgr,
                              gboolean allow_truncate)
 {
     SeafCommit *commit;
-    GList *list = NULL;
+    GList *list = nullptr;
     GHashTable *commit_hash;
     gboolean ret = TRUE;
 
@@ -488,11 +488,11 @@ traverse_commit_tree_common (SeafCommitManager *mgr,
     }
 
     /* A hash table for recording id of traversed commits. */
-    commit_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+    commit_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
 
     list = g_list_insert_sorted_with_data (list, commit,
                                            compare_commit_by_time,
-                                           NULL);
+                                           nullptr);
 
     char *key = g_strdup (commit->commit_id);
     g_hash_table_replace (commit_hash, key, key);
@@ -592,7 +592,7 @@ seaf_commit_manager_commit_exists (SeafCommitManager *mgr,
 {
 #if 0
     commit = g_hash_table_lookup (mgr->priv->commit_cache, id);
-    if (commit != NULL)
+    if (commit != nullptr)
         return TRUE;
 #endif
 
@@ -666,10 +666,10 @@ commit_to_json_object (SeafCommit *commit)
 static SeafCommit *
 commit_from_json_object (const char *commit_id, json_t *object)
 {
-    SeafCommit *commit = NULL;
+    SeafCommit *commit = nullptr;
     const char *root_id;
     const char *repo_id;
-    const char *creator_name = NULL;
+    const char *creator_name = nullptr;
     const char *creator;
     const char *desc;
     gint64 ctime;
@@ -679,14 +679,14 @@ commit_from_json_object (const char *commit_id, json_t *object)
     const char *repo_category;
     const char *device_name;
     const char *client_version;
-    const char *encrypted = NULL;
+    const char *encrypted = nullptr;
     int enc_version = 0;
-    const char *magic = NULL;
-    const char *random_key = NULL;
-    const char *salt = NULL;
-    const char *pwd_hash = NULL;
-    const char *pwd_hash_algo = NULL;
-    const char *pwd_hash_params = NULL;
+    const char *magic = nullptr;
+    const char *random_key = nullptr;
+    const char *salt = nullptr;
+    const char *pwd_hash = nullptr;
+    const char *pwd_hash_algo = nullptr;
+    const char *pwd_hash_params = nullptr;
     int no_local_history = 0;
     int version = 0;
     int conflict = 0, new_merge = 0;
@@ -763,42 +763,42 @@ commit_from_json_object (const char *commit_id, json_t *object)
         break;
     case 1:
         if (!magic || strlen(magic) != 32)
-            return NULL;
+            return nullptr;
         break;
     case 2:
         if (!magic || strlen(magic) != 64)
-            return NULL;
+            return nullptr;
         if (!random_key || strlen(random_key) != 96)
-            return NULL;
+            return nullptr;
         break;
     case 3:
         if (!magic || strlen(magic) != 64)
-            return NULL;
+            return nullptr;
         if (!random_key || strlen(random_key) != 96)
-            return NULL;
+            return nullptr;
         if (!salt || strlen(salt) != 64)
-            return NULL;
+            return nullptr;
         break;
     case 4:
         if (!magic || strlen(magic) != 64)
-            return NULL;
+            return nullptr;
         if (!random_key || strlen(random_key) != 96)
-            return NULL;
+            return nullptr;
         if (!salt || strlen(salt) != 64)
-            return NULL;
+            return nullptr;
         break;
     default:
         seaf_warning ("Unknown encryption version %d.\n", enc_version);
-        return NULL;
+        return nullptr;
     }
 
-    char *creator_name_l = creator_name ? g_ascii_strdown (creator_name, -1) : NULL;
+    char *creator_name_l = creator_name ? g_ascii_strdown (creator_name, -1) : nullptr;
     commit = seaf_commit_new (commit_id, repo_id, root_id,
                               creator_name_l, creator, desc, ctime);
     g_free (creator_name_l);
 
-    commit->parent_id = parent_id ? g_strdup(parent_id) : NULL;
-    commit->second_parent_id = second_parent_id ? g_strdup(second_parent_id) : NULL;
+    commit->parent_id = parent_id ? g_strdup(parent_id) : nullptr;
+    commit->second_parent_id = second_parent_id ? g_strdup(second_parent_id) : nullptr;
 
     commit->repo_name = g_strdup(repo_name);
     commit->repo_desc = g_strdup(repo_desc);
@@ -844,18 +844,18 @@ load_commit (SeafCommitManager *mgr,
              int version,
              const char *commit_id)
 {
-    char *data = NULL;
+    char *data = nullptr;
     int len;
-    SeafCommit *commit = NULL;
-    json_t *object = NULL;
+    SeafCommit *commit = nullptr;
+    json_t *object = nullptr;
     json_error_t jerror;
 
     if (!commit_id || strlen(commit_id) != 40)
-        return NULL;
+        return nullptr;
 
     if (seaf_obj_store_read_obj (mgr->obj_store, repo_id, version,
                                  commit_id, (void **)&data, &len) < 0)
-        return NULL;
+        return nullptr;
 
     object = json_loadb (data, len, 0, &jerror);
     if (!object) {
@@ -892,7 +892,7 @@ save_commit (SeafCommitManager *manager,
              int version,
              SeafCommit *commit)
 {
-    json_t *object = NULL;
+    json_t *object = nullptr;
     char *data;
     gsize len;
 

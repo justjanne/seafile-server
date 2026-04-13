@@ -80,7 +80,7 @@ seafile_derive_key (const char *data_in, int in_len, int version,
     else
         return EVP_BytesToKey (EVP_aes_128_ecb(), /* cipher mode */
                                EVP_sha1(),        /* message digest */
-                               NULL,              /* salt */
+                               nullptr,              /* salt */
                                (unsigned char*)data_in,
                                in_len,
                                3,   /* iteration times */
@@ -142,7 +142,7 @@ seafile_generate_magic (int version, const char *repo_id,
                         const char *repo_salt,
                         char *magic)
 {
-    GString *buf = g_string_new (NULL);
+    GString *buf = g_string_new (nullptr);
     unsigned char key[32], iv[16];
 
     /* Compute a "magic" string from repo_id and passwd.
@@ -166,7 +166,7 @@ seafile_generate_pwd_hash (int version,
                            const char *params_str,
                            char *pwd_hash)
 {
-    GString *buf = g_string_new (NULL);
+    GString *buf = g_string_new (nullptr);
     unsigned char key[32];
 
     /* Compute a "pwd_hash" string from repo_id and passwd.
@@ -195,7 +195,7 @@ seafile_verify_repo_passwd (const char *repo_id,
                             int version,
                             const char *repo_salt)
 {
-    GString *buf = g_string_new (NULL);
+    GString *buf = g_string_new (nullptr);
     unsigned char key[32], iv[16];
     char hex[65];
 
@@ -230,7 +230,7 @@ seafile_pwd_hash_verify_repo_passwd (int version,
                                      const char *algo,
                                      const char *params_str)
 {
-    GString *buf = g_string_new (NULL);
+    GString *buf = g_string_new (nullptr);
     unsigned char key[32];
     char hex[65];
 
@@ -273,7 +273,7 @@ seafile_decrypt_repo_enc_key (int enc_version,
         int outlen;
         SeafileCrypt *crypt;
 
-        if (random_key == NULL || random_key[0] == 0) {
+        if (random_key == nullptr || random_key[0] == 0) {
             seaf_warning ("Empty random key.\n");
             return -1;
         }
@@ -354,11 +354,11 @@ seafile_encrypt (char **data_out,
                  const int in_len,
                  SeafileCrypt *crypt)
 {
-    *data_out = NULL;
+    *data_out = nullptr;
     *out_len = -1;
 
     /* check validation */
-    if ( data_in == NULL || in_len <= 0 || crypt == NULL) {
+    if ( data_in == nullptr || in_len <= 0 || crypt == nullptr) {
         seaf_warning ("Invalid params.\n");
         return -1;
     }
@@ -373,19 +373,19 @@ seafile_encrypt (char **data_out,
     if (crypt->version == 1)
         ret = EVP_EncryptInit_ex (ctx,
                                   EVP_aes_128_cbc(), /* cipher mode */
-                                  NULL, /* engine, NULL for default */
+                                  nullptr, /* engine, nullptr for default */
                                   crypt->key,  /* derived key */
                                   crypt->iv);  /* initial vector */
     else if (crypt->version == 3)
         ret = EVP_EncryptInit_ex (ctx,
                                   EVP_aes_128_ecb(), /* cipher mode */
-                                  NULL, /* engine, NULL for default */
+                                  nullptr, /* engine, nullptr for default */
                                   crypt->key,  /* derived key */
                                   crypt->iv);  /* initial vector */
     else
         ret = EVP_EncryptInit_ex (ctx,
                                   EVP_aes_256_cbc(), /* cipher mode */
-                                  NULL, /* engine, NULL for default */
+                                  nullptr, /* engine, nullptr for default */
                                   crypt->key,  /* derived key */
                                   crypt->iv);  /* initial vector */
 
@@ -405,7 +405,7 @@ seafile_encrypt (char **data_out,
 
     *data_out = (char *)g_malloc (blks * BLK_SIZE);
 
-    if (*data_out == NULL) {
+    if (*data_out == nullptr) {
         seaf_warning ("failed to allocate the output buffer.\n");
         goto enc_error;
     }                
@@ -444,10 +444,10 @@ enc_error:
 
     *out_len = -1;
 
-    if (*data_out != NULL)
+    if (*data_out != nullptr)
         g_free (*data_out);
 
-    *data_out = NULL;
+    *data_out = nullptr;
 
     return -1;
     
@@ -463,13 +463,13 @@ seafile_decrypt (char **data_out,
                  const int in_len,
                  SeafileCrypt *crypt)
 {
-    *data_out = NULL;
+    *data_out = nullptr;
     *out_len = -1;
 
     /* Check validation. Because padding is always used, in_len must
      * be a multiple of BLK_SIZE */
-    if ( data_in == NULL || in_len <= 0 || in_len % BLK_SIZE != 0 ||
-         crypt == NULL) {
+    if ( data_in == nullptr || in_len <= 0 || in_len % BLK_SIZE != 0 ||
+         crypt == nullptr) {
 
         seaf_warning ("Invalid param(s).\n");
         return -1;
@@ -484,19 +484,19 @@ seafile_decrypt (char **data_out,
     if (crypt->version == 1)
         ret = EVP_DecryptInit_ex (ctx,
                                   EVP_aes_128_cbc(), /* cipher mode */
-                                  NULL, /* engine, NULL for default */
+                                  nullptr, /* engine, nullptr for default */
                                   crypt->key,  /* derived key */
                                   crypt->iv);  /* initial vector */
     else if (crypt->version == 3)
         ret = EVP_DecryptInit_ex (ctx,
                                   EVP_aes_128_ecb(), /* cipher mode */
-                                  NULL, /* engine, NULL for default */
+                                  nullptr, /* engine, nullptr for default */
                                   crypt->key,  /* derived key */
                                   crypt->iv);  /* initial vector */
     else
         ret = EVP_DecryptInit_ex (ctx,
                                   EVP_aes_256_cbc(), /* cipher mode */
-                                  NULL, /* engine, NULL for default */
+                                  nullptr, /* engine, nullptr for default */
                                   crypt->key,  /* derived key */
                                   crypt->iv);  /* initial vector */
 
@@ -508,7 +508,7 @@ seafile_decrypt (char **data_out,
     
     *data_out = (char *)g_malloc (in_len);
 
-    if (*data_out == NULL) {
+    if (*data_out == nullptr) {
         seaf_warning ("failed to allocate the output buffer.\n");
         goto dec_error;
     }                
@@ -546,10 +546,10 @@ dec_error:
     EVP_CIPHER_CTX_free (ctx);
 
     *out_len = -1;
-    if (*data_out != NULL)
+    if (*data_out != nullptr)
         g_free (*data_out);
 
-    *data_out = NULL;
+    *data_out = nullptr;
 
     return -1;
     
@@ -569,19 +569,19 @@ seafile_decrypt_init (EVP_CIPHER_CTX **ctx,
     if (version == 1)
         ret = EVP_DecryptInit_ex (*ctx,
                                   EVP_aes_128_cbc(), /* cipher mode */
-                                  NULL, /* engine, NULL for default */
+                                  nullptr, /* engine, nullptr for default */
                                   key,  /* derived key */
                                   iv);  /* initial vector */
     else if (version == 3)
         ret = EVP_DecryptInit_ex (*ctx,
                                   EVP_aes_128_ecb(), /* cipher mode */
-                                  NULL, /* engine, NULL for default */
+                                  nullptr, /* engine, nullptr for default */
                                   key,  /* derived key */
                                   iv);  /* initial vector */
     else
         ret = EVP_DecryptInit_ex (*ctx,
                                   EVP_aes_256_cbc(), /* cipher mode */
-                                  NULL, /* engine, NULL for default */
+                                  nullptr, /* engine, nullptr for default */
                                   key,  /* derived key */
                                   iv);  /* initial vector */
 

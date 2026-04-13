@@ -174,15 +174,15 @@ seaf_repo_get_commits (SeafRepo *repo)
     GList *branches;
     GList *ptr;
     SeafBranch *branch;
-    GList *commits = NULL;
+    GList *commits = nullptr;
 
     branches = seaf_branch_manager_get_branch_list (seaf->branch_mgr, repo->id);
-    if (branches == NULL) {
+    if (branches == nullptr) {
         seaf_warning ("Failed to get branch list of repo %s.\n", repo->id);
-        return NULL;
+        return nullptr;
     }
 
-    for (ptr = branches; ptr != NULL; ptr = ptr->next) {
+    for (ptr = branches; ptr != nullptr; ptr = ptr->next) {
         branch = ptr->data;
         gboolean res = seaf_commit_manager_traverse_commit_tree (seaf->commit_mgr,
                                                                  repo->id,
@@ -192,7 +192,7 @@ seaf_repo_get_commits (SeafRepo *repo)
                                                                  &commits,
                                                                  FALSE);
         if (!res) {
-            for (ptr = commits; ptr != NULL; ptr = ptr->next)
+            for (ptr = commits; ptr != nullptr; ptr = ptr->next)
                 seaf_commit_unref ((SeafCommit *)(ptr->data));
             g_list_free (commits);
             goto out;
@@ -202,7 +202,7 @@ seaf_repo_get_commits (SeafRepo *repo)
     commits = g_list_reverse (commits);
 
 out:
-    for (ptr = branches; ptr != NULL; ptr = ptr->next) {
+    for (ptr = branches; ptr != nullptr; ptr = ptr->next) {
         seaf_branch_unref ((SeafBranch *)ptr->data);
     }
     return commits;
@@ -259,19 +259,19 @@ seaf_repo_manager_get_repo (SeafRepoManager *manager, const gchar *id)
     int len = strlen(id);
 
     if (len >= 37)
-        return NULL;
+        return nullptr;
 
     memcpy (repo.id, id, len + 1);
 
     if (repo_exists_in_db (manager->seaf->db, id)) {
         SeafRepo *ret = load_repo (manager, id, FALSE);
         if (!ret)
-            return NULL;
+            return nullptr;
         /* seaf_repo_ref (ret); */
         return ret;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 SeafRepo*
@@ -279,15 +279,15 @@ seaf_repo_manager_get_repo_ex (SeafRepoManager *manager, const gchar *id)
 {
     int len = strlen(id);
     gboolean db_err = FALSE, exists;
-    SeafRepo *ret = NULL;
+    SeafRepo *ret = nullptr;
 
     if (len >= 37)
-        return NULL;
+        return nullptr;
 
     exists = repo_exists_in_db_ex (manager->seaf->db, id, &db_err);
 
     if (db_err) {
-        ret = seaf_repo_new(id, NULL, NULL);
+        ret = seaf_repo_new(id, nullptr, nullptr);
         ret->is_corrupted = TRUE;
         return ret;
     }
@@ -297,7 +297,7 @@ seaf_repo_manager_get_repo_ex (SeafRepoManager *manager, const gchar *id)
         return ret;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 gboolean
@@ -336,12 +336,12 @@ load_repo (SeafRepoManager *manager, const char *repo_id, gboolean ret_corrupt)
 {
     SeafRepo *repo;
     SeafBranch *branch;
-    SeafVirtRepo *vinfo = NULL;
+    SeafVirtRepo *vinfo = nullptr;
 
-    repo = seaf_repo_new(repo_id, NULL, NULL);
+    repo = seaf_repo_new(repo_id, nullptr, nullptr);
     if (!repo) {
         seaf_warning ("[repo mgr] failed to alloc repo.\n");
-        return NULL;
+        return nullptr;
     }
 
     repo->manager = manager;
@@ -358,7 +358,7 @@ load_repo (SeafRepoManager *manager, const char *repo_id, gboolean ret_corrupt)
     if (repo->is_corrupted) {
         if (!ret_corrupt) {
             seaf_repo_free (repo);
-            return NULL;
+            return nullptr;
         }
         return repo;
     }
@@ -391,14 +391,14 @@ collect_repo_id (SeafDBRow *row, void *data)
 GList *
 seaf_repo_manager_get_repo_id_list (SeafRepoManager *mgr)
 {
-    GList *ret = NULL;
+    GList *ret = nullptr;
     char sql[256];
 
     snprintf (sql, 256, "SELECT repo_id FROM Repo");
 
     if (seaf_db_foreach_selected_row (mgr->seaf->db, sql, 
                                       collect_repo_id, &ret) < 0)
-        return NULL;
+        return nullptr;
 
     return ret;
 }
@@ -407,14 +407,14 @@ GList *
 seaf_repo_manager_get_repo_id_list_by_prefix (SeafRepoManager *mgr,
                                               const char *prefix)
 {
-    GList *ret = NULL;
+    GList *ret = nullptr;
     char sql[256];
 
     snprintf (sql, 256, "SELECT repo_id FROM Repo WHERE repo_id LIKE '%s%%'", prefix);
 
     if (seaf_db_foreach_selected_row (mgr->seaf->db, sql,
                                       collect_repo_id, &ret) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return ret;
@@ -426,8 +426,8 @@ seaf_repo_manager_get_repo_list (SeafRepoManager *mgr,
                                  gboolean *error)
 {
     char sql[256];
-    GList *id_list = NULL, *ptr;
-    GList *ret = NULL;
+    GList *id_list = nullptr, *ptr;
+    GList *ret = nullptr;
     SeafRepo *repo;
 
     *error = FALSE;
@@ -454,7 +454,7 @@ seaf_repo_manager_get_repo_list (SeafRepoManager *mgr,
 error:
     *error = TRUE;
     string_list_free (id_list);
-    return NULL;
+    return nullptr;
 }
 
 int
@@ -589,7 +589,7 @@ seaf_repo_manager_get_repo_truncate_time (SeafRepoManager *mgr,
     days = seaf_repo_manager_get_repo_history_limit (mgr, repo_id);
     timestamp = seaf_repo_manager_get_repo_valid_since (mgr, repo_id);
 
-    gint64 now = (gint64)time(NULL);
+    gint64 now = (gint64)time(nullptr);
     if (days > 0)
         return MAX (now - days * 24 * 3600, timestamp);
     else if (days < 0)
@@ -623,7 +623,7 @@ seaf_repo_manager_get_virtual_repo_info (SeafRepoManager *mgr,
                                          const char *repo_id)
 {
     char sql[256];
-    SeafVirtRepo *vinfo = NULL;
+    SeafVirtRepo *vinfo = nullptr;
 
     snprintf (sql, 256,
               "SELECT origin_repo, path, base_commit FROM VirtualRepo "
@@ -658,7 +658,7 @@ GList *
 seaf_repo_manager_get_virtual_repo_ids_by_origin (SeafRepoManager *mgr,
                                                   const char *origin_repo)
 {
-    GList *ret = NULL;
+    GList *ret = nullptr;
     char sql[256];
 
     snprintf (sql, 256,
@@ -666,7 +666,7 @@ seaf_repo_manager_get_virtual_repo_ids_by_origin (SeafRepoManager *mgr,
               origin_repo);
     if (seaf_db_foreach_selected_row (mgr->seaf->db, sql, 
                                       collect_virtual_repo_ids, &ret) < 0) {
-        return NULL;
+        return nullptr;
     }
 
     return g_list_reverse (ret);
@@ -687,7 +687,7 @@ get_garbage_repo_id (SeafDBRow *row, void *vid_list)
 GList *
 seaf_repo_manager_list_garbage_repos (SeafRepoManager *mgr)
 {
-    GList *repo_ids = NULL;
+    GList *repo_ids = nullptr;
 
     seaf_db_foreach_selected_row (seaf->db,
                                   "SELECT repo_id FROM GarbageRepos",

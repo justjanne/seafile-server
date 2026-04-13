@@ -146,12 +146,12 @@ const char *GET_ACCESSIBLE_REPO_LIST_REGEX = "/accessible-repos";
 static void
 load_http_config (HttpServerStruct *htp_server, SeafileSession *session)
 {
-    GError *error = NULL;
-    char *host = NULL;
+    GError *error = nullptr;
+    char *host = nullptr;
     int port = 0;
     int worker_threads;
     char *encoding;
-    char *cluster_shared_temp_file_mode = NULL;
+    char *cluster_shared_temp_file_mode = nullptr;
     gboolean verify_client_blocks;
 
     host = fileserver_config_get_string (session->config, HOST, &error);
@@ -217,7 +217,7 @@ load_http_config (HttpServerStruct *htp_server, SeafileSession *session)
         if (!cluster_shared_temp_file_mode) {
             htp_server->cluster_shared_temp_file_mode = DEFAULT_CLUSTER_SHARED_TEMP_FILE_MODE;
         } else {
-            htp_server->cluster_shared_temp_file_mode = strtol(cluster_shared_temp_file_mode, NULL, 8);
+            htp_server->cluster_shared_temp_file_mode = strtol(cluster_shared_temp_file_mode, nullptr, 8);
 
             if (htp_server->cluster_shared_temp_file_mode < 0001 ||
                 htp_server->cluster_shared_temp_file_mode > 0777)
@@ -246,15 +246,15 @@ validate_token (HttpServer *htp_server, evhtp_request_t *req,
                 const char *repo_id, char **username,
                 gboolean skip_cache)
 {
-    char *email = NULL;
+    char *email = nullptr;
     TokenInfo *token_info;
-    char *tmp_token = NULL;
+    char *tmp_token = nullptr;
 
     const char *token = evhtp_kv_find (req->headers_in, "Seafile-Repo-Token");
-    if (token == NULL) {
+    if (token == nullptr) {
         const char *auth_token = evhtp_kv_find (req->headers_in, "Authorization");
         tmp_token = seaf_parse_auth_token (auth_token);
-        if (tmp_token == NULL) {
+        if (tmp_token == nullptr) {
             evhtp_send_reply (req, EVHTP_RES_BADREQ);
             return EVHTP_RES_BADREQ;
         }
@@ -284,7 +284,7 @@ validate_token (HttpServer *htp_server, evhtp_request_t *req,
 
     email = seaf_repo_manager_get_email_by_token (seaf->repo_mgr,
                                                   repo_id, token);
-    if (email == NULL) {
+    if (email == nullptr) {
         pthread_mutex_lock (&htp_server->token_cache_lock);
         g_hash_table_remove (htp_server->token_cache, token);
         pthread_mutex_unlock (&htp_server->token_cache_lock);
@@ -294,7 +294,7 @@ validate_token (HttpServer *htp_server, evhtp_request_t *req,
 
     token_info = g_new0 (TokenInfo, 1);
     token_info->repo_id = g_strdup (repo_id);
-    token_info->expire_time = (gint64)time(NULL) + TOKEN_EXPIRE_TIME;
+    token_info->expire_time = (gint64)time(nullptr) + TOKEN_EXPIRE_TIME;
     token_info->email = email;
 
     pthread_mutex_lock (&htp_server->token_cache_lock);
@@ -310,8 +310,8 @@ validate_token (HttpServer *htp_server, evhtp_request_t *req,
 static PermInfo *
 lookup_perm_cache (HttpServer *htp_server, const char *repo_id, const char *username, const char *op)
 {
-    PermInfo *ret = NULL;
-    PermInfo *perm = NULL;
+    PermInfo *ret = nullptr;
+    PermInfo *perm = nullptr;
     char *key = g_strdup_printf ("%s:%s:%s", repo_id, username, op);
 
     pthread_mutex_lock (&htp_server->perm_cache_lock);
@@ -334,7 +334,7 @@ get_auth_token (evhtp_request_t *req)
         return g_strdup (token);
     }
 
-    char *tmp_token = NULL;
+    char *tmp_token = nullptr;
     const char *auth_token = evhtp_kv_find (req->headers_in, "Authorization");
     tmp_token = seaf_parse_auth_token (auth_token);
 
@@ -374,7 +374,7 @@ static int
 check_permission (HttpServer *htp_server, const char *repo_id, const char *username,
                   const char *op, gboolean skip_cache)
 {
-    PermInfo *perm_info = NULL;
+    PermInfo *perm_info = nullptr;
 
     if (!skip_cache)
         perm_info = lookup_perm_cache (htp_server, repo_id, username, op);
@@ -393,7 +393,7 @@ check_permission (HttpServer *htp_server, const char *repo_id, const char *usern
     }
 
     char *perm = seaf_repo_manager_check_permission (seaf->repo_mgr,
-                                                     repo_id, username, NULL);
+                                                     repo_id, username, nullptr);
     if (perm) {
         if ((strcmp (perm, "r") == 0 && strcmp (op, "upload") == 0)) {
             g_free (perm);
@@ -403,7 +403,7 @@ check_permission (HttpServer *htp_server, const char *repo_id, const char *usern
         g_free (perm);
         perm_info = g_new0 (PermInfo, 1);
         /* Take the reference of perm. */
-        perm_info->expire_time = (gint64)time(NULL) + PERM_EXPIRE_TIME;
+        perm_info->expire_time = (gint64)time(nullptr) + PERM_EXPIRE_TIME;
         insert_perm_cache (htp_server, repo_id, username, op, perm_info);
         return EVHTP_RES_OK;
     }
@@ -429,7 +429,7 @@ get_vir_repo_info (SeafDBRow *row, void *data)
     (*vinfo)->store_id = g_strdup (origin_id);
     if (!(*vinfo)->store_id)
         return FALSE;
-    (*vinfo)->expire_time = time (NULL) + VIRINFO_EXPIRE_TIME;
+    (*vinfo)->expire_time = time (nullptr) + VIRINFO_EXPIRE_TIME;
 
     return TRUE;
 }
@@ -437,8 +437,8 @@ get_vir_repo_info (SeafDBRow *row, void *data)
 static char *
 get_store_id_from_vir_repo_info_cache (HttpServer *htp_server, const char *repo_id)
 {
-    char *store_id = NULL;
-    VirRepoInfo *vinfo = NULL;
+    char *store_id = nullptr;
+    VirRepoInfo *vinfo = nullptr;
 
     pthread_mutex_lock (&htp_server->vir_repo_info_cache_lock);
     vinfo = g_hash_table_lookup (htp_server->vir_repo_info_cache, repo_id);
@@ -449,7 +449,7 @@ get_store_id_from_vir_repo_info_cache (HttpServer *htp_server, const char *repo_
         else
             store_id = g_strdup (repo_id);
 
-        vinfo->expire_time = time (NULL) + VIRINFO_EXPIRE_TIME;
+        vinfo->expire_time = time (nullptr) + VIRINFO_EXPIRE_TIME;
     }
 
     pthread_mutex_unlock (&htp_server->vir_repo_info_cache_lock);
@@ -475,26 +475,26 @@ get_repo_store_id (HttpServer *htp_server, const char *repo_id)
         return store_id;
     }
 
-    VirRepoInfo *vinfo = NULL;
+    VirRepoInfo *vinfo = nullptr;
     char *sql = "SELECT repo_id, origin_repo FROM VirtualRepo where repo_id = ?";
     int n_row = seaf_db_statement_foreach_row (seaf->db, sql, get_vir_repo_info,
                                                &vinfo, 1, "string", repo_id);
     if (n_row < 0) {
         // db error, return NULL
-        return NULL;
+        return nullptr;
     } else if (n_row == 0) {
         // repo is not virtual repo
         vinfo = g_new0 (VirRepoInfo, 1);
         if (!vinfo)
-            return NULL;
-        vinfo->expire_time = time (NULL) + VIRINFO_EXPIRE_TIME;
+            return nullptr;
+        vinfo->expire_time = time (nullptr) + VIRINFO_EXPIRE_TIME;
 
         add_vir_info_to_cache (htp_server, repo_id, vinfo);
 
         return g_strdup (repo_id);
     } else if (!vinfo || !vinfo->store_id) {
         // out of memory, return NULL
-        return NULL;
+        return nullptr;
     }
 
     add_vir_info_to_cache (htp_server, repo_id, vinfo);
@@ -542,7 +542,7 @@ static void
 publish_repo_event (RepoEventData *rdata)
 {
     json_t *msg = json_object ();
-    char *msg_str = NULL;
+    char *msg_str = nullptr;
 
     json_object_set_new (msg, "msg_type", json_string(rdata->etype));
     json_object_set_new (msg, "user_name", json_string(rdata->user));
@@ -571,7 +571,7 @@ static void
 publish_stats_event (StatsEventData *rdata)
 {
     json_t *msg = json_object ();
-    char *msg_str = NULL;
+    char *msg_str = nullptr;
 
     json_object_set_new (msg, "msg_type", json_string(rdata->etype));
     json_object_set_new (msg, "user_name", json_string(rdata->user));
@@ -652,7 +652,7 @@ get_client_ip_addr (void *data)
     evhtp_connection_t *conn = req->conn;
     if (conn->saddr->sa_family == AF_INET) {
         char ip_addr[17];
-        const char *ip = NULL;
+        const char *ip = nullptr;
         struct sockaddr_in *addr_in = (struct sockaddr_in *)conn->saddr;
 
         memset (ip_addr, '\0', 17);
@@ -662,7 +662,7 @@ get_client_ip_addr (void *data)
     }
 
     char ip_addr[47];
-    const char *ip = NULL;
+    const char *ip = nullptr;
     struct sockaddr_in6 *addr_in = (struct sockaddr_in6 *)conn->saddr;
 
     memset (ip_addr, '\0', 47);
@@ -674,8 +674,8 @@ get_client_ip_addr (void *data)
 static int
 validate_client_ver (const char *client_ver)
 {
-    char **versions = NULL;
-    char *next_str = NULL;
+    char **versions = nullptr;
+    char *next_str = nullptr;
 
     versions = g_strsplit (client_ver, ".", 3);
     if (g_strv_length (versions) != 3) {
@@ -711,7 +711,7 @@ static void
 get_check_permission_cb (evhtp_request_t *req, void *arg)
 {
     const char *op = evhtp_kv_find (req->uri->query, "op");
-    if (op == NULL || (strcmp (op, "upload") != 0 && strcmp (op, "download") != 0)) {
+    if (op == nullptr || (strcmp (op, "upload") != 0 && strcmp (op, "download") != 0)) {
         evhtp_send_reply (req, EVHTP_RES_BADREQ);
         return;
     }
@@ -731,18 +731,18 @@ get_check_permission_cb (evhtp_request_t *req, void *arg)
         }
     }
 
-    char *client_name = NULL;
+    char *client_name = nullptr;
     const char *client_name_in = evhtp_kv_find (req->uri->query, "client_name");
     if (client_name_in)
-        client_name = g_uri_unescape_string (client_name_in, NULL);
+        client_name = g_uri_unescape_string (client_name_in, nullptr);
 
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     char *repo_id = parts[1];
     HttpServer *htp_server = seaf->http_server->priv;
-    char *username = NULL;
-    char *ip = NULL;
+    char *username = nullptr;
+    char *ip = nullptr;
     const char *token;
-    SeafRepo *repo = NULL;
+    SeafRepo *repo = nullptr;
 
     repo = seaf_repo_manager_get_repo_ex (seaf->repo_mgr, repo_id);
     if (!repo) {
@@ -796,13 +796,13 @@ get_check_permission_cb (evhtp_request_t *req, void *arg)
                                                    client_id,
                                                    ip,
                                                    client_name,
-                                                   (gint64)time(NULL),
+                                                   (gint64)time(nullptr),
                                                    client_ver);
         else
             seaf_repo_manager_update_token_peer_info (seaf->repo_mgr,
                                                       token,
                                                       ip,
-                                                      (gint64)time(NULL),
+                                                      (gint64)time(nullptr),
                                                       client_ver);
     }
 
@@ -832,14 +832,14 @@ get_check_quota_cb (evhtp_request_t *req, void *arg)
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     char *repo_id = parts[1];
 
-    int token_status = validate_token (htp_server, req, repo_id, NULL, FALSE);
+    int token_status = validate_token (htp_server, req, repo_id, nullptr, FALSE);
     if (token_status != EVHTP_RES_OK) {
         evhtp_send_reply (req, token_status);
         goto out;
     }
 
     const char *delta = evhtp_kv_find (req->uri->query, "delta");
-    if (delta == NULL) {
+    if (delta == nullptr) {
         char *error = "Invalid delta parameter.\n";
         seaf_warning ("%s", error);
         evbuffer_add (req->buffer_out, error, strlen (error));
@@ -847,7 +847,7 @@ get_check_quota_cb (evhtp_request_t *req, void *arg)
         goto out;
     }
 
-    char *next_ptr = NULL;
+    char *next_ptr = nullptr;
     gint64 delta_num = strtoll(delta, &next_ptr, 10);
     if (!(*delta != '\0' && *next_ptr == '\0')) {
         char *error = "Invalid delta parameter.\n";
@@ -908,7 +908,7 @@ get_head_commit_cb (evhtp_request_t *req, void *arg)
         goto out;
     }
 
-    token_status = validate_token (htp_server, req, repo_id, NULL, FALSE);
+    token_status = validate_token (htp_server, req, repo_id, nullptr, FALSE);
     if (token_status != EVHTP_RES_OK) {
         evhtp_send_reply (req, token_status);
         goto out;
@@ -948,7 +948,7 @@ gen_merge_description (SeafRepo *repo,
                        const char *p2_root)
 {
     GList *p;
-    GList *results = NULL;
+    GList *results = nullptr;
     char *desc;
 
     diff_merge_roots (repo->store_id, repo->version,
@@ -974,11 +974,11 @@ fast_forward_or_merge (const char *repo_id,
 {
 #define MAX_RETRY_COUNT 3
 
-    SeafRepo *repo = NULL;
-    SeafCommit *current_head = NULL, *merged_commit = NULL;
+    SeafRepo *repo = nullptr;
+    SeafCommit *current_head = nullptr, *merged_commit = nullptr;
     int retry_cnt = 0;
     int ret = 0;
-    char *last_gc_id = NULL;
+    char *last_gc_id = nullptr;
     gboolean check_gc;
     gboolean gc_conflict = FALSE;
 
@@ -1023,7 +1023,7 @@ retry:
     if (strcmp (base->commit_id, current_head->commit_id) != 0) {
         MergeOptions opt;
         const char *roots[3];
-        char *desc = NULL;
+        char *desc = nullptr;
 
         memset (&opt, 0, sizeof(opt));
         opt.n_ways = 3;
@@ -1052,7 +1052,7 @@ retry:
                 desc = g_strdup("Auto merge by system");
         }
 
-        merged_commit = seaf_commit_new(NULL, repo->id, opt.merged_tree_root,
+        merged_commit = seaf_commit_new(nullptr, repo->id, opt.merged_tree_root,
                                         new_commit->creator_name, EMPTY_SHA1,
                                         desc,
                                         0);
@@ -1097,11 +1097,11 @@ retry:
         }
 
         seaf_repo_unref (repo);
-        repo = NULL;
+        repo = nullptr;
         seaf_commit_unref (current_head);
-        current_head = NULL;
+        current_head = nullptr;
         seaf_commit_unref (merged_commit);
-        merged_commit = NULL;
+        merged_commit = nullptr;
 
         if (++retry_cnt <= MAX_RETRY_COUNT) {
             /* Sleep random time between 100 and 1000 millisecs. */
@@ -1138,7 +1138,7 @@ typedef struct CheckBlockAux {
 static int
 check_file_blocks (int n, const char *basedir, SeafDirent *files[], void *data)
 {
-    Seafile *file = NULL;
+    Seafile *file = nullptr;
     char *block_id;
     int i = 0;
     SeafDirent *file1 = files[0];
@@ -1265,7 +1265,7 @@ should_ignore (const char *filename)
 
 static gboolean
 include_invalid_path (SeafCommit *base_commit, SeafCommit *new_commit) {
-    GList *diff_entries = NULL;
+    GList *diff_entries = nullptr;
     gboolean ret = FALSE;
 
     int rc = diff_commits (base_commit, new_commit, &diff_entries, TRUE);
@@ -1300,13 +1300,13 @@ put_update_branch_cb (evhtp_request_t *req, void *arg)
     HttpServer *htp_server = seaf->http_server->priv;
     char **parts;
     char *repo_id;
-    char *username = NULL;
-    SeafRepo *repo = NULL;
-    SeafCommit *new_commit = NULL, *base = NULL;
-    char *token = NULL;
+    char *username = nullptr;
+    SeafRepo *repo = nullptr;
+    SeafCommit *new_commit = nullptr, *base = nullptr;
+    char *token = nullptr;
 
     const char *new_commit_id = evhtp_kv_find (req->uri->query, "head");
-    if (new_commit_id == NULL || !is_object_id_valid (new_commit_id)) {
+    if (new_commit_id == nullptr || !is_object_id_valid (new_commit_id)) {
         evhtp_send_reply (req, EVHTP_RES_BADREQ);
         return;
     }
@@ -1364,7 +1364,7 @@ put_update_branch_cb (evhtp_request_t *req, void *arg)
     token = get_auth_token (req);
 
     if (seaf->http_server->verify_client_blocks) {
-        char *ret_body = NULL;
+        char *ret_body = nullptr;
         int rc = check_blocks(repo, base, new_commit, &ret_body);
         if (rc < 0) {
             if (ret_body) {
@@ -1389,7 +1389,7 @@ put_update_branch_cb (evhtp_request_t *req, void *arg)
         goto out;
     }
 
-    seaf_repo_manager_merge_virtual_repo (seaf->repo_mgr, repo_id, NULL);
+    seaf_repo_manager_merge_virtual_repo (seaf->repo_mgr, repo_id, nullptr);
 
     schedule_repo_size_computation (seaf->size_sched, repo_id);
 
@@ -1432,12 +1432,12 @@ static void
 head_commits_multi_cb (evhtp_request_t *req, void *arg)
 {
     size_t list_len;
-    json_t *repo_id_array = NULL;
+    json_t *repo_id_array = nullptr;
     size_t n, i;
-    GString *id_list_str = NULL;
-    char *sql = NULL;
-    json_t *commit_id_map = NULL;
-    char *data = NULL;
+    GString *id_list_str = nullptr;
+    char *sql = nullptr;
+    json_t *commit_id_map = nullptr;
+    char *data = nullptr;
 
     list_len = evbuffer_get_length (req->buffer_in);
     if (list_len == 0) {
@@ -1533,7 +1533,7 @@ get_commit_info_cb (evhtp_request_t *req, void *arg)
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     char *repo_id = parts[1];
     char *commit_id = parts[3];
-    char *username = NULL;
+    char *username = nullptr;
 
     int token_status = validate_token (htp_server, req, repo_id, &username, FALSE);
     if (token_status != EVHTP_RES_OK) {
@@ -1548,7 +1548,7 @@ get_commit_info_cb (evhtp_request_t *req, void *arg)
         goto out;
     }
 
-    char *data = NULL;
+    char *data = nullptr;
     int len;
 
     int ret = seaf_obj_store_read_obj (seaf->commit_mgr->obj_store, repo_id, 1,
@@ -1597,8 +1597,8 @@ put_commit_cb (evhtp_request_t *req, void *arg)
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     char *repo_id = parts[1];
     char *commit_id = parts[3];
-    char *username = NULL;
-    void *data = NULL;
+    char *username = nullptr;
+    void *data = nullptr;
 
     int token_status = validate_token (htp_server, req, repo_id, &username, FALSE);
     if (token_status != EVHTP_RES_OK) {
@@ -1720,11 +1720,11 @@ calculate_send_object_list (SeafRepo *repo,
                             gboolean dir_only,
                             GList **results)
 {
-    SeafCommit *remote_head = NULL, *master_head = NULL;
+    SeafCommit *remote_head = nullptr, *master_head = nullptr;
     char *remote_head_root;
     int ret = 0;
 
-    *results = NULL;
+    *results = nullptr;
 
     master_head = seaf_commit_manager_get_commit (seaf->commit_mgr,
                                                   repo->id, repo->version,
@@ -1784,12 +1784,12 @@ get_fs_obj_id_cb (evhtp_request_t *req, void *arg)
     HttpServer *htp_server = seaf->http_server->priv;
     char **parts;
     char *repo_id;
-    SeafRepo *repo = NULL;
+    SeafRepo *repo = nullptr;
     gboolean dir_only = FALSE;
-    char *username = NULL;
+    char *username = nullptr;
 
     const char *server_head = evhtp_kv_find (req->uri->query, "server-head");
-    if (server_head == NULL || !is_object_id_valid (server_head)) {
+    if (server_head == nullptr || !is_object_id_valid (server_head)) {
         char *error = "Invalid server-head parameter.\n";
         seaf_warning ("%s", error);
         evbuffer_add (req->buffer_out, error, strlen (error));
@@ -1826,7 +1826,7 @@ get_fs_obj_id_cb (evhtp_request_t *req, void *arg)
         goto out;
     }
 
-    GList *list = NULL, *ptr;
+    GList *list = nullptr, *ptr;
 
     repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
     if (!repo) {
@@ -1908,14 +1908,14 @@ free_obj_cal_result (gpointer data)
 static void
 compute_fs_obj_id (gpointer ptask, gpointer ppara)
 {
-    SeafRepo *repo = NULL;
+    SeafRepo *repo = nullptr;
     ComputeObjTask *task = ptask;
     const char *client_head = task->client_head;
     const char *server_head = task->server_head;
     char *repo_id = task->repo_id;
     gboolean dir_only = task->dir_only;
     HttpServer *htp_server = task->htp_server;
-    CalObjResult *result = NULL;
+    CalObjResult *result = nullptr;
 
     pthread_mutex_lock (&htp_server->fs_obj_ids_lock);
     result = g_hash_table_lookup (htp_server->fs_obj_ids, task->token);
@@ -1953,7 +1953,7 @@ start_fs_obj_id_cb (evhtp_request_t *req, void *arg)
     json_t *obj;
 
     const char *server_head = evhtp_kv_find (req->uri->query, "server-head");
-    if (server_head == NULL || !is_object_id_valid (server_head)) {
+    if (server_head == nullptr || !is_object_id_valid (server_head)) {
         char *error = "Invalid server-head parameter.\n";
         evbuffer_add (req->buffer_out, error, strlen (error));
         evhtp_send_reply (req, EVHTP_RES_BADREQ);
@@ -1975,7 +1975,7 @@ start_fs_obj_id_cb (evhtp_request_t *req, void *arg)
     parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     repo_id = parts[1];
 
-    int token_status = validate_token (htp_server, req, repo_id, NULL, FALSE);
+    int token_status = validate_token (htp_server, req, repo_id, nullptr, FALSE);
     if (token_status != EVHTP_RES_OK) {
         evhtp_send_reply (req, token_status);
         goto out;
@@ -2009,7 +2009,7 @@ start_fs_obj_id_cb (evhtp_request_t *req, void *arg)
     pthread_mutex_lock (&htp_server->fs_obj_ids_lock);
     g_hash_table_insert (htp_server->fs_obj_ids, g_strdup(task->token), result);
     pthread_mutex_unlock (&htp_server->fs_obj_ids_lock);
-    g_thread_pool_push (htp_server->compute_fs_obj_id_pool, task, NULL);
+    g_thread_pool_push (htp_server->compute_fs_obj_id_pool, task, nullptr);
     obj = json_object ();
     json_object_set_new (obj, "token", json_string (new_token));
 
@@ -2027,16 +2027,16 @@ static void
 query_fs_obj_id_cb (evhtp_request_t *req, void *arg)
 {
     json_t *obj;
-    const char *token = NULL;
-    CalObjResult *result = NULL;
+    const char *token = nullptr;
+    CalObjResult *result = nullptr;
     char **parts;
-    char *repo_id = NULL;
+    char *repo_id = nullptr;
     HttpServer *htp_server = seaf->http_server->priv;
 
     parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     repo_id = parts[1];
 
-    int token_status = validate_token (htp_server, req, repo_id, NULL, FALSE);
+    int token_status = validate_token (htp_server, req, repo_id, nullptr, FALSE);
     if (token_status != EVHTP_RES_OK) {
         evhtp_send_reply (req, token_status);
         goto out;
@@ -2084,16 +2084,16 @@ static void
 retrieve_fs_obj_id_cb (evhtp_request_t *req, void *arg)
 {
     char **parts;
-    const char *token = NULL;
-    char *repo_id = NULL;
-    GList *list = NULL;
-    CalObjResult *result = NULL;
+    const char *token = nullptr;
+    char *repo_id = nullptr;
+    GList *list = nullptr;
+    CalObjResult *result = nullptr;
     HttpServer *htp_server = seaf->http_server->priv;
 
     parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     repo_id = parts[1];
 
-    int token_status = validate_token (htp_server, req, repo_id, NULL, FALSE);
+    int token_status = validate_token (htp_server, req, repo_id, nullptr, FALSE);
     if (token_status != EVHTP_RES_OK) {
         evhtp_send_reply (req, token_status);
         goto out;
@@ -2151,12 +2151,12 @@ out:
 static void
 get_block_cb (evhtp_request_t *req, void *arg)
 {
-    const char *repo_id = NULL;
-    char *block_id = NULL;
-    char *store_id = NULL;
+    const char *repo_id = nullptr;
+    char *block_id = nullptr;
+    char *store_id = nullptr;
     HttpServer *htp_server = seaf->http_server->priv;
-    BlockMetadata *blk_meta = NULL;
-    char *username = NULL;
+    BlockMetadata *blk_meta = nullptr;
+    char *username = nullptr;
 
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     repo_id = parts[1];
@@ -2183,12 +2183,12 @@ get_block_cb (evhtp_request_t *req, void *arg)
 
     blk_meta = seaf_block_manager_stat_block (seaf->block_mgr,
                                               store_id, 1, block_id);
-    if (blk_meta == NULL || blk_meta->size <= 0) {
+    if (blk_meta == nullptr || blk_meta->size <= 0) {
         evhtp_send_reply (req, EVHTP_RES_SERVERR);
         goto out;
     }
 
-    BlockHandle *blk_handle = NULL;
+    BlockHandle *blk_handle = nullptr;
     blk_handle = seaf_block_manager_open_block(seaf->block_mgr,
                                                store_id, 1, block_id, BLOCK_READ);
     if (!blk_handle) {
@@ -2231,13 +2231,13 @@ out:
 static void
 put_send_block_cb (evhtp_request_t *req, void *arg)
 {
-    const char *repo_id = NULL;
-    char *block_id = NULL;
-    char *store_id = NULL;
-    char *username = NULL;
+    const char *repo_id = nullptr;
+    char *block_id = nullptr;
+    char *store_id = nullptr;
+    char *username = nullptr;
     HttpServer *htp_server = seaf->http_server->priv;
-    char **parts = NULL;
-    void *blk_con = NULL;
+    char **parts = nullptr;
+    void *blk_con = nullptr;
 
     parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     repo_id = parts[1];
@@ -2277,10 +2277,10 @@ put_send_block_cb (evhtp_request_t *req, void *arg)
 
     evbuffer_remove (req->buffer_in, blk_con, blk_len);
 
-    BlockHandle *blk_handle = NULL;
+    BlockHandle *blk_handle = nullptr;
     blk_handle = seaf_block_manager_open_block (seaf->block_mgr,
                                                 store_id, 1, block_id, BLOCK_WRITE);
-    if (blk_handle == NULL) {
+    if (blk_handle == nullptr) {
         seaf_warning ("Failed to open block %.8s:%s.\n", store_id, block_id);
         evhtp_send_reply (req, EVHTP_RES_SERVERR);
         goto out;
@@ -2341,8 +2341,8 @@ post_check_exist_cb (evhtp_request_t *req, void *arg, CheckExistType type)
     HttpServer *htp_server = seaf->http_server->priv;
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     char *repo_id = parts[1];
-    char *store_id = NULL;
-    char *username = NULL;
+    char *store_id = nullptr;
+    char *username = nullptr;
 
     int token_status = validate_token (htp_server, req, repo_id, &username, FALSE);
     if (token_status != EVHTP_RES_OK) {
@@ -2387,9 +2387,9 @@ post_check_exist_cb (evhtp_request_t *req, void *arg, CheckExistType type)
         return;
     }
 
-    json_t *obj = NULL;
+    json_t *obj = nullptr;
     gboolean ret = TRUE;
-    const char *obj_id = NULL;
+    const char *obj_id = nullptr;
     int index = 0;
 
     int array_size = json_array_size (obj_array);
@@ -2446,9 +2446,9 @@ post_recv_fs_cb (evhtp_request_t *req, void *arg)
     HttpServer *htp_server = seaf->http_server->priv;
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     const char *repo_id = parts[1];
-    char *store_id = NULL;
-    char *username = NULL;
-    FsHdr *hdr = NULL;
+    char *store_id = nullptr;
+    char *username = nullptr;
+    FsHdr *hdr = nullptr;
 
     int token_status = validate_token (htp_server, req, repo_id, &username, FALSE);
     if (token_status != EVHTP_RES_OK) {
@@ -2482,7 +2482,7 @@ post_recv_fs_cb (evhtp_request_t *req, void *arg)
     }
 
     char obj_id[41];
-    void *obj_con = NULL;
+    void *obj_con = nullptr;
     int con_len;
 
     while (fs_con_len > 0) {
@@ -2543,8 +2543,8 @@ post_pack_fs_cb (evhtp_request_t *req, void *arg)
     HttpServer *htp_server = seaf->http_server->priv;
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     const char *repo_id = parts[1];
-    char *store_id = NULL;
-    char *username = NULL;
+    char *store_id = nullptr;
+    char *username = nullptr;
 
     int token_status = validate_token (htp_server, req, repo_id, &username, FALSE);
     if (token_status != EVHTP_RES_OK) {
@@ -2589,10 +2589,10 @@ post_pack_fs_cb (evhtp_request_t *req, void *arg)
         goto out;
     }
 
-    json_t *obj = NULL;
-    const char *obj_id = NULL;
+    json_t *obj = nullptr;
+    const char *obj_id = nullptr;
     int index = 0;
-    void *fs_data = NULL;
+    void *fs_data = nullptr;
     int data_len;
     int data_len_net;
     int total_size = 0;
@@ -2641,16 +2641,16 @@ out:
 static void
 get_block_map_cb (evhtp_request_t *req, void *arg)
 {
-    const char *repo_id = NULL;
-    char *file_id = NULL;
-    char *store_id = NULL;
+    const char *repo_id = nullptr;
+    char *file_id = nullptr;
+    char *store_id = nullptr;
     HttpServer *htp_server = seaf->http_server->priv;
-    Seafile *file = NULL;
+    Seafile *file = nullptr;
     char *block_id;
-    BlockMetadata *blk_meta = NULL;
-    json_t *array = NULL;
-    char *data = NULL;
-    char *username = NULL;
+    BlockMetadata *blk_meta = nullptr;
+    json_t *array = nullptr;
+    char *data = nullptr;
+    char *username = nullptr;
 
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     repo_id = parts[1];
@@ -2688,7 +2688,7 @@ get_block_map_cb (evhtp_request_t *req, void *arg)
         block_id = file->blk_sha1s[i];
         blk_meta = seaf_block_manager_stat_block (seaf->block_mgr,
                                                   store_id, 1, block_id);
-        if (blk_meta == NULL) {
+        if (blk_meta == nullptr) {
             seaf_warning ("Failed to find block %s/%s\n", store_id, block_id);
             evhtp_send_reply (req, EVHTP_RES_SERVERR);
             g_free (blk_meta);
@@ -2716,12 +2716,12 @@ out:
 static void
 get_jwt_token_cb (evhtp_request_t *req, void *arg)
 {
-    const char *repo_id = NULL;
+    const char *repo_id = nullptr;
     HttpServer *htp_server = seaf->http_server->priv;
-    json_t *obj = NULL;
-    char *data = NULL;
-    char *username = NULL;
-    char *jwt_token = NULL;
+    json_t *obj = nullptr;
+    char *data = nullptr;
+    char *username = nullptr;
+    char *jwt_token = nullptr;
 
     char **parts = g_strsplit (req->uri->path->full + 1, "/", 0);
     repo_id = parts[1];
@@ -2765,14 +2765,14 @@ static json_t *
 fill_obj_from_seafilerepo (SeafileRepo *srepo, GHashTable *table)
 {
     int version = 0;
-    char *repo_id = NULL;
-    char *commit_id = NULL;
-    char *repo_name = NULL;
-    char *permission = NULL;
-    char *owner = NULL;
-    char *type = NULL;
+    char *repo_id = nullptr;
+    char *commit_id = nullptr;
+    char *repo_name = nullptr;
+    char *permission = nullptr;
+    char *owner = nullptr;
+    char *type = nullptr;
     gint64 last_modify = 0;
-    json_t *obj = NULL;
+    json_t *obj = nullptr;
 
     g_object_get (srepo, "version", &version,
                          "id", &repo_id,
@@ -2782,7 +2782,7 @@ fill_obj_from_seafilerepo (SeafileRepo *srepo, GHashTable *table)
                          "permission", &permission,
                          "user", &owner,
                          "repo_type", &type,
-                         NULL);
+                         nullptr);
 
     if (!repo_id)
         goto out;
@@ -2818,27 +2818,27 @@ static GHashTable *
 filter_group_repos (GList *repos)
 {
     if (!repos)
-        return NULL;
+        return nullptr;
 
-    SeafileRepo *srepo = NULL;
-    SeafileRepo *srepo_tmp = NULL;
+    SeafileRepo *srepo = nullptr;
+    SeafileRepo *srepo_tmp = nullptr;
     GList *iter;
-    GHashTable *table = NULL;
-    char *permission = NULL;
-    char *permission_prev = NULL;
-    char *repo_id = NULL;
-    char *type = NULL;
+    GHashTable *table = nullptr;
+    char *permission = nullptr;
+    char *permission_prev = nullptr;
+    char *repo_id = nullptr;
+    char *type = nullptr;
 
     table = g_hash_table_new_full (g_str_hash, g_str_equal,
                                    g_free,
-                                   NULL);
+                                   nullptr);
 
     for (iter = repos; iter; iter = iter->next) {
         srepo = iter->data;
         g_object_get (srepo, "id", &repo_id,
                              "permission", &permission,
                              "repo_type", &type,
-                             NULL);
+                             nullptr);
         if (type) {
             g_free (repo_id);
             g_free (permission);
@@ -2849,7 +2849,7 @@ filter_group_repos (GList *repos)
         srepo_tmp = g_hash_table_lookup (table, repo_id);
         if (srepo_tmp) {
             g_object_get (srepo_tmp, "permission", &permission_prev,
-                          NULL);
+                          nullptr);
             if (g_strcmp0 (permission, "rw") == 0 && g_strcmp0 (permission_prev, "r") == 0) {
                 g_object_unref (srepo_tmp);
                 g_hash_table_remove (table, repo_id);
@@ -2875,7 +2875,7 @@ group_repos_to_json (json_t *repo_array, GHashTable *group_repos,
 {
     GHashTableIter iter;
     gpointer key, value;
-    SeafileRepo *srepo = NULL;
+    SeafileRepo *srepo = nullptr;
     json_t *obj;
 
     g_hash_table_iter_init (&iter, group_repos);
@@ -2898,9 +2898,9 @@ get_accessible_repo_list_cb (evhtp_request_t *req, void *arg)
 {
     GList *iter;
     HttpServer *htp_server = seaf->http_server->priv;
-    SeafRepo *repo = NULL;
-    char *user = NULL;
-    GList *repos = NULL;
+    SeafRepo *repo = nullptr;
+    char *user = nullptr;
+    GList *repos = nullptr;
     int org_id = -1;
     const char *repo_id = evhtp_kv_find (req->uri->query, "repo_id");
 
@@ -2920,11 +2920,11 @@ get_accessible_repo_list_cb (evhtp_request_t *req, void *arg)
     json_t *repo_array = json_array ();
 
     gboolean db_err = FALSE;
-    GHashTable *obtained_repos = NULL;
-    char *repo_id_tmp = NULL;
+    GHashTable *obtained_repos = nullptr;
+    char *repo_id_tmp = nullptr;
     obtained_repos = g_hash_table_new_full (g_str_hash, g_str_equal,
                                             g_free,
-                                            NULL);
+                                            nullptr);
     //get personal repo list
     repos = seaf_repo_manager_get_repos_by_owner (seaf->repo_mgr, user, 0, -1, -1, &db_err);
     if (db_err)
@@ -2958,8 +2958,8 @@ get_accessible_repo_list_cb (evhtp_request_t *req, void *arg)
     }
     g_list_free (repos);
 
-    GError *error = NULL;
-    SeafileRepo *srepo = NULL;
+    GError *error = nullptr;
+    SeafileRepo *srepo = nullptr;
     //get shared repo list
     repos = seaf_share_manager_list_share_repos (seaf->share_mgr, user, "to_email", -1, -1, &db_err);
     if (db_err)
@@ -2980,7 +2980,7 @@ get_accessible_repo_list_cb (evhtp_request_t *req, void *arg)
     g_list_free (repos);
 
     //get group repo list
-    GHashTable *group_repos = NULL;
+    GHashTable *group_repos = nullptr;
     repos = seaf_get_group_repos_by_user (seaf->repo_mgr, user, org_id, &error);
     if (error) {
         g_clear_error (&error);
@@ -3052,11 +3052,11 @@ http_request_finish_cb (evhtp_request_t *req, void *arg)
 static evhtp_res
 http_request_start_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
 {
-    RequestInfo *info = NULL;
+    RequestInfo *info = nullptr;
     info = g_new0 (RequestInfo, 1);
     info->url_path = g_strdup (req->uri->path->full);
 
-    gettimeofday (&info->start, NULL);
+    gettimeofday (&info->start, nullptr);
 
     seaf_metric_manager_in_flight_request_inc (seaf->metric_mgr);
     evhtp_set_hook (&req->hooks, evhtp_hook_on_request_fini, (evhtp_hook) http_request_finish_cb, info);
@@ -3073,38 +3073,38 @@ http_request_init (HttpServerStruct *server)
 
     cb = evhtp_set_cb (priv->evhtp,
                   GET_PROTO_PATH, get_protocol_cb,
-                  NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                  nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         GET_CHECK_QUOTA_REGEX, get_check_quota_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         OP_PERM_CHECK_REGEX, get_check_permission_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         HEAD_COMMIT_OPER_REGEX, head_commit_oper_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         GET_HEAD_COMMITS_MULTI_REGEX, head_commits_multi_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         COMMIT_OPER_REGEX, commit_oper_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         GET_FS_OBJ_ID_REGEX, get_fs_obj_id_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     // evhtp_set_regex_cb (priv->evhtp,
     //                     START_FS_OBJ_ID_REGEX, start_fs_obj_id_cb,
@@ -3120,43 +3120,43 @@ http_request_init (HttpServerStruct *server)
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         BLOCK_OPER_REGEX, block_oper_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         POST_CHECK_FS_REGEX, post_check_fs_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         POST_CHECK_BLOCK_REGEX, post_check_block_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         POST_RECV_FS_REGEX, post_recv_fs_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         POST_PACK_FS_REGEX, post_pack_fs_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         GET_BLOCK_MAP_REGEX, get_block_map_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         GET_JWT_TOKEN_REGEX, get_jwt_token_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     cb = evhtp_set_regex_cb (priv->evhtp,
                         GET_ACCESSIBLE_REPO_LIST_REGEX, get_accessible_repo_list_cb,
-                        NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, NULL);
+                        nullptr);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) http_request_start_cb, nullptr);
 
     /* Web access file */
     access_file_init (priv->evhtp);
@@ -3170,7 +3170,7 @@ static void
 token_cache_value_free (gpointer data)
 {
     TokenInfo *token_info = (TokenInfo *)data;
-    if (token_info != NULL) {
+    if (token_info != nullptr) {
         g_free (token_info->repo_id);
         g_free (token_info->email);
         g_free (token_info);
@@ -3182,7 +3182,7 @@ is_token_expire (gpointer key, gpointer value, gpointer arg)
 {
     TokenInfo *token_info = (TokenInfo *)value;
 
-    if(token_info && token_info->expire_time <= (gint64)time(NULL)) {
+    if(token_info && token_info->expire_time <= (gint64)time(nullptr)) {
         return TRUE;
     }
 
@@ -3201,7 +3201,7 @@ is_perm_expire (gpointer key, gpointer value, gpointer arg)
 {
     PermInfo *perm_info = (PermInfo *)value;
 
-    if(perm_info && perm_info->expire_time <= (gint64)time(NULL)) {
+    if(perm_info && perm_info->expire_time <= (gint64)time(nullptr)) {
         return TRUE;
     }
 
@@ -3213,7 +3213,7 @@ is_vir_repo_info_expire (gpointer key, gpointer value, gpointer arg)
 {
     VirRepoInfo *vinfo = (VirRepoInfo *)value;
 
-    if(vinfo && vinfo->expire_time <= (gint64)time(NULL)) {
+    if(vinfo && vinfo->expire_time <= (gint64)time(nullptr)) {
         return TRUE;
     }
 
@@ -3240,16 +3240,16 @@ remove_expire_cache_cb (evutil_socket_t sock, short type, void *data)
     HttpServer *htp_server = data;
 
     pthread_mutex_lock (&htp_server->token_cache_lock);
-    g_hash_table_foreach_remove (htp_server->token_cache, is_token_expire, NULL);
+    g_hash_table_foreach_remove (htp_server->token_cache, is_token_expire, nullptr);
     pthread_mutex_unlock (&htp_server->token_cache_lock);
 
     pthread_mutex_lock (&htp_server->perm_cache_lock);
-    g_hash_table_foreach_remove (htp_server->perm_cache, is_perm_expire, NULL);
+    g_hash_table_foreach_remove (htp_server->perm_cache, is_perm_expire, nullptr);
     pthread_mutex_unlock (&htp_server->perm_cache_lock);
 
     pthread_mutex_lock (&htp_server->vir_repo_info_cache_lock);
     g_hash_table_foreach_remove (htp_server->vir_repo_info_cache,
-                                 is_vir_repo_info_expire, NULL);
+                                 is_vir_repo_info_expire, nullptr);
     pthread_mutex_unlock (&htp_server->vir_repo_info_cache_lock);
 }
 
@@ -3260,7 +3260,7 @@ http_server_run (void *arg)
     HttpServer *priv = server->priv;
 
     priv->evbase = event_base_new();
-    priv->evhtp = evhtp_new(priv->evbase, NULL);
+    priv->evhtp = evhtp_new(priv->evbase, nullptr);
 
     if (evhtp_bind_socket(priv->evhtp,
                           server->bind_addr,
@@ -3271,7 +3271,7 @@ http_server_run (void *arg)
 
     http_request_init (server);
 
-    evhtp_use_threads (priv->evhtp, NULL, server->worker_threads, NULL);
+    evhtp_use_threads (priv->evhtp, nullptr, server->worker_threads, nullptr);
 
     struct timeval tv;
     tv.tv_sec = CLEANING_INTERVAL_SEC;
@@ -3285,7 +3285,7 @@ http_server_run (void *arg)
 
     event_base_loop (priv->evbase, 0);
 
-    return NULL;
+    return nullptr;
 }
 
 HttpServerStruct *
@@ -3294,31 +3294,31 @@ seaf_http_server_new (struct _SeafileSession *session)
     HttpServerStruct *server = g_new0 (HttpServerStruct, 1);
     HttpServer *priv = g_new0 (HttpServer, 1);
 
-    priv->evbase = NULL;
-    priv->evhtp = NULL;
+    priv->evbase = nullptr;
+    priv->evhtp = nullptr;
 
     load_http_config (server, session);
 
     priv->token_cache = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                g_free, token_cache_value_free);
-    pthread_mutex_init (&priv->token_cache_lock, NULL);
+    pthread_mutex_init (&priv->token_cache_lock, nullptr);
 
     priv->perm_cache = g_hash_table_new_full (g_str_hash, g_str_equal,
                                               g_free, perm_cache_value_free);
-    pthread_mutex_init (&priv->perm_cache_lock, NULL);
+    pthread_mutex_init (&priv->perm_cache_lock, nullptr);
 
     priv->vir_repo_info_cache = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                        g_free, free_vir_repo_info);
-    pthread_mutex_init (&priv->vir_repo_info_cache_lock, NULL);
+    pthread_mutex_init (&priv->vir_repo_info_cache_lock, nullptr);
 
-    server->http_temp_dir = g_build_filename (session->seaf_dir, "httptemp", NULL);
+    server->http_temp_dir = g_build_filename (session->seaf_dir, "httptemp", nullptr);
 
-    // priv->compute_fs_obj_id_pool = g_thread_pool_new (compute_fs_obj_id, NULL,
-    //                                                   FS_ID_LIST_MAX_WORKERS, FALSE, NULL);
+    // priv->compute_fs_obj_id_pool = g_thread_pool_new (compute_fs_obj_id, nullptr,
+    //                                                   FS_ID_LIST_MAX_WORKERS, FALSE, nullptr);
 
     // priv->fs_obj_ids = g_hash_table_new_full (g_str_hash, g_str_equal,
     //                                           g_free, free_obj_cal_result);
-    // pthread_mutex_init (&priv->fs_obj_ids_lock, NULL);
+    // pthread_mutex_init (&priv->fs_obj_ids_lock, nullptr);
 
     server->seaf_session = session;
     server->priv = priv;
@@ -3344,18 +3344,18 @@ check_httptemp_dir_recursive (const char *parent_dir, gint64 expired_time)
     const char *dname;
     gint64 cur_time;
     gint64 last_modify = -1;
-    GDir *dir = NULL;
+    GDir *dir = nullptr;
     gint64 file_num = 0;
 
-    dir = g_dir_open (parent_dir, 0, NULL);
+    dir = g_dir_open (parent_dir, 0, nullptr);
 
-    while ((dname = g_dir_read_name(dir)) != NULL) {
-        full_path = g_build_path ("/", parent_dir, dname, NULL);
+    while ((dname = g_dir_read_name(dir)) != nullptr) {
+        full_path = g_build_path ("/", parent_dir, dname, nullptr);
 
         if (g_file_test (full_path, G_FILE_TEST_IS_DIR)) {
             file_num += check_httptemp_dir_recursive (full_path, expired_time);
         } else {
-            cur_time = time (NULL);
+            cur_time = time (nullptr);
             last_modify = get_last_modify_time (full_path);
             if (last_modify == -1) {
                 g_free (full_path);
@@ -3384,7 +3384,7 @@ scan_httptemp_dir (const char *httptemp_dir, gint64 expired_time)
 static void *
 cleanup_expired_httptemp_file (void *arg)
 {
-    GError *error = NULL;
+    GError *error = nullptr;
     HttpServerStruct *server = arg;
     SeafileSession *session = server->seaf_session;
     gint64 ttl = 0;
@@ -3412,20 +3412,20 @@ cleanup_expired_httptemp_file (void *arg)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 int
 seaf_http_server_start (HttpServerStruct *server)
 {
-   int ret = pthread_create (&server->priv->thread_id, NULL, http_server_run, server);
+   int ret = pthread_create (&server->priv->thread_id, nullptr, http_server_run, server);
    if (ret != 0)
        return -1;
 
    pthread_detach (server->priv->thread_id);
 
    pthread_t tid;
-   ret = pthread_create (&tid, NULL, cleanup_expired_httptemp_file, server);
+   ret = pthread_create (&tid, nullptr, cleanup_expired_httptemp_file, server);
    if (ret != 0)
        return -1;
 

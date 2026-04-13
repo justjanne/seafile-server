@@ -45,7 +45,7 @@ commit_tree_to_hash (SeafCommit *head)
     GHashTable *hash;
     gboolean res;
 
-    hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+    hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, nullptr);
 
     res = seaf_commit_manager_traverse_commit_tree (seaf->commit_mgr,
                                                     head->repo_id,
@@ -60,7 +60,7 @@ commit_tree_to_hash (SeafCommit *head)
 
 fail:
     g_hash_table_destroy (hash);
-    return NULL;
+    return nullptr;
 }
 
 static GList *
@@ -92,11 +92,11 @@ get_independent_commits (GList *commits)
                  */
                 if (strcmp (rslt[i]->commit_id, c->commit_id) == 0) {
                     seaf_commit_unref (rslt[i]);
-                    rslt[i] = NULL;
+                    rslt[i] = nullptr;
                 }
                 if (strcmp (rslt[j]->commit_id, c->commit_id) == 0) {
                     seaf_commit_unref (rslt[j]);
-                    rslt[j] = NULL;
+                    rslt[j] = nullptr;
                 }
                 seaf_commit_unref (c);
             }
@@ -104,12 +104,12 @@ get_independent_commits (GList *commits)
     }
 
     /* Surviving ones in rslt[] are the independent results */
-    result = NULL;
+    result = nullptr;
     for (i = 0; i < cnt; i++) {
         if (rslt[i])
             result = g_list_insert_sorted_with_data (result, rslt[i],
                                                      compare_commit_by_time,
-                                                     NULL);
+                                                     nullptr);
     }
     free(rslt);
     return result;
@@ -132,7 +132,7 @@ get_merge_bases (SeafCommit *commit, void *vdata, gboolean *stop)
         if (!g_list_find_custom (data->result, commit, compare_commit)) {
             data->result = g_list_insert_sorted_with_data (data->result, commit,
                                                      compare_commit_by_time,
-                                                     NULL);
+                                                     nullptr);
             seaf_commit_ref (commit);
         }
         *stop = TRUE;
@@ -150,7 +150,7 @@ static GList *
 merge_bases_many (SeafCommit *one, int n, SeafCommit **twos)
 {
     GHashTable *commit_hash;
-    GList *result = NULL;
+    GList *result = nullptr;
     SeafCommit *commit;
     int i;
     MergeTraverseData data;
@@ -165,11 +165,11 @@ merge_bases_many (SeafCommit *one, int n, SeafCommit **twos)
     commit_hash = commit_tree_to_hash (one);
     if (!commit_hash) {
         g_warning ("Failed to load commit hash.\n");
-        return NULL;
+        return nullptr;
     }
 
     data.commit_hash = commit_hash;
-    data.result = NULL;
+    data.result = nullptr;
 
     for (i = 0; i < n; i++) {
         res = seaf_commit_manager_traverse_commit_tree (seaf->commit_mgr,
@@ -201,7 +201,7 @@ fail:
         result = g_list_delete_link (result, result);
     }
     g_hash_table_destroy (commit_hash);
-    return NULL;
+    return nullptr;
 }
 
 /*
@@ -215,7 +215,7 @@ get_merge_base (SeafCommit *head, SeafCommit *remote)
     GList *result, *iter;
     SeafCommit *one, **twos;
     int n, i;
-    SeafCommit *ret = NULL;
+    SeafCommit *ret = nullptr;
 
     one = head;
     twos = (SeafCommit **) calloc (1, sizeof(SeafCommit *));
@@ -324,8 +324,8 @@ diff_parents_with_path (SeafCommit *commit,
                         char *parent,
                         GError **error)
 {
-    SeafCommit *p1 = NULL, *p2 = NULL;
-    char *file_id_p1 = NULL, *file_id_p2 = NULL;
+    SeafCommit *p1 = nullptr, *p2 = nullptr;
+    char *file_id_p1 = nullptr, *file_id_p2 = nullptr;
     int ret = 0;
 
     p1 = seaf_commit_manager_get_commit (seaf->commit_mgr,
@@ -361,7 +361,7 @@ diff_parents_with_path (SeafCommit *commit,
                                                      store_id,
                                                      version,
                                                      p1->root_id, path,
-                                                     NULL,
+                                                     nullptr,
                                                      error);
         if (*error)
             goto out;
@@ -374,14 +374,14 @@ diff_parents_with_path (SeafCommit *commit,
                                                      store_id,
                                                      version,
                                                      p1->root_id, path,
-                                                     NULL, error);
+                                                     nullptr, error);
         if (*error)
             goto out;
         file_id_p2 = seaf_fs_manager_path_to_obj_id (seaf->fs_mgr,
                                                      store_id,
                                                      version,
                                                      p2->root_id, path,
-                                                     NULL, error);
+                                                     nullptr, error);
         if (*error)
             goto out;
 
@@ -426,13 +426,13 @@ get_file_modifier_mtime_v0 (const char *repo_id, const char *store_id, int versi
                             char **modifier, gint64 *mtime)
 {
     char commit_id[41];
-    SeafCommit *commit = NULL;
-    char *file_id = NULL;
+    SeafCommit *commit = nullptr;
+    char *file_id = nullptr;
     int changed;
     int ret = 0;
-    GError *error = NULL;
+    GError *error = nullptr;
 
-    *modifier = NULL;
+    *modifier = nullptr;
     *mtime = 0;
 
     memcpy (commit_id, head, 41);
@@ -454,7 +454,7 @@ get_file_modifier_mtime_v0 (const char *repo_id, const char *store_id, int versi
                                                   store_id, version,
                                                   commit->root_id,
                                                   path,
-                                                  NULL,
+                                                  nullptr,
                                                   &error);
         if (error) {
             g_clear_error (&error);
@@ -501,9 +501,9 @@ get_file_modifier_mtime_v1 (const char *repo_id, const char *store_id, int versi
                             const char *head, const char *path,
                             char **modifier, gint64 *mtime)
 {
-    SeafCommit *commit = NULL;
-    SeafDir *dir = NULL;
-    SeafDirent *dent = NULL;
+    SeafCommit *commit = nullptr;
+    SeafDir *dir = nullptr;
+    SeafDirent *dent = nullptr;
     int ret = 0;
 
     commit = seaf_commit_manager_get_commit (seaf->commit_mgr,
@@ -524,7 +524,7 @@ get_file_modifier_mtime_v1 (const char *repo_id, const char *store_id, int versi
     dir = seaf_fs_manager_get_seafdir_by_path (seaf->fs_mgr,
                                                store_id, version,
                                                commit->root_id,
-                                               parent, NULL);
+                                               parent, nullptr);
     if (!dir) {
         seaf_warning ("dir %s doesn't exist in repo %s.\n", parent, repo_id);
         ret = -1;
@@ -588,14 +588,14 @@ gen_conflict_path (const char *origin_path,
     char time_buf[64];
     time_t t = (time_t)mtime;
     char *copy = g_strdup (origin_path);
-    GString *conflict_path = g_string_new (NULL);
+    GString *conflict_path = g_string_new (nullptr);
     char *dot, *ext;
 
     strftime(time_buf, 64, "%Y-%m-%d-%H-%M-%S", localtime(&t));
 
     dot = strrchr (copy, '.');
 
-    if (dot != NULL) {
+    if (dot != nullptr) {
         *dot = '\0';
         ext = dot + 1;
         if (modifier)
@@ -631,7 +631,7 @@ gen_conflict_path_wrapper (const char *repo_id, int version,
      */
     if (get_file_modifier_mtime (repo_id, repo_id, version, head, in_repo_path,
                                  &modifier, &mtime) < 0)
-        return NULL;
+        return nullptr;
 
     return gen_conflict_path (original_path, modifier, mtime);
 }

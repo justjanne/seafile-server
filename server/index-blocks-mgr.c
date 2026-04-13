@@ -68,7 +68,7 @@ free_progress (IdxProgress *progress)
 IndexBlksMgr *
 index_blocks_mgr_new (SeafileSession *session)
 {
-    GError *error = NULL;
+    GError *error = nullptr;
     IndexBlksMgr *mgr = g_new0 (IndexBlksMgr, 1);
     IndexBlksMgrPriv *priv = g_new0 (IndexBlksMgrPriv, 1);
 
@@ -85,10 +85,10 @@ index_blocks_mgr_new (SeafileSession *session)
         }
         g_free (priv);
         g_free (mgr);
-        return NULL;
+        return nullptr;
     }
 
-    pthread_mutex_init (&priv->progress_lock, NULL);
+    pthread_mutex_init (&priv->progress_lock, nullptr);
     priv->progress_store = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                                   (GDestroyNotify)free_progress);
     priv->scan_progress_timer = ccnet_timer_new (scan_progress, priv,
@@ -101,7 +101,7 @@ index_blocks_mgr_new (SeafileSession *session)
 static int
 scan_progress (void *data)
 {
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     IndexBlksMgrPriv *priv = data;
     GHashTableIter iter;
     gpointer key, value;
@@ -142,10 +142,10 @@ start_index_task (gpointer data, gpointer user_data)
 {
     IndexPara *idx_para = data;
     SeafRepo *repo = idx_para->repo;
-    GList *ptr = NULL, *id_list = NULL, *size_list = NULL;
-    char *path = NULL;
-    char *ret_json = NULL;
-    char *gc_id = NULL;
+    GList *ptr = nullptr, *id_list = nullptr, *size_list = nullptr;
+    char *path = nullptr;
+    char *ret_json = nullptr;
+    char *gc_id = nullptr;
     char hex[41];
     unsigned char sha1[20];
     int ret = 0;
@@ -175,14 +175,14 @@ start_index_task (gpointer data, gpointer user_data)
     ret = post_files_and_gen_commit (idx_para->filenames,
                                      idx_para->repo->id,
                                      idx_para->user,
-                                     idx_para->ret_json ? &ret_json : NULL,
+                                     idx_para->ret_json ? &ret_json : nullptr,
                                      idx_para->replace_existed,
                                      idx_para->canon_path,
                                      id_list,
                                      size_list,
                                      0,
                                      gc_id,
-                                     NULL);
+                                     nullptr);
     progress->status = ret;
     if (idx_para->ret_json) {
         progress->ret_json = g_strdup(ret_json);
@@ -219,7 +219,7 @@ index_blocks_mgr_query_progress (IndexBlksMgr *mgr,
         seaf_warning ("Index progress not found for token %s\n", token);
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_GENERAL,
                      "Index progress not found");
-        return NULL;
+        return nullptr;
     }
 
     obj = json_object ();
@@ -252,9 +252,9 @@ index_blocks_mgr_start_index (IndexBlksMgr *mgr,
                               SeafileCrypt *crypt,
                               char **task_id)
 {
-    GList *ptr = NULL;
-    char *path = NULL, *token = NULL;
-    SeafileCrypt *_crypt = NULL;
+    GList *ptr = nullptr;
+    char *path = nullptr, *token = nullptr;
+    SeafileCrypt *_crypt = nullptr;
 
     SeafRepo *repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
     if (!repo) {
@@ -279,8 +279,8 @@ index_blocks_mgr_start_index (IndexBlksMgr *mgr,
     progress->status = 1;
 
     IndexPara *idx_para = g_new0 (IndexPara, 1);
-    idx_para->filenames = g_list_copy_deep (filenames, (GCopyFunc)g_strdup, NULL);
-    idx_para->paths = g_list_copy_deep (paths, (GCopyFunc)g_strdup, NULL);
+    idx_para->filenames = g_list_copy_deep (filenames, (GCopyFunc)g_strdup, nullptr);
+    idx_para->paths = g_list_copy_deep (paths, (GCopyFunc)g_strdup, nullptr);
     idx_para->repo = repo;
     idx_para->user = g_strdup (user);
     idx_para->canon_path = g_strdup(canon_path);
@@ -290,7 +290,7 @@ index_blocks_mgr_start_index (IndexBlksMgr *mgr,
     idx_para->progress = progress;
 
     progress->status = 1;
-    progress->expire_ts = time(NULL) + PROGRESS_TTL;
+    progress->expire_ts = time(nullptr) + PROGRESS_TTL;
 
     /* Get total size of all files for progress. */
     for (ptr = paths; ptr; ptr = ptr->next) {
@@ -311,7 +311,7 @@ index_blocks_mgr_start_index (IndexBlksMgr *mgr,
     g_hash_table_replace (priv->progress_store, g_strdup (token), progress);
     pthread_mutex_unlock (&priv->progress_lock);
 
-    g_thread_pool_push (priv->idx_tpool, idx_para, NULL);
+    g_thread_pool_push (priv->idx_tpool, idx_para, nullptr);
 
     g_free (token);
     return 0;
@@ -339,7 +339,7 @@ gen_new_token (GHashTable *token_hash)
         token = g_strndup(uuid, TOKEN_LEN);
 
         /* Make sure the new token doesn't conflict with an existing one. */
-        if (g_hash_table_lookup (token_hash, token) != NULL)
+        if (g_hash_table_lookup (token_hash, token) != nullptr)
             g_free (token);
         else
             return token;

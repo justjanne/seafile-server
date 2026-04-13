@@ -15,16 +15,16 @@ load_filesystem_block_backend(GKeyFile *config)
     char *tmp_dir;
     char *block_dir;
     
-    block_dir = g_key_file_get_string (config, "block_backend", "block_dir", NULL);
+    block_dir = g_key_file_get_string (config, "block_backend", "block_dir", nullptr);
     if (!block_dir) {
         seaf_warning ("Block dir not set in config.\n");
-        return NULL;
+        return nullptr;
     }
 
-    tmp_dir = g_key_file_get_string (config, "block_backend", "tmp_dir", NULL);
+    tmp_dir = g_key_file_get_string (config, "block_backend", "tmp_dir", nullptr);
     if (!tmp_dir) {
         seaf_warning ("Block tmp dir not set in config.\n");
-        return NULL;
+        return nullptr;
     }
 
     bend = block_backend_fs_new (block_dir, tmp_dir);
@@ -40,9 +40,9 @@ load_block_backend (GKeyFile *config)
     char *backend;
     BlockBackend *bend;
 
-    backend = g_key_file_get_string (config, "block_backend", "name", NULL);
+    backend = g_key_file_get_string (config, "block_backend", "name", nullptr);
     if (!backend) {
-        return NULL;
+        return nullptr;
     }
 
     if (strcmp(backend, "filesystem") == 0) {
@@ -52,5 +52,5 @@ load_block_backend (GKeyFile *config)
     }
 
     seaf_warning ("Unknown backend\n");
-    return NULL;
+    return nullptr;
 }
