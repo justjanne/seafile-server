@@ -40,21 +40,21 @@ commit_from_json_object (const char *id, json_t *object);
 
 static void compute_commit_id (SeafCommit* commit)
 {
-    SHA_CTX ctx;
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
     uint8_t sha1[20];    
     gint64 ctime_n;
 
-    SHA1_Init (&ctx);
-    SHA1_Update (&ctx, commit->root_id, 41);
-    SHA1_Update (&ctx, commit->creator_id, 41);
+    EVP_DigestInit(ctx, EVP_sha1());
+    EVP_DigestUpdate(ctx, commit->root_id, 41);
+    EVP_DigestUpdate(ctx, commit->creator_id, 41);
     if (commit->creator_name)
-        SHA1_Update (&ctx, commit->creator_name, strlen(commit->creator_name)+1);
-    SHA1_Update (&ctx, commit->desc, strlen(commit->desc)+1);
+        EVP_DigestUpdate(ctx, commit->creator_name, strlen(commit->creator_name)+1);
+    EVP_DigestUpdate(ctx, commit->desc, strlen(commit->desc)+1);
 
     /* convert to network byte order */
     ctime_n = hton64 (commit->ctime);
-    SHA1_Update (&ctx, &ctime_n, sizeof(ctime_n));
-    SHA1_Final (sha1, &ctx);
+    EVP_DigestUpdate(ctx, &ctime_n, sizeof(ctime_n));
+    EVP_DigestFinal(ctx, sha1, nullptr);
     
     rawdata_to_hex (sha1, commit->commit_id, 20);
 }

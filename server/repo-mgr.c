@@ -999,11 +999,11 @@ generate_repo_token ()
     char *uuid = gen_uuid ();
     unsigned char sha1[20];
     char token[41];
-    SHA_CTX s;
+    EVP_MD_CTX *s = EVP_MD_CTX_new();
 
-    SHA1_Init (&s);
-    SHA1_Update (&s, uuid, strlen(uuid));
-    SHA1_Final (sha1, &s);
+    EVP_DigestInit(s, EVP_sha1());
+    EVP_DigestUpdate(s, uuid, strlen(uuid));
+    EVP_DigestFinal(s, sha1, nullptr);
 
     rawdata_to_hex (sha1, token, 20);
 

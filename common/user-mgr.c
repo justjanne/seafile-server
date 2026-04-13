@@ -624,11 +624,11 @@ static void
 hash_password (const char *passwd, char *hashed_passwd)
 {
     unsigned char sha1[20];
-    SHA_CTX s;
+    EVP_MD_CTX *s = EVP_MD_CTX_new();
 
-    SHA1_Init (&s);
-    SHA1_Update (&s, passwd, strlen(passwd));
-    SHA1_Final (sha1, &s);
+    EVP_DigestInit(s, EVP_sha1());
+    EVP_DigestUpdate(s, passwd, strlen(passwd));
+    EVP_DigestFinal(s, sha1, nullptr);
     rawdata_to_hex (sha1, hashed_passwd, 20);
 }
 
@@ -636,12 +636,13 @@ static void
 hash_password_salted (const char *passwd, char *hashed_passwd)
 {
     unsigned char sha[SHA256_DIGEST_LENGTH];
-    SHA256_CTX s;
+    EVP_MD_CTX *s = EVP_MD_CTX_new();
 
-    SHA256_Init (&s);
-    SHA256_Update (&s, passwd, strlen(passwd));
-    SHA256_Update (&s, salt, sizeof(salt));
-    SHA256_Final (sha, &s);
+    EVP_DigestInit(s, EVP_sha256());
+    EVP_DigestUpdate(s, passwd, strlen(passwd));
+    EVP_DigestUpdate(s, salt, sizeof(salt));
+    EVP_DigestFinal(s, sha, nullptr);
+
     rawdata_to_hex (sha, hashed_passwd, SHA256_DIGEST_LENGTH);
 }
 

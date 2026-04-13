@@ -2175,7 +2175,7 @@ copy_block_between_enc_repo (SeafRepo *src_repo, SeafRepo *dst_repo,
     char *buf = nullptr;
     char *src_dec_out = nullptr;
     int src_dec_out_len = -1;
-    SHA_CTX ctx;
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
     uint8_t  checksum[CHECKSUM_LENGTH];
     char checksum_str[41];
     int block_size = 0;
@@ -2238,9 +2238,9 @@ copy_block_between_enc_repo (SeafRepo *src_repo, SeafRepo *dst_repo,
             goto out;
         }
 
-        SHA1_Init (&ctx);
-        SHA1_Update (&ctx, dst_enc_buf, dst_enc_len);
-        SHA1_Final (checksum, &ctx);
+        EVP_DigestInit(ctx, EVP_sha1());
+        EVP_DigestUpdate(ctx, dst_enc_buf, dst_enc_len);
+        EVP_DigestFinal(ctx, checksum, nullptr);
         rawdata_to_hex (checksum, checksum_str, 20);
         if (write_block (dst_repo->store_id, checksum_str, dst_repo->version, dst_enc_buf, dst_enc_len) < 0) {
             g_free (dst_enc_buf);
@@ -2250,9 +2250,9 @@ copy_block_between_enc_repo (SeafRepo *src_repo, SeafRepo *dst_repo,
         ret = g_strdup (checksum_str);
     } else if (src_crypt && !dst_crypt) {
         // Source repo is encrypted.
-        SHA1_Init (&ctx);
-        SHA1_Update (&ctx, src_dec_out, src_dec_out_len);
-        SHA1_Final (checksum, &ctx);
+        EVP_DigestInit(ctx, EVP_sha1());
+        EVP_DigestUpdate(ctx, src_dec_out, src_dec_out_len);
+        EVP_DigestFinal(ctx, checksum, nullptr);
         rawdata_to_hex (checksum, checksum_str, 20);
         if (write_block (dst_repo->store_id, checksum_str, dst_repo->version, src_dec_out, src_dec_out_len) < 0) {
             goto out;
@@ -2269,9 +2269,9 @@ copy_block_between_enc_repo (SeafRepo *src_repo, SeafRepo *dst_repo,
             goto out;
         }
 
-        SHA1_Init (&ctx);
-        SHA1_Update (&ctx, dst_enc_buf, dst_enc_len);
-        SHA1_Final (checksum, &ctx);
+        EVP_DigestInit(ctx, EVP_sha1());
+        EVP_DigestUpdate(ctx, dst_enc_buf, dst_enc_len);
+        EVP_DigestFinal(ctx, checksum, nullptr);
         rawdata_to_hex (checksum, checksum_str, 20);
         if (write_block (dst_repo->store_id, checksum_str, dst_repo->version, dst_enc_buf, dst_enc_len) < 0) {
             g_free (dst_enc_buf);

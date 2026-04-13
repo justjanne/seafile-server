@@ -8,6 +8,8 @@
 
 #include "bloom-filter.h"
 
+#include <openssl/evp.h>
+
 #define SETBIT(a, n) (a[n/CHAR_BIT] |= (1<<(n%CHAR_BIT)))
 #define CLEARBIT(a, n) (a[n/CHAR_BIT] &= ~(1<<(n%CHAR_BIT)))
 #define GETBIT(a, n) (a[n/CHAR_BIT] & (1<<(n%CHAR_BIT)))
@@ -124,13 +126,13 @@ decr_bit (Bloom *bf, unsigned int bit_idx)
 int bloom_add(Bloom *bloom, const char *s)
 {
     int i;
-    SHA256_CTX c;
+    EVP_MD_CTX *c = EVP_MD_CTX_new();
     unsigned char sha256[SHA256_DIGEST_LENGTH];
     size_t *sha_int = (size_t *)&sha256;
-    
-    SHA256_Init(&c);
-    SHA256_Update(&c, s, strlen(s));
-    SHA256_Final (sha256, &c);
+
+    EVP_DigestInit(c, EVP_sha256());
+    EVP_DigestUpdate(c, s, strlen(s));
+    EVP_DigestFinal(c, sha256, nullptr);
     
     for (i=0; i < bloom->k; ++i)
         incr_bit (bloom, sha_int[i] % bloom->asize);
@@ -141,16 +143,16 @@ int bloom_add(Bloom *bloom, const char *s)
 int bloom_remove(Bloom *bloom, const char *s)
 {
     int i;
-    SHA256_CTX c;
+    EVP_MD_CTX *c = EVP_MD_CTX_new();
     unsigned char sha256[SHA256_DIGEST_LENGTH];
     size_t *sha_int = (size_t *)&sha256;
     
     if (!bloom->counting)
         return -1;
 
-    SHA256_Init(&c);
-    SHA256_Update(&c, s, strlen(s));
-    SHA256_Final (sha256, &c);
+    EVP_DigestInit(c, EVP_sha256());
+    EVP_DigestUpdate(c, s, strlen(s));
+    EVP_DigestFinal(c, sha256, nullptr);
     
     for (i=0; i < bloom->k; ++i)
         decr_bit (bloom, sha_int[i] % bloom->asize);
@@ -161,13 +163,13 @@ int bloom_remove(Bloom *bloom, const char *s)
 int bloom_test(Bloom *bloom, const char *s)
 {
     int i;
-    SHA256_CTX c;
+    EVP_MD_CTX *c = EVP_MD_CTX_new();
     unsigned char sha256[SHA256_DIGEST_LENGTH];
     size_t *sha_int = (size_t *)&sha256;
-    
-    SHA256_Init(&c);
-    SHA256_Update(&c, s, strlen(s));
-    SHA256_Final (sha256, &c);
+
+    EVP_DigestInit(c, EVP_sha256());
+    EVP_DigestUpdate(c, s, strlen(s));
+    EVP_DigestFinal(c, sha256, nullptr);
     
     for (i=0; i < bloom->k; ++i)
         if(!(GETBIT(bloom->a, sha_int[i] % bloom->asize))) return 0;

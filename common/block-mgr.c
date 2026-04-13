@@ -224,7 +224,7 @@ seaf_block_manager_verify_block (SeafBlockManager *mgr,
     BlockHandle *h;
     char buf[10240];
     int n;
-    SHA_CTX ctx;
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
     guint8 sha1[20];
     char check_id[41];
 
@@ -237,7 +237,7 @@ seaf_block_manager_verify_block (SeafBlockManager *mgr,
         return false;
     }
 
-    SHA1_Init (&ctx);
+    EVP_DigestInit(ctx, EVP_sha1());
     while (1) {
         n = seaf_block_manager_read_block (mgr, h, buf, sizeof(buf));
         if (n < 0) {
@@ -248,13 +248,13 @@ seaf_block_manager_verify_block (SeafBlockManager *mgr,
         if (n == 0)
             break;
 
-        SHA1_Update (&ctx, buf, n);
+        EVP_DigestUpdate(ctx, buf, n);
     }
 
     seaf_block_manager_close_block (mgr, h);
     seaf_block_manager_block_handle_free (mgr, h);
 
-    SHA1_Final (sha1, &ctx);
+    EVP_DigestFinal(ctx, sha1, nullptr);
     rawdata_to_hex (sha1, check_id, 20);
 
     if (strcmp (check_id, block_id) == 0)

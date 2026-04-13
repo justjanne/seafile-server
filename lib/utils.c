@@ -1016,14 +1016,14 @@ ccnet_expand_path (const char *src)
 int
 calculate_sha1 (unsigned char *sha1, const char *msg, int len)
 {
-    SHA_CTX c;
+    EVP_MD_CTX *c = EVP_MD_CTX_new();
 
     if (len < 0)
         len = strlen(msg);
 
-    SHA1_Init(&c);
-    SHA1_Update(&c, msg, len);    
-	SHA1_Final(sha1, &c);
+    EVP_DigestInit(c, EVP_sha1());
+    EVP_DigestUpdate(c, msg, len);
+	EVP_DigestFinal(c, sha1, nullptr);
     return 0;
 }
 
