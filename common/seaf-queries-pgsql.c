@@ -32,12 +32,12 @@ SeafDBQueries queries_pgsql = {
     .create_table_repo =
         "CREATE TABLE IF NOT EXISTS Repo ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37) UNIQUE"
+            "repo_id VARCHAR(37) UNIQUE"
         ");",
     .create_table_repo_owner =
         "CREATE TABLE IF NOT EXISTS RepoOwner ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37) UNIQUE,"
+            "repo_id VARCHAR(37) UNIQUE,"
             "owner_id VARCHAR(255)"
         ");"
         "CREATE INDEX IF NOT EXISTS RepoOwner_owner_id_idx"
@@ -45,10 +45,10 @@ SeafDBQueries queries_pgsql = {
     .create_table_repo_group =
         "CREATE TABLE IF NOT EXISTS RepoGroup ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37),"
+            "repo_id VARCHAR(37),"
             "group_id INTEGER,"
             "user_name VARCHAR(255),"
-            "permission CHAR(15),"
+            "permission VARCHAR(15),"
             "UNIQUE (group_id, repo_id)"
         ");"
         "CREATE INDEX IF NOT EXISTS RepoGroup_repo_id_idx"
@@ -58,15 +58,15 @@ SeafDBQueries queries_pgsql = {
     .create_table_inner_pub_repo =
         "CREATE TABLE IF NOT EXISTS InnerPubRepo ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37) UNIQUE,"
-            "permission CHAR(15)"
+            "repo_id VARCHAR(37) UNIQUE,"
+            "permission VARCHAR(15)"
         ");",
     .create_table_repo_user_token =
         "CREATE TABLE IF NOT EXISTS RepoUserToken ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37),"
+            "repo_id VARCHAR(37),"
             "email VARCHAR(255),"
-            "token CHAR(41),"
+            "token VARCHAR(41),"
             "UNIQUE (repo_id, token)"
         ");"
         "CREATE INDEX IF NOT EXISTS RepoUserToken_token_idx"
@@ -76,8 +76,8 @@ SeafDBQueries queries_pgsql = {
     .create_table_repo_token_peer_info =
         "CREATE TABLE IF NOT EXISTS RepoTokenPeerInfo ("
             "id BIGSERIAL PRIMARY KEY,"
-            "token CHAR(41) UNIQUE,"
-            "peer_id CHAR(41),"
+            "token VARCHAR(41) UNIQUE,"
+            "peer_id VARCHAR(41),"
             "peer_ip VARCHAR(50),"
             "peer_name VARCHAR(255),"
             "sync_time BIGINT,"
@@ -88,69 +88,69 @@ SeafDBQueries queries_pgsql = {
     .create_table_repo_head =
         "CREATE TABLE IF NOT EXISTS RepoHead ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37) UNIQUE,"
+            "repo_id VARCHAR(37) UNIQUE,"
             "branch_name VARCHAR(10)"
         ");",
     .create_table_repo_size =
         "CREATE TABLE IF NOT EXISTS RepoSize ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37) UNIQUE,"
+            "repo_id VARCHAR(37) UNIQUE,"
             "\"size\" BIGINT,"
-            "head_id CHAR(41)"
+            "head_id VARCHAR(41)"
         ");",
     .create_table_repo_history_limit =
         "CREATE TABLE IF NOT EXISTS RepoHistoryLimit ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37) UNIQUE,"
+            "repo_id VARCHAR(37) UNIQUE,"
             "days INTEGER"
         ");",
     .create_table_repo_valid_since =
         "CREATE TABLE IF NOT EXISTS RepoValidSince ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37) UNIQUE,"
+            "repo_id VARCHAR(37) UNIQUE,"
             "\"timestamp\" BIGINT"
         ");",
     .create_table_web_ap =
         "CREATE TABLE IF NOT EXISTS WebAP ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(37) UNIQUE,"
-            "access_property CHAR(10)"
+            "repo_id VARCHAR(37) UNIQUE,"
+            "access_property VARCHAR(10)"
         ");",
     .create_table_virtual_repo =
         "CREATE TABLE IF NOT EXISTS VirtualRepo ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(36) UNIQUE,"
-            "origin_repo CHAR(36),"
+            "repo_id VARCHAR(36) UNIQUE,"
+            "origin_repo VARCHAR(36),"
             "path TEXT,"
-            "base_commit CHAR(40)"
+            "base_commit VARCHAR(40)"
         ");"
         "CREATE INDEX IF NOT EXISTS VirtualRepo_origin_repo_idx"
             " ON VirtualRepo(origin_repo);",
     .create_table_garbage_repos =
         "CREATE TABLE IF NOT EXISTS GarbageRepos ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(36) UNIQUE"
+            "repo_id VARCHAR(36) UNIQUE"
         ");",
     .create_table_gcid =
         "CREATE TABLE IF NOT EXISTS GCID ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(36) UNIQUE,"
-            "gc_id CHAR(36)"
+            "repo_id VARCHAR(36) UNIQUE,"
+            "gc_id VARCHAR(36)"
         ");",
     .create_table_last_gcid =
         "CREATE TABLE IF NOT EXISTS LastGCID ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(36),"
+            "repo_id VARCHAR(36),"
             "client_id VARCHAR(128),"
-            "gc_id CHAR(36),"
+            "gc_id VARCHAR(36),"
             "UNIQUE (repo_id, client_id)"
         ");",
     .create_table_repo_trash =
         "CREATE TABLE IF NOT EXISTS RepoTrash ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(36) UNIQUE,"
+            "repo_id VARCHAR(36) UNIQUE,"
             "repo_name VARCHAR(255),"
-            "head_id CHAR(40),"
+            "head_id VARCHAR(40),"
             "owner_id VARCHAR(255),"
             "\"size\" BIGINT,"
             "org_id INTEGER,"
@@ -163,13 +163,13 @@ SeafDBQueries queries_pgsql = {
     .create_table_repo_file_count =
         "CREATE TABLE IF NOT EXISTS RepoFileCount ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(36) UNIQUE,"
+            "repo_id VARCHAR(36) UNIQUE,"
             "file_count BIGINT"
         ");",
     .create_table_repo_info =
         "CREATE TABLE IF NOT EXISTS RepoInfo ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(36) UNIQUE,"
+            "repo_id VARCHAR(36) UNIQUE,"
             "name VARCHAR(255) NOT NULL,"
             "update_time BIGINT,"
             "version INTEGER,"
@@ -183,7 +183,7 @@ SeafDBQueries queries_pgsql = {
     .create_table_webupload_temp_files =
         "CREATE TABLE IF NOT EXISTS WebUploadTempFiles ("
             "id BIGSERIAL PRIMARY KEY,"
-            "repo_id CHAR(40) NOT NULL,"
+            "repo_id VARCHAR(40) NOT NULL,"
             "file_path TEXT NOT NULL,"
             "tmp_file_path TEXT NOT NULL"
         ");"
@@ -229,10 +229,10 @@ SeafDBQueries queries_pgsql = {
     .create_table_shared_repo =
         "CREATE TABLE IF NOT EXISTS SharedRepo ("
               "id BIGSERIAL PRIMARY KEY,"
-              "repo_id CHAR(37),"
+              "repo_id VARCHAR(37),"
               "from_email VARCHAR(255),"
               "to_email VARCHAR(255),"
-              "permission CHAR(15)"
+              "permission VARCHAR(15)"
         ");"
         "CREATE INDEX IF NOT EXISTS SharedRepo_repo_id_idx"
             " ON SharedRepo(repo_id);"
@@ -546,7 +546,7 @@ SeafDBQueries queries_pgsql = {
         "CREATE TABLE IF NOT EXISTS Binding ("
             "id BIGSERIAL PRIMARY KEY,"
             "email VARCHAR(255),"
-            "peer_id CHAR(41) UNIQUE"
+            "peer_id VARCHAR(41) UNIQUE"
         ");"
         "CREATE INDEX IF NOT EXISTS Binding_email_idx"
             " ON Binding(email);",
@@ -579,8 +579,8 @@ SeafDBQueries queries_pgsql = {
         "CREATE TABLE IF NOT EXISTS Branch ("
             "id BIGSERIAL PRIMARY KEY,"
             "name VARCHAR(10),"
-            "repo_id CHAR(41),"
-            "commit_id CHAR(41),"
+            "repo_id VARCHAR(41),"
+            "commit_id VARCHAR(41),"
             "UNIQUE (repo_id, name)"
         ");",
     .upsert_branch =
