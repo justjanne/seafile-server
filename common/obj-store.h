@@ -1,5 +1,4 @@
-#ifndef OBJ_STORE_H
-#define OBJ_STORE_H
+#pragma once
 
 #include <glib.h>
 #include <sys/types.h>
@@ -67,5 +66,3 @@ seaf_obj_store_copy_obj (struct SeafObjStore *obj_store,
 int
 seaf_obj_store_remove_store (struct SeafObjStore *obj_store,
                              const char *store_id);
-
-#endif

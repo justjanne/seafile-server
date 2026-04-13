@@ -1,12 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-/**
- * Job Manager manages long term jobs. These jobs are run in their
- * own threads.
- */
-
-#ifndef JOB_MGR_H
-#define JOB_MGR_H
+#pragma once
 
 #include <glib.h>
 
@@ -52,6 +44,3 @@ ccnet_job_manager_schedule_job (CcnetJobManager *mgr,
  */
 void
 ccnet_job_manager_wait_job (CcnetJobManager *mgr, int job_id);
-
-
-#endif

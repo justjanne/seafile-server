@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef GROUP_MGR_H
-#define GROUP_MGR_H
+#pragma once
 
 /* #define MAX_GROUP_MEMBERS	16 */
 
@@ -157,5 +154,3 @@ int
 ccnet_group_manager_update_group_user (CcnetGroupManager *mgr,
                                        const char *old_email,
                                        const char *new_email);
-#endif /* GROUP_MGR_H */
-

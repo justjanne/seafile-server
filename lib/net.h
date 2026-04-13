@@ -1,6 +1,5 @@
 
-#ifndef CCNET_NET_H
-#define CCNET_NET_H
+#pragma once
 
 #ifdef WIN32
     #include <inttypes.h>
@@ -74,5 +73,3 @@ evutil_socket_t udp_client (const char *host, const char *serv,
 int mcast_set_loop(evutil_socket_t sockfd, int onoff);
 
 evutil_socket_t create_multicast_sock (struct sockaddr *sasend, socklen_t salen);
-
-#endif

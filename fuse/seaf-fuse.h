@@ -1,5 +1,4 @@
-#ifndef SEAF_FUSE_H
-#define SEAF_FUSE_H
+#pragma once
 
 #include "seafile-session.h"
 
@@ -25,5 +24,3 @@ int do_getattr(SeafileSession *seaf, const char *path, struct stat *stbuf);
 int do_readdir(SeafileSession *seaf, const char *path, void *buf,
                fuse_fill_dir_t filler, off_t offset,
                struct fuse_file_info *info);
-
-#endif /* SEAF_FUSE_H */

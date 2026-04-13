@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SEAF_METRIC_MGR_H
-#define SEAF_METRIC_MGR_H
+#pragma once
 
 struct _SeafMetricManager;
 
@@ -26,5 +23,3 @@ seaf_metric_manager_in_flight_request_inc (SeafMetricManager *mgr);
 
 void
 seaf_metric_manager_in_flight_request_dec (SeafMetricManager *mgr);
-
-#endif

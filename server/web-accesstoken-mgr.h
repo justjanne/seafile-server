@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef WEB_ACCESSTOKEN_MGR_H
-#define WEB_ACCESSTOKEN_MGR_H
+#pragma once
 
 struct _SeafileSession;
 
@@ -37,6 +34,3 @@ seaf_web_at_manager_get_access_token (SeafWebAccessTokenManager *mgr,
 SeafileWebAccess *
 seaf_web_at_manager_query_access_token (SeafWebAccessTokenManager *mgr,
                                         const char *token);
-
-#endif /* WEB_ACCESSTOKEN_MGR_H */
-

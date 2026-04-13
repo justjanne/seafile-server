@@ -1,15 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-/*
-  Description:
-  
-  The function pair "seafile_encrypt/seafile_decrypt" are used to
-  encrypt/decrypt data in the seafile system, using AES 128 bit ecb
-  algorithm provided by openssl.
-*/  
-
-#ifndef _SEAFILE_CRYPT_H
-#define _SEAFILE_CRYPT_H
+#pragma once
 
 #include <openssl/aes.h>
 #include <openssl/evp.h>
@@ -133,5 +122,3 @@ seafile_decrypt_init (EVP_CIPHER_CTX **ctx,
                       int version,
                       const unsigned char *key,
                       const unsigned char *iv);
-
-#endif  /* _SEAFILE_CRYPT_H */

@@ -1,5 +1,4 @@
-#ifndef DIFF_SIMPLE_H
-#define DIFF_SIMPLE_H
+#pragma once
 
 #include <glib.h>
 #include "seafile-session.h"
@@ -110,5 +109,3 @@ typedef struct DiffOptions {
 
 int
 diff_trees (int n, const char *roots[], DiffOptions *opt);
-
-#endif

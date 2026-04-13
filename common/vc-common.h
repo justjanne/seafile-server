@@ -1,5 +1,4 @@
-#ifndef VC_COMMON_H
-#define VC_COMMON_H
+#pragma once
 
 #include "commit-mgr.h"
 
@@ -47,5 +46,3 @@ char *
 gen_conflict_path_wrapper (const char *repo_id, int version,
                            const char *head, const char *in_repo_path,
                            const char *original_path);
-
-#endif

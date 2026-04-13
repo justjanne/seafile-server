@@ -1,5 +1,4 @@
-#ifndef HTTP_TX_MGR_H
-#define HTTP_TX_MGR_H
+#pragma once
 
 #include <curl/curl.h>
 
@@ -59,4 +58,3 @@ http_tx_manager_check_file_access (const char *repo_id, const char *token, const
                                    const char *path, const char *op, const char *ip_addr,
                                    const char *user_agent, char **user,
                                    int *status, char **err_msg);
-#endif

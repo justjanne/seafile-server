@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef CCNET_TIMER_H
-#define CCNET_TIMER_H
+#pragma once
 
 /* return TRUE to reschedule the timer, return FALSE to cancle the timer */
 typedef int (*TimerCB) (void *data);
@@ -23,6 +20,3 @@ CcnetTimer* ccnet_timer_new (TimerCB           func,
  * Frees a timer and sets the timer pointer to NULL.
  */
 void ccnet_timer_free (CcnetTimer **timer);
-
-
-#endif

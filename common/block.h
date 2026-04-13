@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef BLOCK_H
-#define BLOCK_H
+#pragma once
 
 typedef struct _BMetadata BlockMetadata;
 typedef struct _BMetadata BMetadata;
@@ -25,5 +22,3 @@ typedef gboolean (*SeafBlockFunc) (const char *store_id,
                                    int version,
                                    const char *block_id,
                                    void *user_data);
-
-#endif

@@ -1,11 +1,6 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+#pragma once
 
-#ifndef COMMON_H
-#define COMMON_H
-
-#ifdef HAVE_CONFIG_H
- #include <config.h>
-#endif
+#include <config.h>
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -54,5 +49,3 @@
 #endif
 
 #define DEFAULT_CONFIG_DIR "~/.ccnet"
-
-#endif

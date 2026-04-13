@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SEAFILE_SESSION_H
-#define SEAFILE_SESSION_H
+#pragma once
 
 #include <job-mgr.h>
 
@@ -140,5 +137,3 @@ get_system_default_repo_id (SeafileSession *session);
 
 int
 set_system_default_repo_id (SeafileSession *session, const char *repo_id);
-
-#endif /* SEAFILE_H */

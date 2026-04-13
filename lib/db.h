@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef DB_UTILS_H
-#define DB_UTILS_H
+#pragma once
 
 #include <sqlite3.h>
 
@@ -28,6 +25,3 @@ int sqlite_get_int (sqlite3 *db, const char *sql);
 gint64 sqlite_get_int64 (sqlite3 *db, const char *sql);
 
 char *sqlite_get_string (sqlite3 *db, const char *sql);
-
-
-#endif

@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SEAF_REPO_MGR_H
-#define SEAF_REPO_MGR_H
+#pragma once
 
 #include "seafile-object.h"
 #include "commit-mgr.h"
@@ -967,4 +964,3 @@ seaf_repo_manager_get_repo_status(SeafRepoManager *mgr,
 
 int
 seaf_repo_manager_repair_virtual_repo (char *repo_id);
-#endif

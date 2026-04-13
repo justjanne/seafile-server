@@ -1,6 +1,5 @@
 
-#ifndef _SEAFILE_RPC_H
-#define _SEAFILE_RPC_H
+#pragma once
 
 #include "seafile-object.h"
 
@@ -1388,5 +1387,3 @@ ccnet_rpc_set_reference_id (const char *primary_id, const char *reference_id, GE
 
 char *
 ccnet_rpc_get_primary_id (const char *email, GError **error);
-
-#endif

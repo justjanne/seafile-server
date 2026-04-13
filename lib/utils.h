@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef CCNET_UTILS_H
-#define CCNET_UTILS_H
+#pragma once
 
 #ifdef WIN32
 #ifndef _WIN32_WINNT
@@ -408,5 +405,3 @@ seaf_key_file_get_string (GKeyFile *key_file,
 gchar* ccnet_key_file_get_string (GKeyFile *keyf,
                                   const char *category,
                                   const char *key);
-
-#endif

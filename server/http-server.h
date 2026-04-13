@@ -1,5 +1,4 @@
-#ifndef HTTP_SERVER_H
-#define HTTP_SERVER_H
+#pragma once
 
 #ifdef HAVE_EVHTP
 #include <glib.h>
@@ -47,7 +46,5 @@ send_statistic_msg (const char *repo_id, char *user, char *operation, guint64 by
 
 char *
 get_client_ip_addr (void *data);
-
-#endif
 
 #endif

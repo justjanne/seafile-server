@@ -1,5 +1,4 @@
-#ifndef OBJ_BACKEND_H
-#define OBJ_BACKEND_H
+#pragma once
 
 #include <glib.h>
 #include "obj-store.h"
@@ -50,5 +49,3 @@ struct ObjBackend {
 
     void *priv;
 };
-
-#endif

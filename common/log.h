@@ -1,5 +1,4 @@
-#ifndef LOG_H
-#define LOG_H
+#pragma once
 
 #define SEAFILE_DOMAIN g_quark_from_string("seafile")
 
@@ -47,5 +46,3 @@ void seafile_debug_impl (SeafileDebugFlags flag, const gchar *format, ...);
     seafile_debug_impl (DEBUG_FLAG, "%.10s(%d): " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #endif  /* DEBUG_FLAG */
-
-#endif

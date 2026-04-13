@@ -1,5 +1,4 @@
-#ifndef SEAFILE_FILESERVER_CONFIG_H
-#define SEAFILE_FILESERVER_CONFIG_H
+#pragma once
 
 struct GKeyFile;
 
@@ -14,5 +13,3 @@ fileserver_config_get_int64(GKeyFile *config, char *key, GError **error);
 
 gboolean
 fileserver_config_get_boolean(GKeyFile *config, char *key, GError **error);
-
-#endif // SEAFILE_FILESERVER_CONFIG_H

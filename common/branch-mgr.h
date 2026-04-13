@@ -1,5 +1,4 @@
-#ifndef SEAF_BRANCH_MGR_H
-#define SEAF_BRANCH_MGR_H
+#pragma once
 
 #include "commit-mgr.h"
 #define NO_BRANCH "-"
@@ -83,4 +82,3 @@ gint64
 seaf_branch_manager_calculate_branch_size (SeafBranchManager *mgr,
                                            const char *repo_id, 
                                            const char *commit_id);
-#endif /* SEAF_BRANCH_MGR_H */

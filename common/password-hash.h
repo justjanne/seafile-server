@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef _PASSWORD_HASH_H
-#define _PASSWORD_HASH_H
+#pragma once
 
 #define PWD_HASH_PDKDF2 "pbkdf2_sha256"
 #define PWD_HASH_ARGON2ID "argon2id"
@@ -19,5 +16,3 @@ pwd_hash_derive_key (const char *data_in, int in_len,
                      const char *repo_salt,
                      const char *algo, const char *params_str,
                      unsigned char *key);
-
-#endif

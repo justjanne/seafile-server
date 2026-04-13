@@ -1,5 +1,4 @@
-#ifndef INDEX_BLOCKS_MGR_H
-#define INDEX_BLOCKS_MGR_H
+#pragma once
 
 #include "seafile-object.h"
 
@@ -37,5 +36,3 @@ index_blocks_mgr_start_index (IndexBlksMgr *mgr,
                               const char *canon_path,
                               SeafileCrypt *crypt,
                               char **task_id);
-
-#endif

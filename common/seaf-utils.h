@@ -1,5 +1,4 @@
-#ifndef SEAF_UTILS_H
-#define SEAF_UTILS_H
+#pragma once
 
 #include <searpc-client.h>
 
@@ -30,5 +29,3 @@ split_filename (const char *filename, char **name, char **ext);
 
 int
 seaf_delete_repo_tokens (SeafRepo *repo);
-
-#endif

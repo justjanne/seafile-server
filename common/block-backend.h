@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef BLOCK_BACKEND_H
-#define BLOCK_BACKEND_H
+#pragma once
 
 #include "block.h"
 
@@ -60,5 +57,3 @@ struct BlockBackend {
 
 
 BlockBackend* load_block_backend (GKeyFile *config);
-
-#endif

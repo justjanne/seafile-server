@@ -1,5 +1,4 @@
-#ifndef SEAFILE_ERROR_H
-#define SEAFILE_ERROR_H
+#pragma once
 
 #define SEAF_ERR_GENERAL        500
 #define SEAF_ERR_BAD_REPO       501
@@ -25,5 +24,3 @@
 #define SEAF_ERR_CONCURRENT_UPLOAD 520
 #define SEAF_ERR_FILES_WITH_SAME_NAME 521
 #define SEAF_ERR_GC_CONFLICT 522
-
-#endif

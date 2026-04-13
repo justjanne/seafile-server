@@ -1,6 +1,3 @@
-#ifndef GC_VERIFY_H
-#define GC_VERIFY_H
+#pragma once
 
 int verify_repos (GList *repo_id_list);
-
-#endif

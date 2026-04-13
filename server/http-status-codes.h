@@ -1,5 +1,4 @@
-#ifndef HTTP_STATUS_CODES_H
-#define HTTP_STATUS_CODES_H
+#pragma once
 
 /* Seafile specific http status codes. */
 
@@ -12,6 +11,3 @@
 #define SEAF_HTTP_RES_REPO_DELETED 444
 #define SEAF_HTTP_RES_REPO_CORRUPTED 445
 #define SEAF_HTTP_RES_BLOCK_MISSING 446
-
-
-#endif

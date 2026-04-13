@@ -1,5 +1,4 @@
-#ifndef SEAF_CONFIG_MGR_H
-#define SEAF_CONFIG_MGR_H
+#pragma once
 
 typedef struct _SeafCfgManager SeafCfgManager;
 #include "seafile-session.h"
@@ -46,5 +45,3 @@ seaf_cfg_manager_get_config_boolean (SeafCfgManager *mgr, const char *group, con
 
 int
 seaf_cfg_manager_init (SeafCfgManager *mgr);
-
-#endif /* SEAF_CONFIG_MGR_H */

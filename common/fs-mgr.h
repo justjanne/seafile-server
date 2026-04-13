@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SEAF_FILE_MGR_H
-#define SEAF_FILE_MGR_H
+#pragma once
 
 #include <glib.h>
 
@@ -408,5 +405,3 @@ seaf_fs_manager_search_files_by_path (SeafFSManager *mgr,
                                       const char *repo_id,
                                       const char *path,
                                       const char *str);
-
-#endif

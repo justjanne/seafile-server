@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef CCNET_USER_MGR_H
-#define CCNET_USER_MGR_H
+#pragma once
 
 #include <glib.h>
 #include <glib-object.h>
@@ -182,4 +179,3 @@ ccnet_user_manager_update_emailuser_id (CcnetUserManager *manager,
                                         const char *old_email,
                                         const char *new_email,
                                         GError **error);
-#endif

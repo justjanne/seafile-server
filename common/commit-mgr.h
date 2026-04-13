@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SEAF_COMMIT_MGR_H
-#define SEAF_COMMIT_MGR_H
+#pragma once
 
 struct _SeafCommitManager;
 typedef struct _SeafCommit SeafCommit;
@@ -196,5 +193,3 @@ seaf_commit_manager_commit_exists (SeafCommitManager *mgr,
 int
 seaf_commit_manager_remove_store (SeafCommitManager *mgr,
                                   const char *store_id);
-
-#endif

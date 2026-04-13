@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SEAF_CHANGE_SET_H
-#define SEAF_CHANGE_SET_H
+#pragma once
 
 #include <glib.h>
 #include "utils.h"
@@ -33,5 +30,3 @@ remove_from_changeset (ChangeSet *changeset,
 
 char *
 commit_tree_from_changeset (ChangeSet *changeset);
-
-#endif

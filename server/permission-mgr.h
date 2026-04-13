@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SEAF_PERM_MGR_H
-#define SEAF_PERM_MGR_H
+#pragma once
 
 #include <glib.h>
 
@@ -37,5 +34,3 @@ seaf_perm_manager_get_repo_owner (SeafPermManager *mgr,
 GList *
 seaf_perm_manager_get_repos_by_owner (SeafPermManager *mgr,
                                       const char *user_id);
-
-#endif

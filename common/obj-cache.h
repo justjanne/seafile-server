@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef OBJ_CACHE_H
-#define OBJ_CACHE_H
+#pragma once
 
 #define DEFAULT_MEMCACHED_EXPIRY 24 * 3600
 
@@ -75,5 +72,3 @@ objcache_publish (ObjCache *cache, const char *channel, const char *msg);
 
 int
 objcache_push (ObjCache *cache, const char *list, const char *msg);
-
-#endif

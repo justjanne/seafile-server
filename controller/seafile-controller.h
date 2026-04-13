@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+#pragma once
 
 /*
  * Seafile-controller is responsible for:
@@ -16,9 +16,6 @@
  *         If some process has stopped working, try to restart it.
  *
  */
-
-#ifndef SEAFILE_CONTROLLER_H
-#define SEAFILE_CONTROLLER_H
 
 typedef struct _SeafileController SeafileController;
 
@@ -58,4 +55,3 @@ struct _SeafileController {
 
     gboolean            has_seafevents;
 };
-#endif

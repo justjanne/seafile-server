@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SEAF_BLOCK_MGR_H
-#define SEAF_BLOCK_MGR_H
+#pragma once
 
 #include <glib.h>
 #include <glib-object.h>
@@ -150,5 +147,3 @@ seaf_block_manager_verify_block (SeafBlockManager *mgr,
                                  int version,
                                  const char *block_id,
                                  gboolean *io_error);
-
-#endif

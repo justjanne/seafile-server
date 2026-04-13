@@ -1,5 +1,5 @@
-#ifndef PACK_DIR_H
-#define PACK_DIR_H
+#pragma once
+
 #ifdef HAVE_EVHTP
 
 /* Pack a seafile directory to a zipped archive, saved in a temporary file.
@@ -24,6 +24,4 @@ pack_files (const char *store_id,
             SeafileCrypt *crypt,
             gboolean is_windows,
             Progress *progress);
-#endif
-
 #endif

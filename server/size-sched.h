@@ -1,5 +1,4 @@
-#ifndef SIZE_SCHEDULER_H
-#define SIZE_SCHEDULER_H
+#pragma once
 
 struct _SeafileSession;
 
@@ -19,5 +18,3 @@ size_scheduler_start (SizeScheduler *scheduler);
 
 void
 schedule_repo_size_computation (SizeScheduler *scheduler, const char *repo_id);
-
-#endif

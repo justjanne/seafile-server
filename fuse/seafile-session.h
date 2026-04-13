@@ -1,5 +1,4 @@
-#ifndef SEAFILE_SESSION_H
-#define SEAFILE_SESSION_H
+#pragma once
 
 #include <stdint.h>
 #include <glib.h>
@@ -54,5 +53,3 @@ seafile_session_init (SeafileSession *session);
 
 int
 seafile_session_start (SeafileSession *session);
-
-#endif

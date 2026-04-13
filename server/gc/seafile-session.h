@@ -1,5 +1,4 @@
-#ifndef SEAFILE_SESSION_H
-#define SEAFILE_SESSION_H
+#pragma once
 
 #include <stdint.h>
 #include <glib.h>
@@ -43,5 +42,3 @@ seafile_session_new(const char *central_config_dir,
                     const char *seafile_dir,
                     const char *ccnet_dir,
                     gboolean need_db);
-
-#endif

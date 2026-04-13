@@ -1,5 +1,4 @@
-#ifndef MERGE_NEW_H
-#define MERGE_NEW_H
+#pragma once
 
 #include "common.h"
 
@@ -32,5 +31,3 @@ typedef struct MergeOptions {
 int
 seaf_merge_trees (const char *store_id, int version,
                   int n, const char *roots[], MergeOptions *opt);
-
-#endif

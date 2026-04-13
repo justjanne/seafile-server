@@ -1,5 +1,4 @@
-#ifndef SEAF_MQ_MANAGER_H
-#define SEAF_MQ_MANAGER_H
+#pragma once
 
 #include <jansson.h>
 
@@ -20,5 +19,3 @@ seaf_mq_manager_publish_event (SeafMqManager *mgr, const char *channel, const ch
 
 json_t *
 seaf_mq_manager_pop_event (SeafMqManager *mgr, const char *channel);
-
-#endif

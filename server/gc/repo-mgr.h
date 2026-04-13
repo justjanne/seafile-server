@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SEAF_REPO_MGR_H
-#define SEAF_REPO_MGR_H
+#pragma once
 
 #include <pthread.h>
 
@@ -165,5 +162,3 @@ seaf_repo_manager_list_garbage_repos (SeafRepoManager *mgr);
 
 void
 seaf_repo_manager_remove_garbage_repo (SeafRepoManager *mgr, const char *repo_id);
-
-#endif

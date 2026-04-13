@@ -1,5 +1,4 @@
-#ifndef SEAF_DB_H
-#define SEAF_DB_H
+#pragma once
 
 #include "seaf-queries.h"
 
@@ -133,5 +132,3 @@ seaf_db_statement_get_int64 (SeafDB *db, const char *sql, int n, ...);
 
 char *
 seaf_db_statement_get_string (SeafDB *db, const char *sql, int n, ...);
-
-#endif

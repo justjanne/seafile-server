@@ -1,5 +1,4 @@
-#ifndef SEAF_QUERIES_H
-#define SEAF_QUERIES_H
+#pragma once
 
 struct SeafDBQueries {
     const char *user_count;
@@ -127,5 +126,3 @@ struct SeafDBQueries {
     const char *get_branch;
 };
 typedef const struct SeafDBQueries SeafDBQueries;
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef COPY_MGR_H
-#define COPY_MGR_H
+#pragma once
 
 #include <glib.h>
 
@@ -63,5 +62,3 @@ seaf_copy_manager_get_task (SeafCopyManager *mgr,
 
 int
 seaf_copy_manager_cancel_task (SeafCopyManager *mgr, const char *task_id);
-
-#endif

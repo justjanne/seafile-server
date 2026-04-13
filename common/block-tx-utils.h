@@ -1,5 +1,4 @@
-#ifndef BLOCK_TX_UTILS_H
-#define BLOCK_TX_UTILS_H
+#pragma once
 
 #include <event2/buffer.h>
 #include <event2/util.h>
@@ -138,5 +137,3 @@ handle_one_frame (struct evbuffer *buf, FrameParser *parser);
  */
 int
 handle_frame_fragments (struct evbuffer *buf, FrameParser *parser);
-
-#endif

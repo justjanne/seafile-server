@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef SHARE_MGR_H
-#define SHARE_MGR_H
+#pragma once
 
 #include <glib.h>
 
@@ -126,5 +123,3 @@ seaf_share_manager_org_get_shared_users_by_repo (SeafShareManager* mgr,
 GList *
 seaf_share_manager_get_shared_users_by_repo (SeafShareManager* mgr,
                                              const char *repo_id);
-#endif /* SHARE_MGR_H */
-

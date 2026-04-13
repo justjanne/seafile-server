@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef OBJECTTX_COMMON_H
-#define OBJECTTX_COMMON_H
+#pragma once
 
 #define SC_GET_OBJECT   "301"
 #define SS_GET_OBJECT   "Get Object"
@@ -48,5 +45,3 @@ typedef struct {
     char    id[41];
     uint8_t object[0];
 } __attribute__((__packed__)) ObjectPack;
-
-#endif

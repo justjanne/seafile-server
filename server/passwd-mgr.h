@@ -1,5 +1,4 @@
-#ifndef PASSWD_MGR_H
-#define PASSWD_MGR_H
+#pragma once
 
 #include <glib.h>
 
@@ -78,5 +77,3 @@ seaf_passwd_manager_get_decrypt_key_raw (SeafPasswdManager *mgr,
                                          const char *user,
                                          unsigned char *key_out,
                                          unsigned char *iv_out);
-
-#endif

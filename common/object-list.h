@@ -1,7 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-
-#ifndef OBJECT_LIST_H
-#define OBJECT_LIST_H
+#pragma once
 
 #include <glib.h>
 
@@ -38,5 +35,3 @@ object_list_length (ObjectList *ol)
 {
     return ol->obj_ids->len;
 }
-
-#endif
