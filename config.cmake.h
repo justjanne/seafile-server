@@ -1,0 +1,15 @@
+#pragma once
+
+#cmakedefine HAVE_EVHTP 1
+#cmakedefine HAVE_LDAP 1
+#cmakedefine HAVE_MYSQL 1
+#cmakedefine HAVE_POSTGRESQL 1
+
+#define _FILE_OFFSET_BITS 64
+#define _LARGE_FILES 1
+
+#define PACKAGE "@PROJECT_NAME@"
+#define PACKAGE_VERSION "@PROJECT_VERSION@"
+#define PACKAGE_NAME "@PROJECT_NAME@"
+#define PACKAGE_STRING "@PROJECT_NAME@ @PROJECT_VERSION@"
+#define VERSION "@PROJECT_VERSION@"
