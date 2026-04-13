@@ -51,7 +51,6 @@ int
 seaf_branch_manager_update_branch (SeafBranchManager *mgr,
                                    SeafBranch *branch);
 
-#ifdef SEAFILE_SERVER
 /**
  * Atomically test whether the current head commit id on @branch
  * is the same as @old_commit_id and update branch in db.
@@ -64,7 +63,6 @@ seaf_branch_manager_test_and_update_branch (SeafBranchManager *mgr,
                                             const char *last_gc_id,
                                             const char *origin_repo_id,
                                             gboolean *gc_conflict);
-#endif
 
 SeafBranch *
 seaf_branch_manager_get_branch (SeafBranchManager *mgr,

@@ -352,19 +352,13 @@ diff_commits (SeafCommit *commit1, SeafCommit *commit2, GList **results,
     data.fold_dir_diff = fold_dir_diff;
 
     memset (&opt, 0, sizeof(opt));
-#ifdef SEAFILE_SERVER
     memcpy (opt.store_id, repo->store_id, 36);
-#else
-    memcpy (opt.store_id, repo->id, 36);
-#endif
     opt.version = repo->version;
     opt.file_cb = twoway_diff_files;
     opt.dir_cb = twoway_diff_dirs;
     opt.data = &data;
 
-#ifdef SEAFILE_SERVER
     seaf_repo_unref (repo);
-#endif
 
     roots[0] = commit1->root_id;
     roots[1] = commit2->root_id;
@@ -504,19 +498,13 @@ diff_merge (SeafCommit *merge, GList **results, gboolean fold_dir_diff)
     data.fold_dir_diff = fold_dir_diff;
 
     memset (&opt, 0, sizeof(opt));
-#ifdef SEAFILE_SERVER
     memcpy (opt.store_id, repo->store_id, 36);
-#else
-    memcpy (opt.store_id, repo->id, 36);
-#endif
     opt.version = repo->version;
     opt.file_cb = threeway_diff_files;
     opt.dir_cb = threeway_diff_dirs;
     opt.data = &data;
 
-#ifdef SEAFILE_SERVER
     seaf_repo_unref (repo);
-#endif
 
     roots[0] = merge->root_id;
     roots[1] = parent1->root_id;

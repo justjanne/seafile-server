@@ -16,22 +16,10 @@
 #include "seafile-rpc.h"
 #include "mq-mgr.h"
 #include "password-hash.h"
-
-#ifdef SEAFILE_SERVER
 #include "web-accesstoken-mgr.h"
-#endif
-
-#ifndef SEAFILE_SERVER
-#include "seafile-config.h"
-#endif
 
 #define DEBUG_FLAG SEAFILE_DEBUG_OTHER
 #include "log.h"
-
-#ifndef SEAFILE_SERVER
-#include "../daemon/vc-utils.h"
-
-#endif  /* SEAFILE_SERVER */
 
 
 /* -------- Utilities -------- */
@@ -39,14 +27,6 @@ static GObject*
 convert_repo (SeafRepo *r)
 {
     SeafileRepo *repo = NULL;
-
-#ifndef SEAFILE_SERVER
-    if (r->head == NULL)
-        return NULL;
-
-    if (r->worktree_invalid && !seafile_session_config_get_allow_invalid_worktree(seaf))
-        return NULL;
-#endif
 
     repo = seafile_repo_new ();
     if (!repo)
@@ -69,7 +49,6 @@ convert_repo (SeafRepo *r)
                   "repo_type", r->type,
                   NULL);
 
-#ifdef SEAFILE_SERVER
     if (r->virtual_info) {
         g_object_set (repo,
                       "is_virtual", TRUE,
@@ -89,17 +68,6 @@ convert_repo (SeafRepo *r)
                   "repaired", r->repaired,
                   "size", r->size, "file_count", r->file_count, NULL);
     g_object_set (repo, "is_corrupted", r->is_corrupted, NULL);
-#endif
-
-#ifndef SEAFILE_SERVER
-    g_object_set (repo, "worktree", r->worktree,
-                  "relay-id", r->relay_id,
-                  "worktree-invalid", r->worktree_invalid,
-                  "last-sync-time", r->last_sync_time,
-                  "auto-sync", r->auto_sync,
-                  NULL);
-
-#endif  /* SEAFILE_SERVER */
 
     return (GObject *)repo;
 }
@@ -162,7 +130,6 @@ seafile_branch_gets (const char *repo_id, GError **error)
     return ret;
 }
 
-#ifdef SEAFILE_SERVER
 GList*
 seafile_get_trash_repo_list (int start, int limit, GError **error)
 {
@@ -245,7 +212,7 @@ seafile_publish_event(const char *channel, const char *content, GError **error)
     int ret = 0;
 
     if (!channel || !content) {
-        g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS, "Argument should not be null");                                                          
+        g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS, "Argument should not be null");
         return -1;
     }
 
@@ -263,7 +230,6 @@ seafile_pop_event(const char *channel, GError **error)
     }
     return seaf_mq_manager_pop_event (seaf->mq_mgr, channel);
 }
-#endif
 
 GList*
 seafile_get_repo_list (int start, int limit, const char *order_by, int ret_virt_repo, GError **error)
@@ -273,23 +239,19 @@ seafile_get_repo_list (int start, int limit, const char *order_by, int ret_virt_
 
     ret = convert_repo_list (repos);
 
-#ifdef SEAFILE_SERVER
     GList *ptr;
     for (ptr = repos; ptr != NULL; ptr = ptr->next)
         seaf_repo_unref ((SeafRepo *)ptr->data);
-#endif
     g_list_free (repos);
 
     return ret;
 }
 
-#ifdef SEAFILE_SERVER
 gint64
 seafile_count_repos (GError **error)
 {
     return seaf_repo_manager_count_repos (seaf->repo_mgr, error);
 }
-#endif
 
 GObject*
 seafile_get_repo (const char *repo_id, GError **error)
@@ -312,9 +274,7 @@ seafile_get_repo (const char *repo_id, GError **error)
 
     GObject *repo = convert_repo (r);
 
-#ifdef SEAFILE_SERVER
     seaf_repo_unref (r);
-#endif
 
     return repo;
 }
@@ -373,10 +333,8 @@ struct CollectParam {
     int limit;
     int count;
     GList *commits;
-#ifdef SEAFILE_SERVER
     gint64 truncate_time;
     gboolean traversed_head;
-#endif
 };
 
 static gboolean
@@ -384,7 +342,6 @@ get_commit (SeafCommit *c, void *data, gboolean *stop)
 {
     struct CollectParam *cp = data;
 
-#ifdef SEAFILE_SERVER
     if (cp->truncate_time == 0)
     {
         *stop = TRUE;
@@ -410,7 +367,6 @@ get_commit (SeafCommit *c, void *data, gboolean *stop)
     /* Always traverse the head commit. */
     if (!cp->traversed_head)
         cp->traversed_head = TRUE;
-#endif
 
     /* if offset = 1, limit = 1, we should stop when the count = 2 */
     if (cp->limit > 0 && cp->count >= cp->offset + cp->limit) {
@@ -472,9 +428,7 @@ seafile_get_commit_list (const char *repo_id,
                        repo_id);
             g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_REPO,
                          "No head and branch master");
-#ifdef SEAFILE_SERVER
             seaf_repo_unref (repo);
-#endif
             return NULL;
         }
     } else {
@@ -486,19 +440,15 @@ seafile_get_commit_list (const char *repo_id,
     cp.offset = offset;
     cp.limit = limit;
 
-#ifdef SEAFILE_SERVER
     cp.truncate_time = seaf_repo_manager_get_repo_truncate_time (seaf->repo_mgr,
                                                                  repo_id);
-#endif
 
     ret =
         seaf_commit_manager_traverse_commit_tree (seaf->commit_mgr,
                                                   repo->id, repo->version,
                                                   commit_id, get_commit, &cp, TRUE);
     g_free (commit_id);
-#ifdef SEAFILE_SERVER
     seaf_repo_unref (repo);
-#endif
 
     if (!ret) {
         g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_LIST_COMMITS, "Failed to list commits");
@@ -509,162 +459,6 @@ seafile_get_commit_list (const char *repo_id,
     return commits;
 }
 
-#ifndef SEAFILE_SERVER
-static
-int do_unsync_repo(SeafRepo *repo)
-{
-    if (!seaf->started) {
-        seaf_message ("System not started, skip removing repo.\n");
-        return -1;
-    }
-
-    if (repo->auto_sync && (repo->sync_interval == 0))
-        seaf_wt_monitor_unwatch_repo (seaf->wt_monitor, repo->id);
-
-    seaf_sync_manager_cancel_sync_task (seaf->sync_mgr, repo->id);
-
-    SyncInfo *info = seaf_sync_manager_get_sync_info (seaf->sync_mgr, repo->id);
-
-    /* If we are syncing the repo,
-     * we just mark the repo as deleted and let sync-mgr actually delete it.
-     * Otherwise we are safe to delete the repo.
-     */
-    char *worktree = g_strdup (repo->worktree);
-    if (info != NULL && info->in_sync) {
-        seaf_repo_manager_mark_repo_deleted (seaf->repo_mgr, repo);
-    } else {
-        seaf_repo_manager_del_repo (seaf->repo_mgr, repo);
-    }
-
-    g_free (worktree);
-
-    return 0;
-}
-
-static void
-cancel_clone_tasks_by_account (const char *account_server, const char *account_email)
-{
-    GList *ptr, *tasks;
-    CloneTask *task;
-
-    tasks = seaf_clone_manager_get_tasks (seaf->clone_mgr);
-    for (ptr = tasks; ptr != NULL; ptr = ptr->next) {
-        task = ptr->data;
-
-        if (g_strcmp0(account_server, task->peer_addr) == 0
-            && g_strcmp0(account_email, task->email) == 0) {
-            seaf_clone_manager_cancel_task (seaf->clone_mgr, task->repo_id);
-        }
-    }
-
-    g_list_free (tasks);
-}
-
-int
-seafile_unsync_repos_by_account (const char *server_addr, const char *email, GError **error)
-{
-    if (!server_addr || !email) {
-        g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS, "Argument should not be null");
-        return -1;
-    }
-
-    GList *ptr, *repos = seaf_repo_manager_get_repo_list(seaf->repo_mgr, -1, -1, NULL, 0);
-    if (!repos) {
-        return 0;
-    }
-
-    for (ptr = repos; ptr; ptr = ptr->next) {
-        SeafRepo *repo = (SeafRepo*)ptr->data;
-        char *addr = NULL;
-        seaf_repo_manager_get_repo_relay_info(seaf->repo_mgr,
-                                              repo->id,
-                                              &addr, /* addr */
-                                              NULL); /* port */
-
-        if (g_strcmp0(addr, server_addr) == 0 && g_strcmp0(repo->email, email) == 0) {
-            if (do_unsync_repo(repo) < 0) {
-                return -1;
-            }
-        }
-
-        g_free (addr);
-    }
-
-    g_list_free (repos);
-
-    cancel_clone_tasks_by_account (server_addr, email);
-
-    return 0;
-}
-
-int
-seafile_remove_repo_tokens_by_account (const char *server_addr, const char *email, GError **error)
-{
-    if (!server_addr || !email) {
-        g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS, "Argument should not be null");
-        return -1;
-    }
-
-    GList *ptr, *repos = seaf_repo_manager_get_repo_list(seaf->repo_mgr, -1, -1, NULL, 0);
-    if (!repos) {
-        return 0;
-    }
-
-    for (ptr = repos; ptr; ptr = ptr->next) {
-        SeafRepo *repo = (SeafRepo*)ptr->data;
-        char *addr = NULL;
-        seaf_repo_manager_get_repo_relay_info(seaf->repo_mgr,
-                                              repo->id,
-                                              &addr, /* addr */
-                                              NULL); /* port */
-
-        if (g_strcmp0(addr, server_addr) == 0 && g_strcmp0(repo->email, email) == 0) {
-            if (seaf_repo_manager_remove_repo_token(seaf->repo_mgr, repo) < 0) {
-                return -1;
-            }
-        }
-
-        g_free (addr);
-    }
-
-    g_list_free (repos);
-
-    cancel_clone_tasks_by_account (server_addr, email);
-
-    return 0;
-}
-
-int
-seafile_set_repo_token (const char *repo_id,
-                        const char *token,
-                        GError **error)
-{
-    int ret;
-
-    if (repo_id == NULL || token == NULL) {
-        g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS, "Arguments should not be empty");
-        return -1;
-    }
-
-    SeafRepo *repo;
-    repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
-    if (!repo) {
-        g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_REPO, "Can't find Repo %s", repo_id);
-        return -1;
-    }
-
-    ret = seaf_repo_manager_set_repo_token (seaf->repo_mgr,
-                                            repo, token);
-    if (ret < 0) {
-        g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_INTERNAL,
-                     "Failed to set token for repo %s", repo_id);
-        return -1;
-    }
-
-    return 0;
-}
-
-#endif
 
 int
 seafile_destroy_repo (const char *repo_id, GError **error)
@@ -678,20 +472,8 @@ seafile_destroy_repo (const char *repo_id, GError **error)
         return -1;
     }
 
-#ifndef SEAFILE_SERVER
-    SeafRepo *repo;
-
-    repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
-    if (!repo) {
-        g_set_error (error, SEAFILE_DOMAIN, SEAF_ERR_BAD_ARGS, "No such repository");
-        return -1;
-    }
-
-    return do_unsync_repo(repo);
-#else
 
     return seaf_repo_manager_del_repo (seaf->repo_mgr, repo_id, error);
-#endif
 }
 
 
@@ -788,15 +570,11 @@ seafile_diff (const char *repo_id, const char *arg1, const char *arg2, int fold_
     if (err_msgs) {
         g_set_error (error, SEAFILE_DOMAIN, -1, "%s", err_msgs);
         g_free (err_msgs);
-#ifdef SEAFILE_SERVER
         seaf_repo_unref (repo);
-#endif
         return NULL;
     }
 
-#ifdef SEAFILE_SERVER
     seaf_repo_unref (repo);
-#endif
 
     for (p = diff_entries; p != NULL; p = p->next) {
         DiffEntry *de = p->data;
@@ -821,8 +599,6 @@ seafile_diff (const char *repo_id, const char *arg1, const char *arg2, int fold_
 /*
  * RPC functions only available for server.
  */
-
-#ifdef SEAFILE_SERVER
 
 GList *
 seafile_list_dir_by_path(const char *repo_id,
@@ -5815,5 +5591,3 @@ ccnet_rpc_get_primary_id (const char *email, GError **error)
 
     return ccnet_user_manager_get_primary_id (user_mgr, email);
 }
-
-#endif  /* SEAFILE_SERVER */

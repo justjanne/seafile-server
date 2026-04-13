@@ -172,25 +172,6 @@ seaf_fs_manager_new (struct _SeafileSession *seaf,
 int
 seaf_fs_manager_init (SeafFSManager *mgr);
 
-#ifndef SEAFILE_SERVER
-
-int 
-seaf_fs_manager_checkout_file (SeafFSManager *mgr, 
-                               const char *repo_id,
-                               int version,
-                               const char *file_id, 
-                               const char *file_path,
-                               guint32 mode,
-                               guint64 mtime,
-                               struct SeafileCrypt *crypt,
-                               const char *in_repo_path,
-                               const char *conflict_head_id,
-                               gboolean force_conflict,
-                               gboolean *conflicted,
-                               const char *email);
-
-#endif  /* not SEAFILE_SERVER */
-
 /**
  * Check in blocks and create seafile/symlink object.
  * Returns sha1 id for the seafile/symlink object in @sha1 parameter.
@@ -322,20 +303,6 @@ seaf_fs_manager_get_fs_size (SeafFSManager *mgr,
                              const char *repo_id,
                              int version,
                              const char *root_id);
-
-#ifndef SEAFILE_SERVER
-int
-seafile_write_chunk (const char *repo_id,
-                     int version,
-                     CDCDescriptor *chunk,
-                     SeafileCrypt *crypt,
-                     uint8_t *checksum,
-                     gboolean write_data);
-int
-seafile_check_write_chunk (CDCDescriptor *chunk,
-                           uint8_t *sha1,
-                           gboolean write_data);
-#endif /* SEAFILE_SERVER */
 
 uint32_t
 calculate_chunk_size (uint64_t total_size);

@@ -6,9 +6,7 @@
 #include <glib/gstdio.h>
 
 #ifndef WIN32
-#ifdef SEAFILE_SERVER
 #include <sys/syslog.h>
-#endif
 #endif
 
 #include "log.h"
@@ -23,13 +21,10 @@ static gboolean log_to_stdout = FALSE;
 static char *app_name;
 
 #ifndef WIN32
-#ifdef SEAFILE_SERVER
 static gboolean enable_syslog;
-#endif
 #endif
 
 #ifndef WIN32
-#ifdef SEAFILE_SERVER
 static int
 get_syslog_level (GLogLevelFlags level)
 {
@@ -48,7 +43,6 @@ get_syslog_level (GLogLevelFlags level)
             return LOG_DEBUG;
     }
 }
-#endif
 #endif
 
 static void 
@@ -88,10 +82,8 @@ seafile_log (const gchar *log_domain, GLogLevelFlags log_level,
     }
 
 #ifndef WIN32
-#ifdef SEAFILE_SERVER
     if (enable_syslog)
         syslog (get_syslog_level (log_level), "%s", message);
-#endif
 #endif
 }
 
@@ -126,10 +118,8 @@ ccnet_log (const gchar *log_domain, GLogLevelFlags log_level,
     }
 
 #ifndef WIN32
-#ifdef SEAFILE_SERVER
     if (enable_syslog)
         syslog (get_syslog_level (log_level), "%s", message);
-#endif
 #endif
 }
 
@@ -250,7 +240,6 @@ seafile_debug_impl (SeafileDebugFlags flag, const gchar *format, ...)
 }
 
 #ifndef WIN32
-#ifdef SEAFILE_SERVER
 void
 set_syslog_config (GKeyFile *config)
 {
@@ -260,5 +249,4 @@ set_syslog_config (GKeyFile *config)
     if (enable_syslog)
         openlog (NULL, LOG_NDELAY | LOG_PID, LOG_USER);
 }
-#endif
 #endif

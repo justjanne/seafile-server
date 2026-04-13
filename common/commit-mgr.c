@@ -908,7 +908,6 @@ save_commit (SeafCommitManager *manager,
 
     json_decref (object);
 
-#ifdef SEAFILE_SERVER
     if (seaf_obj_store_write_obj (manager->obj_store,
                                   repo_id, version,
                                   commit->commit_id,
@@ -916,15 +915,6 @@ save_commit (SeafCommitManager *manager,
         g_free (data);
         return -1;
     }
-#else
-    if (seaf_obj_store_write_obj (manager->obj_store,
-                                  repo_id, version,
-                                  commit->commit_id,
-                                  data, (int)len, FALSE) < 0) {
-        g_free (data);
-        return -1;
-    }
-#endif
     free (data);
 
     return 0;

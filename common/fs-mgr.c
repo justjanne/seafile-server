@@ -28,11 +28,6 @@ char *strcasestr (const char *haystack, const char *needle);
 #include "log.h"
 #include "../common/seafile-crypt.h"
 
-#ifndef SEAFILE_SERVER
-#include "../daemon/vc-utils.h"
-#include "vc-common.h"
-#endif  /* SEAFILE_SERVER */
-
 #include "db.h"
 
 #define SEAF_TMP_EXT "~"
@@ -60,15 +55,6 @@ typedef struct SeafdirOndisk {
     char    dirents[0];
 } __attribute__((__packed__)) SeafdirOndisk;
 
-#ifndef SEAFILE_SERVER
-uint32_t
-calculate_chunk_size (uint64_t total_size);
-static int
-write_seafile (SeafFSManager *fs_mgr,
-               const char *repo_id, int version,
-               CDCFileDescriptor *cdc,
-               unsigned char *obj_sha1);
-#endif  /* SEAFILE_SERVER */
 
 SeafFSManager *
 seaf_fs_manager_new (SeafileSession *seaf,
@@ -99,245 +85,6 @@ seaf_fs_manager_init (SeafFSManager *mgr)
 
     return 0;
 }
-
-#ifndef SEAFILE_SERVER
-static int
-checkout_block (const char *repo_id,
-                int version,
-                const char *block_id,
-                int wfd,
-                SeafileCrypt *crypt)
-{
-    SeafBlockManager *block_mgr = seaf->block_mgr;
-    BlockHandle *handle;
-    BlockMetadata *bmd;
-    char *dec_out = NULL;
-    int dec_out_len = -1;
-    char *blk_content = NULL;
-
-    handle = seaf_block_manager_open_block (block_mgr,
-                                            repo_id, version,
-                                            block_id, BLOCK_READ);
-    if (!handle) {
-        seaf_warning ("Failed to open block %s\n", block_id);
-        return -1;
-    }
-
-    /* first stat the block to get its size */
-    bmd = seaf_block_manager_stat_block_by_handle (block_mgr, handle);
-    if (!bmd) {
-        seaf_warning ("can't stat block %s.\n", block_id);
-        goto checkout_blk_error;
-    }
-
-    /* empty file, skip it */
-    if (bmd->size == 0) {
-        seaf_block_manager_close_block (block_mgr, handle);
-        seaf_block_manager_block_handle_free (block_mgr, handle);
-        return 0;
-    }
-
-    blk_content = (char *)malloc (bmd->size * sizeof(char));
-
-    /* read the block to prepare decryption */
-    if (seaf_block_manager_read_block (block_mgr, handle,
-                                       blk_content, bmd->size) != bmd->size) {
-        seaf_warning ("Error when reading from block %s.\n", block_id);
-        goto checkout_blk_error;
-    }
-
-    if (crypt != NULL) {
-
-        /* An encrypted block size must be a multiple of
-           ENCRYPT_BLK_SIZE
-        */
-        if (bmd->size % ENCRYPT_BLK_SIZE != 0) {
-            seaf_warning ("Error: An invalid encrypted block, %s \n", block_id);
-            goto checkout_blk_error;
-        }
-
-        /* decrypt the block */
-        int ret = seafile_decrypt (&dec_out,
-                                   &dec_out_len,
-                                   blk_content,
-                                   bmd->size,
-                                   crypt);
-
-        if (ret != 0) {
-            seaf_warning ("Decryt block %s failed. \n", block_id);
-            goto checkout_blk_error;
-        }
-
-        /* write the decrypted content */
-        ret = writen (wfd, dec_out, dec_out_len);
-
-
-        if (ret !=  dec_out_len) {
-            seaf_warning ("Failed to write the decryted block %s.\n",
-                       block_id);
-            goto checkout_blk_error;
-        }
-
-        g_free (blk_content);
-        g_free (dec_out);
-
-    } else {
-        /* not an encrypted block */
-        if (writen(wfd, blk_content, bmd->size) != bmd->size) {
-            seaf_warning ("Failed to write the decryted block %s.\n",
-                       block_id);
-            goto checkout_blk_error;
-        }
-        g_free (blk_content);
-    }
-
-    g_free (bmd);
-    seaf_block_manager_close_block (block_mgr, handle);
-    seaf_block_manager_block_handle_free (block_mgr, handle);
-    return 0;
-
-checkout_blk_error:
-
-    if (blk_content)
-        free (blk_content);
-    if (dec_out)
-        g_free (dec_out);
-    if (bmd)
-        g_free (bmd);
-
-    seaf_block_manager_close_block (block_mgr, handle);
-    seaf_block_manager_block_handle_free (block_mgr, handle);
-    return -1;
-}
-
-int
-seaf_fs_manager_checkout_file (SeafFSManager *mgr,
-                               const char *repo_id,
-                               int version,
-                               const char *file_id,
-                               const char *file_path,
-                               guint32 mode,
-                               guint64 mtime,
-                               SeafileCrypt *crypt,
-                               const char *in_repo_path,
-                               const char *conflict_head_id,
-                               gboolean force_conflict,
-                               gboolean *conflicted,
-                               const char *email)
-{
-    Seafile *seafile;
-    char *blk_id;
-    int wfd;
-    int i;
-    char *tmp_path;
-    char *conflict_path;
-
-    *conflicted = FALSE;
-
-    seafile = seaf_fs_manager_get_seafile (mgr, repo_id, version, file_id);
-    if (!seafile) {
-        seaf_warning ("File %s does not exist.\n", file_id);
-        return -1;
-    }
-
-    tmp_path = g_strconcat (file_path, SEAF_TMP_EXT, NULL);
-
-    mode_t rmode = mode & 0100 ? 0777 : 0666;
-    wfd = seaf_util_create (tmp_path, O_WRONLY | O_TRUNC | O_CREAT | O_BINARY,
-                            rmode & ~S_IFMT);
-    if (wfd < 0) {
-        seaf_warning ("Failed to open file %s for checkout: %s.\n",
-                   tmp_path, strerror(errno));
-        goto bad;
-    }
-
-    for (i = 0; i < seafile->n_blocks; ++i) {
-        blk_id = seafile->blk_sha1s[i];
-        if (checkout_block (repo_id, version, blk_id, wfd, crypt) < 0)
-            goto bad;
-    }
-
-    close (wfd);
-    wfd = -1;
-
-    if (force_conflict || seaf_util_rename (tmp_path, file_path) < 0) {
-        *conflicted = TRUE;
-
-        /* XXX
-         * In new syncing protocol and http sync, files are checked out before
-         * the repo is created. So we can't get user email from repo at this point.
-         * So a email parameter is needed.
-         * For old syncing protocol, repo always exists when files are checked out.
-         * This is a quick and dirty hack. A cleaner solution should modifiy the
-         * code of old syncing protocol to pass in email too. But I don't want to
-         * spend more time on the nearly obsoleted code.
-         */
-        const char *suffix = NULL;
-        if (email) {
-            suffix = email;
-        } else {
-            SeafRepo *repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
-            if (!repo)
-                goto bad;
-            suffix = email;
-        }
-
-        conflict_path = gen_conflict_path (file_path, suffix, (gint64)time(NULL));
-
-        seaf_warning ("Cannot update %s, creating conflict file %s.\n",
-                      file_path, conflict_path);
-
-        /* First try to rename the local version to a conflict file,
-         * this will preserve the version from the server.
-         * If this fails, fall back to checking out the server version
-         * to the conflict file.
-         */
-        if (seaf_util_rename (file_path, conflict_path) == 0) {
-            if (seaf_util_rename (tmp_path, file_path) < 0) {
-                g_free (conflict_path);
-                goto bad;
-            }
-        } else {
-            g_free (conflict_path);
-            conflict_path = gen_conflict_path_wrapper (repo_id, version,
-                                                       conflict_head_id, in_repo_path,
-                                                       file_path);
-            if (!conflict_path)
-                goto bad;
-
-            if (seaf_util_rename (tmp_path, conflict_path) < 0) {
-                g_free (conflict_path);
-                goto bad;
-            }
-        }
-
-        g_free (conflict_path);
-    }
-
-    if (mtime > 0) {
-        /* 
-         * Set the checked out file mtime to what it has to be.
-         */
-        if (seaf_set_file_time (file_path, mtime) < 0) {
-            seaf_warning ("Failed to set mtime for %s.\n", file_path);
-        }
-    }
-
-    g_free (tmp_path);
-    seafile_unref (seafile);
-    return 0;
-
-bad:
-    if (wfd >= 0)
-        close (wfd);
-    /* Remove the tmp file if it still exists, in case that rename fails. */
-    seaf_util_unlink (tmp_path);
-    g_free (tmp_path);
-    seafile_unref (seafile);
-    return -1;
-}
-
-#endif /* SEAFILE_SERVER */
 
 static void *
 create_seafile_v0 (CDCFileDescriptor *cdc, int *ondisk_size, char *seafile_id)
@@ -605,7 +352,7 @@ create_cdc_for_empty_file (CDCFileDescriptor *cdc)
     memset (cdc, 0, sizeof(CDCFileDescriptor));
 }
 
-#if defined SEAFILE_SERVER && defined FULL_FEATURE
+#ifdef FULL_FEATURE
 
 #define FIXED_BLOCK_SIZE (1<<20)
 
@@ -763,7 +510,7 @@ out:
     return ret;
 }
 
-#endif  /* SEAFILE_SERVER */
+#endif
 
 #define CDC_AVERAGE_BLOCK_SIZE (1 << 23) /* 8MB */
 #define CDC_MIN_BLOCK_SIZE (6 * (1 << 20)) /* 6MB */
@@ -797,7 +544,7 @@ seaf_fs_manager_index_blocks (SeafFSManager *mgr,
         create_cdc_for_empty_file (&cdc);
     } else {
         memset (&cdc, 0, sizeof(cdc));
-#if defined SEAFILE_SERVER && defined FULL_FEATURE
+#ifdef FULL_FEATURE
         if (use_cdc || version == 0) {
             cdc.block_sz = CDC_AVERAGE_BLOCK_SIZE;
             cdc.block_min_sz = CDC_MIN_BLOCK_SIZE;

@@ -2,11 +2,7 @@
 
 #include "log.h"
 
-#ifndef SEAFILE_SERVER
-#include "db.h"
-#else
 #include "seaf-db.h"
-#endif
 
 #include "seafile-session.h"
 
@@ -81,9 +77,6 @@ seaf_branch_unref (SeafBranch *branch)
 
 struct _SeafBranchManagerPriv {
     sqlite3 *db;
-#ifndef SEAFILE_SERVER
-    pthread_mutex_t db_lock;
-#endif
 };
 
 static int open_db (SeafBranchManager *mgr);
@@ -97,9 +90,6 @@ seaf_branch_manager_new (struct _SeafileSession *seaf)
     mgr->priv = g_new0 (SeafBranchManagerPriv, 1);
     mgr->seaf = seaf;
 
-#ifndef SEAFILE_SERVER
-    pthread_mutex_init (&mgr->priv->db_lock, NULL);
-#endif
 
     return mgr;
 }
@@ -115,29 +105,8 @@ open_db (SeafBranchManager *mgr)
 {
     if (!mgr->seaf->create_tables && seaf_db_type (mgr->seaf->db) != SEAF_DB_TYPE_PGSQL)
         return 0;
-#ifndef SEAFILE_SERVER
 
-    char *db_path;
-    const char *sql;
-
-    db_path = g_build_filename (mgr->seaf->seaf_dir, BRANCH_DB, NULL);
-    if (sqlite_open_db (db_path, &mgr->priv->db) < 0) {
-        g_critical ("[Branch mgr] Failed to open branch db\n");
-        g_free (db_path);
-        return -1;
-    }
-    g_free (db_path);
-
-    sql = "CREATE TABLE IF NOT EXISTS Branch ("
-          "name TEXT, repo_id TEXT, commit_id TEXT);";
-    if (sqlite_query_exec (mgr->priv->db, sql) < 0)
-        return -1;
-
-    sql = "CREATE INDEX IF NOT EXISTS branch_index ON Branch(repo_id, name);";
-    if (sqlite_query_exec (mgr->priv->db, sql) < 0)
-        return -1;
-
-#elif defined FULL_FEATURE
+#ifdef FULL_FEATURE
     SeafDB *db = mgr->seaf->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
@@ -150,30 +119,6 @@ open_db (SeafBranchManager *mgr)
 int
 seaf_branch_manager_add_branch (SeafBranchManager *mgr, SeafBranch *branch)
 {
-#ifndef SEAFILE_SERVER
-    char sql[256];
-
-    pthread_mutex_lock (&mgr->priv->db_lock);
-
-    sqlite3_snprintf (sizeof(sql), sql,
-                      "SELECT 1 FROM Branch WHERE name=%Q and repo_id=%Q",
-                      branch->name, branch->repo_id);
-    if (sqlite_check_for_existence (mgr->priv->db, sql))
-        sqlite3_snprintf (sizeof(sql), sql,
-                          "UPDATE Branch SET commit_id=%Q WHERE "
-                          "name=%Q and repo_id=%Q",
-                          branch->commit_id, branch->name, branch->repo_id);
-    else
-        sqlite3_snprintf (sizeof(sql), sql,
-                          "INSERT INTO Branch (name, repo_id, commit_id) VALUES (%Q, %Q, %Q)",
-                          branch->name, branch->repo_id, branch->commit_id);
-
-    sqlite_query_exec (mgr->priv->db, sql);
-
-    pthread_mutex_unlock (&mgr->priv->db_lock);
-
-    return 0;
-#else
     SeafDB *db = mgr->seaf->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
@@ -183,7 +128,6 @@ seaf_branch_manager_add_branch (SeafBranchManager *mgr, SeafBranch *branch)
         return -1;
 
     return 0;
-#endif
 }
 
 int
@@ -191,21 +135,7 @@ seaf_branch_manager_del_branch (SeafBranchManager *mgr,
                                 const char *repo_id,
                                 const char *name)
 {
-#ifndef SEAFILE_SERVER
-    char *sql;
 
-    pthread_mutex_lock (&mgr->priv->db_lock);
-
-    sql = sqlite3_mprintf ("DELETE FROM Branch WHERE name = %Q AND "
-                           "repo_id = '%s'", name, repo_id);
-    if (sqlite_query_exec (mgr->priv->db, sql) < 0)
-        seaf_warning ("Delete branch %s failed\n", name);
-    sqlite3_free (sql);
-
-    pthread_mutex_unlock (&mgr->priv->db_lock);
-
-    return 0;
-#else
     SeafDB *db = mgr->seaf->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
     int rc = seaf_db_statement_query (db, queries->delete_branch,
@@ -213,29 +143,12 @@ seaf_branch_manager_del_branch (SeafBranchManager *mgr,
     if (rc < 0)
         return -1;
     return 0;
-#endif
 }
 
 int
 seaf_branch_manager_update_branch (SeafBranchManager *mgr, SeafBranch *branch)
 {
-#ifndef SEAFILE_SERVER
-    sqlite3 *db;
-    char *sql;
 
-    pthread_mutex_lock (&mgr->priv->db_lock);
-
-    db = mgr->priv->db;
-    sql = sqlite3_mprintf ("UPDATE Branch SET commit_id = %Q "
-                           "WHERE name = %Q AND repo_id = %Q",
-                           branch->commit_id, branch->name, branch->repo_id);
-    sqlite_query_exec (db, sql);
-    sqlite3_free (sql);
-
-    pthread_mutex_unlock (&mgr->priv->db_lock);
-
-    return 0;
-#else
     SeafDB *db = mgr->seaf->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
     int rc = seaf_db_statement_query (db, queries->update_branch,
@@ -243,10 +156,9 @@ seaf_branch_manager_update_branch (SeafBranchManager *mgr, SeafBranch *branch)
     if (rc < 0)
         return -1;
     return 0;
-#endif
 }
 
-#if defined( SEAFILE_SERVER ) && defined( FULL_FEATURE )
+#ifdef FULL_FEATURE
 
 #include "mq-mgr.h"
 
@@ -422,72 +334,6 @@ seaf_branch_manager_test_and_update_branch (SeafBranchManager *mgr,
 
 #endif
 
-#ifndef SEAFILE_SERVER
-static SeafBranch *
-real_get_branch (SeafBranchManager *mgr,
-                 const char *repo_id,
-                 const char *name)
-{
-    SeafBranch *branch = NULL;
-    sqlite3_stmt *stmt;
-    sqlite3 *db;
-    char *sql;
-    int result;
-
-    pthread_mutex_lock (&mgr->priv->db_lock);
-
-    db = mgr->priv->db;
-    sql = sqlite3_mprintf ("SELECT commit_id FROM Branch "
-                           "WHERE name = %Q and repo_id='%s'",
-                           name, repo_id);
-    if (!(stmt = sqlite_query_prepare (db, sql))) {
-        seaf_warning ("[Branch mgr] Couldn't prepare query %s\n", sql);
-        sqlite3_free (sql);
-        pthread_mutex_unlock (&mgr->priv->db_lock);
-        return NULL;
-    }
-    sqlite3_free (sql);
-
-    result = sqlite3_step (stmt);
-    if (result == SQLITE_ROW) {
-        char *commit_id = (char *)sqlite3_column_text (stmt, 0);
-
-        branch = seaf_branch_new (name, repo_id, commit_id);
-        pthread_mutex_unlock (&mgr->priv->db_lock);
-        sqlite3_finalize (stmt);
-        return branch;
-    } else if (result == SQLITE_ERROR) {
-        const char *str = sqlite3_errmsg (db);
-        seaf_warning ("Couldn't prepare query, error: %d->'%s'\n",
-                   result, str ? str : "no error given");
-    }
-
-    sqlite3_finalize (stmt);
-    pthread_mutex_unlock (&mgr->priv->db_lock);
-    return NULL;
-}
-
-SeafBranch *
-seaf_branch_manager_get_branch (SeafBranchManager *mgr,
-                                const char *repo_id,
-                                const char *name)
-{
-    SeafBranch *branch;
-
-    /* "fetch_head" maps to "local" or "master" on client (LAN sync) */
-    if (strcmp (name, "fetch_head") == 0) {
-        branch = real_get_branch (mgr, repo_id, "local");
-        if (!branch) {
-            branch = real_get_branch (mgr, repo_id, "master");
-        }
-        return branch;
-    } else {
-        return real_get_branch (mgr, repo_id, name);
-    }
-}
-
-#else
-
 static gboolean
 get_branch (SeafDBRow *row, void *vid)
 {
@@ -540,27 +386,11 @@ seaf_branch_manager_get_branch (SeafBranchManager *mgr,
     }
 }
 
-#endif  /* not SEAFILE_SERVER */
-
 gboolean
 seaf_branch_manager_branch_exists (SeafBranchManager *mgr,
                                    const char *repo_id,
                                    const char *name)
 {
-#ifndef SEAFILE_SERVER
-    char *sql;
-    gboolean ret;
-
-    pthread_mutex_lock (&mgr->priv->db_lock);
-
-    sql = sqlite3_mprintf ("SELECT name FROM Branch WHERE name = %Q "
-                           "AND repo_id='%s'", name, repo_id);
-    ret = sqlite_check_for_existence (mgr->priv->db, sql);
-    sqlite3_free (sql);
-
-    pthread_mutex_unlock (&mgr->priv->db_lock);
-    return ret;
-#else
     gboolean db_err = FALSE;
 
     SeafDB *db = mgr->seaf->db;
@@ -568,60 +398,8 @@ seaf_branch_manager_branch_exists (SeafBranchManager *mgr,
 
     return seaf_db_statement_exists (db, queries->get_branch_name,  &db_err,
         2, "string", name, "string", repo_id);
-#endif
 }
 
-#ifndef SEAFILE_SERVER
-GList *
-seaf_branch_manager_get_branch_list (SeafBranchManager *mgr,
-                                     const char *repo_id)
-{
-    sqlite3 *db = mgr->priv->db;
-    
-    int result;
-    sqlite3_stmt *stmt;
-    char sql[256];
-    char *name;
-    char *commit_id;
-    GList *ret = NULL;
-    SeafBranch *branch;
-
-    snprintf (sql, 256, "SELECT name, commit_id FROM branch WHERE repo_id ='%s'",
-              repo_id);
-
-    pthread_mutex_lock (&mgr->priv->db_lock);
-
-    if ( !(stmt = sqlite_query_prepare(db, sql)) ) {
-        pthread_mutex_unlock (&mgr->priv->db_lock);
-        return NULL;
-    }
-
-    while (1) {
-        result = sqlite3_step (stmt);
-        if (result == SQLITE_ROW) {
-            name = (char *)sqlite3_column_text(stmt, 0);
-            commit_id = (char *)sqlite3_column_text(stmt, 1);
-            branch = seaf_branch_new (name, repo_id, commit_id);
-            ret = g_list_prepend (ret, branch);
-        }
-        if (result == SQLITE_DONE)
-            break;
-        if (result == SQLITE_ERROR) {
-            const gchar *str = sqlite3_errmsg (db);
-            seaf_warning ("Couldn't prepare query, error: %d->'%s'\n", 
-                       result, str ? str : "no error given");
-            sqlite3_finalize (stmt);
-            seaf_branch_list_free (ret);
-            pthread_mutex_unlock (&mgr->priv->db_lock);
-            return NULL;
-        }
-    }
-
-    sqlite3_finalize (stmt);
-    pthread_mutex_unlock (&mgr->priv->db_lock);
-    return g_list_reverse(ret);
-}
-#else
 static gboolean
 get_branches (SeafDBRow *row, void *vplist)
 {
@@ -659,4 +437,3 @@ seaf_branch_manager_get_branch_list (SeafBranchManager *mgr,
 
     return ret;
 }
-#endif
