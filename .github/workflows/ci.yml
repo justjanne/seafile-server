@@ -7,14 +7,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
-      - uses: actions/setup-python@v3
-        with:
-          python-version: "3.12"
-      - name: install dependencies and test
-        run: |
-          cd $GITHUB_WORKSPACE
-          ./ci/install-deps.sh
-          ./ci/run.py
+      - uses: actions/checkout@v6
+      - name: Setup up Docker Compose
+        uses: docker/setup-compose-action@v1
+      - name: Generate test config
+        working-directory: ./ci
+        run: ./create_config.sh c pgsql
+      - name: Start database environment
+        working-directory: ./ci
+        run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml up db --wait
+      - name: Start seafile
+        working-directory: ./ci
+        run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml up seafile --wait
+      - name: Install python
+        working-directory: ./ci
+        run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml exec seafile /bin/bash -c "cd /source/seafile-server/python && pip3 install --break-system-packages -r ../ci/requirements.txt"
+      - name: Run tests
+        working-directory: ./ci
+        run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml exec seafile /bin/bash -c "cd /source/seafile-server/python && python3 -m pytest"
+      - name: Show docker logs
+        working-directory: ./ci
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml logs

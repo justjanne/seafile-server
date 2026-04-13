@@ -1,0 +1,4 @@
+CREATE USER seafile WITH ENCRYPTED PASSWORD 'password';
+
+CREATE DATABASE ccnet OWNER seafile;
+CREATE DATABASE seafile OWNER seafile;

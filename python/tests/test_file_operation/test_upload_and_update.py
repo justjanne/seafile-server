@@ -8,7 +8,7 @@ from requests_toolbelt import MultipartEncoder
 
 file_name = 'file.txt'
 file_name_not_replaced = 'file (1).txt'
-file_path = os.getcwd() + '/' + file_name
+file_path = os.getcwd() + '/tests/resources/' + file_name
 file_content = 'File content.\r\n'
 file_size = len(file_content)
 
@@ -16,8 +16,8 @@ resumable_file_name = 'resumable.txt'
 resumable_test_file_name = 'test/resumable.txt'
 chunked_part1_name = 'part1.txt'
 chunked_part2_name = 'part2.txt'
-chunked_part1_path = os.getcwd() + '/' + chunked_part1_name
-chunked_part2_path = os.getcwd() + '/' + chunked_part2_name
+chunked_part1_path = os.getcwd() + '/tests/resources/' + chunked_part1_name
+chunked_part2_path = os.getcwd() + '/tests/resources/' + chunked_part2_name
 chunked_part1_content = 'First line.\r\n'
 chunked_part2_content = 'Second line.\r\n'
 total_size = len(chunked_part1_content) + len(chunked_part2_content)

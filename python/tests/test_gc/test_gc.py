@@ -10,15 +10,15 @@ from requests_toolbelt import MultipartEncoder
 
 file_name = 'file.txt'
 first_name = 'first.txt'
-first_path = os.getcwd() + '/' + first_name
+first_path = os.getcwd() + '/tests/resources/' + first_name
 first_content = 'Fist file content.\r\n'
 
 second_name = 'second.txt'
 second_content = 'Second file content.\r\n'
-second_path = os.getcwd() + '/' + second_name
+second_path = os.getcwd() + '/tests/resources/' + second_name
 
 third_name = 'third.txt'
-third_path = os.getcwd() + '/' + third_name
+third_path = os.getcwd() + '/tests/resources/' + third_name
 third_content = 'Third file content.\r\n'
 
 def create_test_file():
@@ -42,7 +42,7 @@ def create_test_dir(repo, dir_name):
     api.post_dir(repo.id,parent_dir,dir_name,USER)
 
 def run_gc(repo_id, rm_fs, check):
-    cmdStr = 'seafserv-gc --verbose -F /tmp/seafile-tests/conf -d /tmp/seafile-tests/seafile-data %s %s %s'%(rm_fs, check, repo_id)
+    cmdStr = f'seafserv-gc --verbose -F /config -d /data {rm_fs} {check} {repo_id}'
     cmd=cmdStr.split(' ')
     ret = run (cmd)
     assert ret.returncode == 0

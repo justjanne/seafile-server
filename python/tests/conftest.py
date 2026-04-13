@@ -3,6 +3,10 @@
 import logging
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import pytest
 from tenacity import retry, stop_after_attempt, wait_fixed
 from tests.config import (

@@ -9,14 +9,14 @@ from seaserv import seafile_api as api
 
 file1_name = 'file1.txt'
 file2_name = 'file2.txt'
-file1_path = os.getcwd() + '/' + file1_name
-file2_path = os.getcwd() + '/' + file2_name
+file1_path = os.getcwd() + '/tests/resources/' + file1_name
+file2_path = os.getcwd() + '/tests/resources/' + file2_name
 file1_content ='File1 content'
 file2_content ='File2 content'
-download_dir_path = os.getcwd() + '/download_dir'
+download_dir_path = os.getcwd() + '/tests/resources/download_dir'
 
 def create_test_files():
-    os.mkdir(download_dir_path)
+    os.makedirs(download_dir_path, exist_ok=True)
     with open(file1_path, 'w') as fp1:
         fp1.write(file1_content)
     with open(file2_path, 'w') as fp2:

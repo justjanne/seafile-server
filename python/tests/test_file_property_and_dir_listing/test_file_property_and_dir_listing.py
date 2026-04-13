@@ -7,7 +7,7 @@ from seaserv import seafile_api as api
 file_name = 'test.txt'
 dir_name = 'test_dir'
 file_content = 'test file content'
-file_path = os.getcwd() + '/' + file_name
+file_path = os.getcwd() + '/tests/resources/' + file_name
 
 def create_the_file ():
     fp = open(file_path, 'w')

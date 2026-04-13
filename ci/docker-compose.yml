@@ -1,0 +1,34 @@
+services:
+  seafile:
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./config:/config
+      - shared-run:/run/seafile
+      - seafile-data:/data
+    environment:
+      - SEAFILE_DB_USER=seafile
+      - SEAFILE_DB_PASSWORD=password
+
+      - CCNET_CONF_DIR=/config
+      - SEAFILE_CENTRAL_CONF_DIR=/config
+      - SEAFILE_DATA_DIR=/data
+      - JWT_PRIVATE_KEY=f06052e8d82e57baa5a3befcc0006e219b7c56c9
+
+      - SEAFILE_DB_TYPE=pgsql
+      - SEAFILE_DB_HOST=db
+      - SEAFILE_DB_PORT=5432
+
+      - SEAFILE_CCNET_DB_NAME=ccnet
+      - SEAFILE_SEAFILE_DB_NAME=seafile
+      - SEAFILE_SEAHUB_DB_NAME=seahub
+      - SEAFILE_RPC_PIPE_PATH=/run/seafile
+    ports:
+      - "8082:8082"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  seafile-data:
+  shared-run:

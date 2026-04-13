@@ -8,20 +8,20 @@ from requests_toolbelt import MultipartEncoder
 
 file_name = 'file.txt'
 file_name_not_replaced = 'file (1).txt'
-file_path = os.getcwd() + '/' + file_name
+file_path = os.getcwd() + '/tests/resources/' + file_name
 file_size = 400*1024*1024
 
 download_file_name = 'download_file.txt'
-download_file_path = os.getcwd() + '/' + download_file_name
+download_file_path = os.getcwd() + '/tests/resources/' + download_file_name
 
 resumable_download_file_name = 'resumable_download_file.txt'
-resumable_download_file_path = os.getcwd() + '/' + resumable_download_file_name
+resumable_download_file_path = os.getcwd() + '/tests/resources/' + resumable_download_file_name
 
 resumable_file_name = 'resumable.txt'
 chunked_part1_name = 'part1.txt'
 chunked_part2_name = 'part2.txt'
-chunked_part1_path = os.getcwd() + '/' + chunked_part1_name
-chunked_part2_path = os.getcwd() + '/' + chunked_part2_name
+chunked_part1_path = os.getcwd() + '/tests/resources/' + chunked_part1_name
+chunked_part2_path = os.getcwd() + '/tests/resources/' + chunked_part2_name
 chunked_part1_size = 200*1024*1024
 chunked_part2_size = 200*1024*1024
 total_size = chunked_part1_size + chunked_part2_size
