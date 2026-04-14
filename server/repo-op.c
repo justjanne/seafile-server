@@ -6612,16 +6612,14 @@ static GList *
 scan_stat_to_list(const char *scan_stat, GHashTable *commit_hash, SeafRepo *repo)
 {
     json_t *commit_array = nullptr, *commit_obj = nullptr;
-    char *commit_id = nullptr;
+    const char *commit_id = nullptr;
     SeafCommit *commit = nullptr;
     GList *list = nullptr;
-    char *key;
     commit_array = json_loadb (scan_stat, strlen(scan_stat), 0, nullptr);
     if (!commit_array) {
         return nullptr;
     }
-    int i;
-    for (i = 0; i < json_array_size (commit_array); i++) {
+    for (int i = 0; i < json_array_size (commit_array); i++) {
         commit_obj = json_array_get (commit_array, i);
         commit_id = json_string_value (commit_obj);
         if (commit_id && strlen(commit_id) == 40) {
@@ -6631,7 +6629,7 @@ scan_stat_to_list(const char *scan_stat, GHashTable *commit_hash, SeafRepo *repo
                 return nullptr;
             }
             list = g_list_prepend (list, commit);
-            key = g_strdup (commit->commit_id);
+            char* key = g_strdup (commit->commit_id);
             g_hash_table_replace (commit_hash, key, key);
         }
     }

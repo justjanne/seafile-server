@@ -102,8 +102,6 @@ load_fileserver_config (SeafileSession *session)
 
     seaf_message ("fileserver: max_upload_size = %ld\n",
                   session->max_upload_size);
-
-    return;
 }
 
 static int

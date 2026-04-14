@@ -32,7 +32,7 @@ get_nickname_by_modifier (GHashTable *email_to_nickname, const char *modifier)
     if (!nickname) {
         nickname = g_strdup (modifier);
     }
-    g_hash_table_insert (email_to_nickname, g_strdup(modifier), nickname);
+    g_hash_table_insert (email_to_nickname, g_strdup(modifier), (void*) nickname);
 
     return nickname;
 }
@@ -627,9 +627,7 @@ merge_trees_recursive (const char *store_id, int version,
             if (ptrs[i] != nullptr) {
                 done = false;
                 dent = ptrs[i]->data;
-                if (!first_name)
-                    first_name = dent->name;
-                else if (strcmp(dent->name, first_name) > 0)
+                if (!first_name || strcmp(dent->name, first_name) > 0)
                     first_name = dent->name;
             }
         }

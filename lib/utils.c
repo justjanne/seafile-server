@@ -1153,22 +1153,16 @@ is_object_id_valid (const char *obj_id)
 
 char* strjoin_n (const char *seperator, int argc, char **argv)
 {
-    GString *buf;
-    int i;
-    char *str;
-
     if (argc == 0)
         return nullptr;
     
-    buf = g_string_new (argv[0]);
-    for (i = 1; i < argc; ++i) {
+    GString *buf = g_string_new (argv[0]);
+    for (int i = 1; i < argc; ++i) {
         g_string_append (buf, seperator);
         g_string_append (buf, argv[i]);
     }
 
-    str = buf->str;
-    g_string_free (buf, FALSE);
-    return str;
+    return g_string_free (buf, false);
 }
 
 
