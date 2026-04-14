@@ -646,7 +646,7 @@ hash_password_salted (const char *passwd, char *hashed_passwd)
     rawdata_to_hex (sha, hashed_passwd, SHA256_DIGEST_LENGTH);
 }
 
-static void
+static int
 hash_password_pbkdf2_sha256 (const char *passwd,
                              int iterations,
                              char **db_passwd)
@@ -656,17 +656,17 @@ hash_password_pbkdf2_sha256 (const char *passwd,
     char hashed_passwd[SHA256_DIGEST_LENGTH*2+1];
     char salt_str[SHA256_DIGEST_LENGTH*2+1];
 
-    if (!RAND_bytes (salt, sizeof(salt))) {
-        ccnet_warning ("Failed to generate salt "
-                       "with RAND_bytes(), use RAND_pseudo_bytes().\n");
-        RAND_pseudo_bytes (salt, sizeof(salt));
+    int ret = RAND_bytes (salt, sizeof(salt));
+    if (ret != 1) {
+        ccnet_warning ("Failed to generate salt\n");
+        return -1;
     }
 
-    PKCS5_PBKDF2_HMAC (passwd, strlen(passwd),
-                       salt, sizeof(salt),
-                       iterations,
-                       EVP_sha256(),
-                       sizeof(sha), sha);
+    ret = PKCS5_PBKDF2_HMAC (passwd, -1, salt, sizeof(salt),
+        iterations, EVP_sha256(), sizeof(sha), sha);
+    if (ret != 1) {
+        return -1;
+    }
 
     rawdata_to_hex (sha, hashed_passwd, SHA256_DIGEST_LENGTH);
 
@@ -677,6 +677,8 @@ hash_password_pbkdf2_sha256 (const char *passwd,
     g_string_printf (buf, "PBKDF2SHA256$%d$%s$%s",
                      iterations, salt_str, hashed_passwd);
     *db_passwd = g_string_free (buf, FALSE);
+
+    return 0;
 }
 
 static gboolean
@@ -752,8 +754,9 @@ update_user_passwd (CcnetUserManager *manager,
     char *db_passwd = nullptr;
     int ret;
 
-    hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter,
-                                 &db_passwd);
+    if (hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter, &db_passwd) < 0) {
+        return -1;
+    }
 
     /* convert email to lower case for case insensitive lookup. */
     char *email_down = g_ascii_strdown (email, strlen(email));
@@ -790,11 +793,13 @@ ccnet_user_manager_add_emailuser (CcnetUserManager *manager,
      * Such users are created for book keeping, such as users from
      * Shibboleth.
      */
-    if (g_strcmp0 (passwd, "!") != 0)
-        hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter,
-                                     &db_passwd);
-    else
+    if (g_strcmp0 (passwd, "!") != 0) {
+        if (hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter, &db_passwd) < 0) {
+            return -1;
+        }
+    } else {
         db_passwd = g_strdup(passwd);
+    }
 
     /* convert email to lower case for case insensitive lookup. */
     char *email_down = g_ascii_strdown (email, strlen(email));
@@ -1568,7 +1573,9 @@ ccnet_user_manager_update_emailuser (CcnetUserManager *manager,
                                              3, "int", is_staff, "int", is_active,
                                              "int", id);
         } else {
-            hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter, &db_passwd);
+            if (hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter, &db_passwd) < 0) {
+                return -1;
+            }
 
             return seaf_db_statement_query (db, "UPDATE EmailUser SET passwd=?, "
                                              "is_staff=?, is_active=? WHERE id=?",
