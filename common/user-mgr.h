@@ -15,7 +15,7 @@ typedef struct _SeafileSession SeafileSession;
 typedef struct _CcnetUserManager CcnetUserManager;
 typedef struct _CcnetUserManagerClass CcnetUserManagerClass;
 
-typedef struct CcnetUserManagerPriv CcnetUserManagerPriv;
+typedef struct CcnetUserManagerPrivate CcnetUserManagerPrivate;
 
 
 struct _CcnetUserManager
@@ -44,7 +44,7 @@ struct _CcnetUserManager
 
     int passwd_hash_iter;
 
-    CcnetUserManagerPriv *priv;
+    CcnetUserManagerPrivate *priv;
 };
 
 struct _CcnetUserManagerClass

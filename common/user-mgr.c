@@ -37,11 +37,13 @@
 
 #define DEFAULT_MAX_CONNECTIONS 100
 
-G_DEFINE_TYPE (CcnetUserManager, ccnet_user_manager, G_TYPE_OBJECT);
+struct CcnetUserManagerPrivate {
+    CcnetDB    *db;
+    int         max_users;
+};
 
-
-#define GET_PRIV(o)  \
-   (G_TYPE_INSTANCE_GET_PRIVATE ((o), CCNET_TYPE_USER_MANAGER, CcnetUserManagerPriv))
+G_DEFINE_TYPE_WITH_CODE (CcnetUserManager, ccnet_user_manager, G_TYPE_OBJECT,
+    G_ADD_PRIVATE(CcnetUserManager));
 
 
 static int open_db (CcnetUserManager *manager);
@@ -50,22 +52,16 @@ static int open_db (CcnetUserManager *manager);
 static int try_load_ldap_settings (CcnetUserManager *manager);
 #endif
 
-struct CcnetUserManagerPriv {
-    CcnetDB    *db;
-    int         max_users;
-};
-
 static void
 ccnet_user_manager_class_init (CcnetUserManagerClass *klass)
 {
 
-    g_type_class_add_private (klass, sizeof (CcnetUserManagerPriv));
 }
 
 static void
 ccnet_user_manager_init (CcnetUserManager *manager)
 {
-    manager->priv = GET_PRIV(manager);
+    manager->priv = ccnet_user_manager_get_instance_private(manager);
 }
 
 CcnetUserManager*
