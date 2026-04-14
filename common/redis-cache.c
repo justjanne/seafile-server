@@ -205,7 +205,7 @@ redis_cache_get_object (ObjCache *cache, const char *obj_id, size_t *len)
     }
 
     *len = reply->len;
-    object = g_memdup (reply->str, reply->len);
+    object = g_memdup2 (reply->str, reply->len);
 
 out:
     freeReplyObject(reply);

@@ -1267,7 +1267,7 @@ seaf_dirent_dup (SeafDirent *dent)
 {
     SeafDirent *new_dent;
 
-    new_dent = g_memdup (dent, sizeof(SeafDirent));
+    new_dent = g_memdup2 (dent, sizeof(SeafDirent));
     new_dent->name = g_strdup(dent->name);
     new_dent->modifier = g_strdup(dent->modifier);
 
