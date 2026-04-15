@@ -486,11 +486,15 @@ get_file_modifier_mtime_v0 (const char *repo_id, const char *store_id, int versi
              * to the parent commit to traverse.
              */
             g_free (file_id);
+            file_id = nullptr;
             seaf_commit_unref (commit);
         }
     }
 
-    g_free (file_id);
+    if (file_id) {
+        g_free (file_id);
+        file_id = nullptr;
+    }
     if (commit)
         seaf_commit_unref (commit);
     return ret;
@@ -541,6 +545,8 @@ get_file_modifier_mtime_v1 (const char *repo_id, const char *store_id, int versi
     }
 
     if (!dent) {
+        seaf_warning ("object %s doesn't exist in repo %s.\n", filename, repo_id);
+        ret = -1;
         goto out;
     }
 
