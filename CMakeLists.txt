@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(seafile VERSION 13.0.20 LANGUAGES C)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 option(ENABLE_FUSE "Enable fuse virtual file system" ON)
