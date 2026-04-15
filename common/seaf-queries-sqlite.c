@@ -68,6 +68,65 @@ SeafDBQueries queries_sqlite = {
             " ON RepoUserToken (repo_id, token);"
         "CREATE INDEX IF NOT EXISTS repo_token_email_indx"
             " ON RepoUserToken (email);",
+    .create_table_shared_repo =
+        "CREATE TABLE IF NOT EXISTS SharedRepo ("
+            "repo_id CHAR(37),"
+            "from_email VARCHAR(255),"
+            "to_email VARCHAR(255),"
+            "permission CHAR(15)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS RepoIdIndex"
+            " ON SharedRepo (repo_id);"
+        "CREATE INDEX IF NOT EXISTS FromEmailIndex"
+            " ON SharedRepo (from_email);"
+        "CREATE INDEX IF NOT EXISTS ToEmailIndex"
+            " ON SharedRepo (to_email);",
+
+    .create_table_org_repo =
+        "CREATE TABLE IF NOT EXISTS OrgRepo ("
+            "id BIGSERIAL NOT NULL,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "user VARCHAR(255),"
+            "UNIQUE (org_id, repo_id),"
+            "UNIQUE (repo_id)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS ON OrgRepo (org_id, \"user\");"
+        "CREATE INDEX IF NOT EXISTS ON OrgRepo (\"user\");",
+    .create_table_org_repo_group =
+        "CREATE TABLE IF NOT EXISTS OrgGroupRepo ("
+            "id BIGSERIAL NOT NULL,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "group_id INTEGER,"
+            "owner VARCHAR(255),"
+            "permission CHAR(15),"
+            "UNIQUE (org_id, group_id, repo_id)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS ON OrgGroupRepo (repo_id);"
+        "CREATE INDEX IF NOT EXISTS ON OrgGroupRepo (owner);",
+    .create_table_org_inner_pub_repo =
+        "CREATE TABLE IF NOT EXISTS OrgInnerPubRepo ("
+            "id BIGSERIAL NOT NULL,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "permission CHAR(15),"
+            "UNIQUE (org_id, repo_id)"
+        ");",
+    .create_table_org_shared_repo =
+        "CREATE TABLE IF NOT EXISTS OrgSharedRepo ("
+            "id SERIAL NOT NULL,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "from_email VARCHAR(255),"
+            "to_email VARCHAR(255),"
+            "permission CHAR(15)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS ON OrgSharedRepo (repo_id);"
+        "CREATE INDEX IF NOT EXISTS ON OrgSharedRepo (org_id, repo_id);"
+        "CREATE INDEX IF NOT EXISTS ON OrgSharedRepo (from_email);"
+        "CREATE INDEX IF NOT EXISTS ON OrgSharedRepo (to_email);",
+
     .create_table_repo_token_peer_info =
         "CREATE TABLE IF NOT EXISTS RepoTokenPeerInfo ("
             "token CHAR(41) PRIMARY KEY,"
@@ -184,19 +243,6 @@ SeafDBQueries queries_sqlite = {
             "info_key VARCHAR(256),"
             "info_value VARCHAR(1024)"
         ");",
-    .create_table_shared_repo =
-        "CREATE TABLE IF NOT EXISTS SharedRepo ("
-            "repo_id CHAR(37),"
-            "from_email VARCHAR(255),"
-            "to_email VARCHAR(255),"
-            "permission CHAR(15)"
-        ");"
-        "CREATE INDEX IF NOT EXISTS RepoIdIndex"
-            " ON SharedRepo (repo_id);"
-        "CREATE INDEX IF NOT EXISTS FromEmailIndex"
-            " ON SharedRepo (from_email);"
-        "CREATE INDEX IF NOT EXISTS ToEmailIndex"
-            " ON SharedRepo (to_email);",
 
     .create_table_seafile_conf =
         "CREATE TABLE IF NOT EXISTS SeafileConf ("
@@ -524,6 +570,15 @@ SeafDBQueries queries_sqlite = {
             " ON UserRole (email);"
         "CREATE UNIQUE INDEX IF NOT EXISTS userrole_userrole_index"
             " ON UserRole (email, role);",
+    .create_table_folder_user_perm =
+        "CREATE TABLE IF NOT EXISTS FolderUserPerm ("
+            "repo_id CHAR(36) NOT NULL,"
+            "path TEXT NOT NULL,"
+            "permission CHAR(15),"
+            "user VARCHAR(255) NOT NULL"
+        ");"
+        "CREATE INDEX IF NOT EXISTS folder_user_perm_idx"
+        " ON FolderUserPerm(repo_id);",
     .create_table_ldap_users =
         "CREATE TABLE IF NOT EXISTS LDAPUsers ("
             "id INTEGER PRIMARY KEY AUTOINCREMENT,"

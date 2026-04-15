@@ -966,6 +966,11 @@ create_db_tables_if_not_exist (SeafRepoManager *mgr)
     if (seaf_db_query (db, queries->create_table_repo_owner) < 0) return -1;
     if (seaf_db_query (db, queries->create_table_repo_group) < 0) return -1;
     if (seaf_db_query (db, queries->create_table_inner_pub_repo) < 0) return -1;
+
+    if (seaf_db_query (db, queries->create_table_org_repo) < 0) return -1;
+    if (seaf_db_query (db, queries->create_table_org_repo_group) < 0) return -1;
+    if (seaf_db_query (db, queries->create_table_org_inner_pub_repo) < 0) return -1;
+
     if (seaf_db_query (db, queries->create_table_repo_user_token) < 0) return -1;
     if (seaf_db_query (db, queries->create_table_repo_token_peer_info) < 0) return -1;
     if (seaf_db_query (db, queries->create_table_repo_head) < 0) return -1;
@@ -985,6 +990,7 @@ create_db_tables_if_not_exist (SeafRepoManager *mgr)
     if (seaf_db_query (db, queries->create_table_repo_file_count) < 0) return -1;
     if (seaf_db_query (db, queries->create_table_repo_info) < 0) return -1;
     if (seaf_db_query (db, queries->create_table_webupload_temp_files) < 0) return -1;
+    if (seaf_db_query (db, queries->create_table_folder_user_perm) < 0) return -1;
 
     return 0;
 }

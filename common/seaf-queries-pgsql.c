@@ -61,6 +61,74 @@ SeafDBQueries queries_pgsql = {
             "repo_id VARCHAR(37) UNIQUE,"
             "permission VARCHAR(15)"
         ");",
+    .create_table_shared_repo =
+        "CREATE TABLE IF NOT EXISTS SharedRepo ("
+              "id BIGSERIAL PRIMARY KEY,"
+              "repo_id VARCHAR(37),"
+              "from_email VARCHAR(255),"
+              "to_email VARCHAR(255),"
+              "permission VARCHAR(15)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS SharedRepo_repo_id_idx"
+            " ON SharedRepo(repo_id);"
+        "CREATE INDEX IF NOT EXISTS SharedRepo_from_email_idx"
+            " ON SharedRepo(from_email);"
+        "CREATE INDEX IF NOT EXISTS SharedRepo_to_email_idx"
+            " ON SharedRepo(to_email);",
+
+    .create_table_org_repo =
+        "CREATE TABLE IF NOT EXISTS OrgRepo ("
+            "id BIGSERIAL NOT NULL,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "\"user\" VARCHAR(255),"
+            "UNIQUE (org_id, repo_id),"
+            "UNIQUE (repo_id)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS idx_OrgRepo_org_id_user"
+        " ON OrgRepo (org_id, \"user\");"
+        "CREATE INDEX IF NOT EXISTS idx_OrgRepo_user"
+        " ON OrgRepo (\"user\");",
+    .create_table_org_repo_group =
+        "CREATE TABLE IF NOT EXISTS OrgGroupRepo ("
+            "id BIGSERIAL NOT NULL,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "group_id INTEGER,"
+            "owner VARCHAR(255),"
+            "permission CHAR(15),"
+            "UNIQUE (org_id, group_id, repo_id)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS idx_OrgGroupRepo_repo_id"
+        " ON OrgGroupRepo (repo_id);"
+        "CREATE INDEX IF NOT EXISTS idx_OrgGroupRepo_owner"
+        " ON OrgGroupRepo (owner);",
+    .create_table_org_inner_pub_repo =
+        "CREATE TABLE IF NOT EXISTS OrgInnerPubRepo ("
+            "id BIGSERIAL NOT NULL,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "permission CHAR(15),"
+            "UNIQUE (org_id, repo_id)"
+        ");",
+    .create_table_org_shared_repo =
+        "CREATE TABLE IF NOT EXISTS OrgSharedRepo ("
+            "id SERIAL NOT NULL,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "from_email VARCHAR(255),"
+            "to_email VARCHAR(255),"
+            "permission CHAR(15)"
+        ");"
+        "CREATE INDEX IF NOT EXISTS idx_OrgSharedRepo_repo_id"
+        " ON OrgSharedRepo (repo_id);"
+        "CREATE INDEX IF NOT EXISTS idx_OrgSharedRepo_org_id_repo_id"
+        " ON OrgSharedRepo (org_id, repo_id);"
+        "CREATE INDEX IF NOT EXISTS idx_OrgSharedRepo_from_email"
+        " ON OrgSharedRepo (from_email);"
+        "CREATE INDEX IF NOT EXISTS idx_OrgSharedRepo_to_email"
+        " ON OrgSharedRepo (to_email);",
+
     .create_table_repo_user_token =
         "CREATE TABLE IF NOT EXISTS RepoUserToken ("
             "id BIGSERIAL PRIMARY KEY,"
@@ -226,20 +294,6 @@ SeafDBQueries queries_pgsql = {
             "info_key VARCHAR(256), "
             "info_value VARCHAR(1024)"
         ");",
-    .create_table_shared_repo =
-        "CREATE TABLE IF NOT EXISTS SharedRepo ("
-              "id BIGSERIAL PRIMARY KEY,"
-              "repo_id VARCHAR(37),"
-              "from_email VARCHAR(255),"
-              "to_email VARCHAR(255),"
-              "permission VARCHAR(15)"
-        ");"
-        "CREATE INDEX IF NOT EXISTS SharedRepo_repo_id_idx"
-            " ON SharedRepo(repo_id);"
-        "CREATE INDEX IF NOT EXISTS SharedRepo_from_email_idx"
-            " ON SharedRepo(from_email);"
-        "CREATE INDEX IF NOT EXISTS SharedRepo_to_email_idx"
-            " ON SharedRepo(to_email);",
 
     .create_table_seafile_conf =
         "CREATE TABLE IF NOT EXISTS SeafileConf ("
@@ -600,6 +654,16 @@ SeafDBQueries queries_pgsql = {
             "email VARCHAR(255) UNIQUE,"
             "role VARCHAR(255)"
         ");",
+    .create_table_folder_user_perm =
+        "CREATE TABLE IF NOT EXISTS FolderUserPerm ("
+            "id BIGSERIAL NOT NULL,"
+            "repo_id CHAR(36) NOT NULL,"
+            "path TEXT NOT NULL,"
+            "permission CHAR(15),"
+            "\"user\" VARCHAR(255) NOT NULL"
+        ");"
+        "CREATE INDEX IF NOT EXISTS idx_FolderUserPerm_repo_id"
+        " ON FolderUserPerm (repo_id);",
     .create_table_ldap_users =
         "CREATE TABLE IF NOT EXISTS LDAPUsers ("
             "id BIGSERIAL PRIMARY KEY,"

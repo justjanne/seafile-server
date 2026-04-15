@@ -32,7 +32,8 @@ seaf_share_manager_start (SeafShareManager *mgr)
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
     if (seaf_db_query (db, queries->create_table_shared_repo) < 0) return -1;
-    
+    if (seaf_db_query (db, queries->create_table_org_shared_repo) < 0) return -1;
+
     return 0;
 }
 

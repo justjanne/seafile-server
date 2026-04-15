@@ -61,6 +61,61 @@ SeafDBQueries queries_mysql = {
             "permission CHAR(15),"
             "UNIQUE INDEX (repo_id)"
         ") ENGINE=INNODB;",
+    .create_table_shared_repo =
+        "CREATE TABLE IF NOT EXISTS `SharedRepo` ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "repo_id CHAR(37),"
+            "from_email VARCHAR(255),"
+            "to_email VARCHAR(255),"
+            "permission CHAR(15),"
+            "INDEX (repo_id),"
+            "INDEX(from_email),"
+            "INDEX(to_email)"
+        ") ENGINE=INNODB;",
+
+    .create_table_org_repo =
+        "CREATE TABLE IF NOT EXISTS OrgRepo ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "user VARCHAR(255),"
+            "UNIQUE INDEX(org_id, repo_id),"
+            "UNIQUE INDEX (repo_id),"
+            "INDEX (org_id, user),"
+            "INDEX(user)"
+        ") ENGINE=INNODB;",
+    .create_table_org_repo_group =
+        "CREATE TABLE IF NOT EXISTS OrgGroupRepo ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "group_id INTEGER,"
+            "owner VARCHAR(255),"
+            "permission CHAR(15),"
+            "UNIQUE INDEX(org_id, group_id, repo_id),"
+            "INDEX (repo_id), INDEX (owner)"
+        ") ENGINE=INNODB;",
+    .create_table_org_inner_pub_repo =
+        "CREATE TABLE IF NOT EXISTS OrgInnerPubRepo ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "org_id INTEGER,"
+            "repo_id CHAR(37),"
+            "UNIQUE INDEX(org_id, repo_id),"
+            "permission CHAR(15)"
+        ") ENGINE=INNODB;",
+    .create_table_org_shared_repo =
+        "CREATE TABLE IF NOT EXISTS OrgSharedRepo ("
+            "id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "org_id INT,"
+            "repo_id CHAR(37) ,"
+            "from_email VARCHAR(255),"
+            "to_email VARCHAR(255),"
+            "permission CHAR(15),"
+            "INDEX(repo_id),"
+            "INDEX (org_id, repo_id),"
+            "INDEX(from_email), INDEX(to_email)"
+        ") ENGINE=INNODB;",
+
     .create_table_repo_user_token =
         "CREATE TABLE IF NOT EXISTS RepoUserToken ("
             "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
@@ -230,17 +285,6 @@ SeafDBQueries queries_mysql = {
             "info_key VARCHAR(256),"
             "info_value VARCHAR(1024)"
         ");",
-    .create_table_shared_repo =
-        "CREATE TABLE IF NOT EXISTS `SharedRepo` ("
-            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
-            "repo_id CHAR(37),"
-            "from_email VARCHAR(255),"
-            "to_email VARCHAR(255),"
-            "permission CHAR(15),"
-            "INDEX (repo_id),"
-            "INDEX(from_email),"
-            "INDEX(to_email)"
-        ") ENGINE=INNODB;",
 
     .create_table_seafile_conf =
         "CREATE TABLE IF NOT EXISTS `SeafileConf` ("
@@ -598,6 +642,15 @@ SeafDBQueries queries_mysql = {
             "email VARCHAR(255),"
             "role VARCHAR(255),"
             "UNIQUE INDEX (email)"
+        ") ENGINE=INNODB;",
+    .create_table_folder_user_perm =
+        "CREATE TABLE IF NOT EXISTS FolderUserPerm ("
+            "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+            "repo_id CHAR(36) NOT NULL,"
+            "path TEXT NOT NULL,"
+            "permission CHAR(15),"
+            "user VARCHAR(255) NOT NULL,"
+            "INDEX(repo_id)"
         ") ENGINE=INNODB;",
     .create_table_ldap_users =
         "CREATE TABLE IF NOT EXISTS LDAPUsers ("

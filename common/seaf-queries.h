@@ -13,6 +13,13 @@ struct SeafDBQueries {
     const char *create_table_repo_owner;
     const char *create_table_repo_group;
     const char *create_table_inner_pub_repo;
+    const char *create_table_shared_repo;
+
+    const char *create_table_org_repo;
+    const char *create_table_org_repo_group;
+    const char *create_table_org_inner_pub_repo;
+    const char *create_table_org_shared_repo;
+
     const char *create_table_repo_user_token;
     const char *create_table_repo_token_peer_info;
     const char *create_table_repo_head;
@@ -35,7 +42,6 @@ struct SeafDBQueries {
     const char *create_table_org_user_quota;
 
     const char *create_table_system_info;
-    const char *create_table_shared_repo;
 
     const char *create_table_seafile_conf;
     const char *get_seafile_conf_exists;
@@ -123,6 +129,7 @@ struct SeafDBQueries {
     const char *create_table_email_user;
     const char *create_table_binding;
     const char *create_table_user_role;
+    const char *create_table_folder_user_perm;
     const char *create_table_ldap_users;
     const char *create_table_ldap_config;
 
