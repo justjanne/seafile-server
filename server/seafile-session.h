@@ -124,11 +124,6 @@ seafile_session_init (SeafileSession *session);
 int
 seafile_session_start (SeafileSession *session);
 
-char *
-seafile_session_get_tmp_file_path (SeafileSession *session,
-                                   const char *basename,
-                                   char path[]);
-
 void
 schedule_create_system_default_repo (SeafileSession *session);
 

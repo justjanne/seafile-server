@@ -14,21 +14,6 @@
 
 #define JWT_TOKEN_EXPIRE_TIME 3*24*3600 /* 3 days*/
 
-char *
-seafile_session_get_tmp_file_path (SeafileSession *session,
-                                   const char *basename,
-                                   char path[])
-{
-    int path_len;
-
-    path_len = strlen (session->tmp_file_dir);
-    memcpy (path, session->tmp_file_dir, path_len + 1);
-    path[path_len] = '/';
-    strcpy (path + path_len + 1, basename);
-
-    return path;
-}
-
 #define DEFAULT_MAX_CONNECTIONS 100
 
 #define SQLITE_DB_NAME "seafile.db"
