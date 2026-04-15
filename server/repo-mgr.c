@@ -2996,12 +2996,18 @@ seaf_fill_repo_obj_from_commit (GList **repos)
                 seaf_commit_unref (commit);
             }
             g_free (repo_id);
+            repo_id = nullptr;
             g_free (commit_id);
+            commit_id = nullptr;
         }
-        if (repo_name)
+        if (repo_name) {
             g_free (repo_name);
-        if (last_modifier)
+            repo_name = nullptr;
+        }
+        if (last_modifier) {
             g_free (last_modifier);
+            last_modifier = nullptr;
+        }
 
         p = p->next;
     }

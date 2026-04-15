@@ -734,7 +734,7 @@ gc_v1_repo (SeafRepo *repo, int dry_run, int online, int verbose, int rm_fs)
     guint64 reachable_blocks = 0;
     gint64 removed_fs = 0;
     gint64 ret;
-    GCData *data;
+    GCData *data = nullptr;
     SeafDBTrans *trans = nullptr;
 
     ret = seaf_block_manager_foreach_block (seaf->block_mgr,

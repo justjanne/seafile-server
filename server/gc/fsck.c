@@ -756,34 +756,26 @@ repair_repo_with_thread_pool(gpointer data, gpointer user_data)
 static void
 repair_repos (GList *repo_id_list, FsckOptions *options)
 {
-    GList *ptr;
-    char *repo_id;
-    GThreadPool *pool;
-
     if (options->max_thread_num) {
-        pool = g_thread_pool_new(
-            (GFunc)repair_repo_with_thread_pool, nullptr, options->max_thread_num, FALSE, nullptr);
+        GThreadPool *pool = g_thread_pool_new(
+            (GFunc)repair_repo_with_thread_pool, nullptr, options->max_thread_num, false, nullptr);
         if (!pool) {
             seaf_warning ("Failed to create check and recover repo thread pool.\n");
             return;
         }
-    }
 
-    for (ptr = repo_id_list; ptr; ptr = ptr->next) {
-        repo_id = ptr->data;
-
-        if (options->max_thread_num) {
+        for (GList *ptr = repo_id_list; ptr; ptr = ptr->next) {
             CheckAndRecoverRepoObj *obj = g_new0(CheckAndRecoverRepoObj, 1);
-            obj->repo_id = repo_id;
+            obj->repo_id = ptr->data;
             obj->options = options;
             g_thread_pool_push(pool, obj, nullptr);
-        } else {
-            repair_repo(repo_id, options);
         }
-     }
 
-    if (options->max_thread_num) {
-        g_thread_pool_free(pool, FALSE, true);
+        g_thread_pool_free(pool, false, true);
+    } else {
+        for (GList *ptr = repo_id_list; ptr; ptr = ptr->next) {
+            repair_repo(ptr->data, options);
+        }
     }
 }
 

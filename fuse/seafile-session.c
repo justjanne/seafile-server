@@ -125,23 +125,22 @@ onerror:
 static int
 read_excluded_users (SeafileSession *session)
 {
-    char *users;
-    int l, i;
-    char *hash_value;
-
-    users = seaf_key_file_get_string (session->config, "fuse", "excluded_users", nullptr);
+    char *users = seaf_key_file_get_string (session->config, "fuse", "excluded_users", nullptr);
     if (!users)
         return 0;
 
     char **parts = g_strsplit_set(users, " ,", 0);
-    l = g_strv_length(parts);
-    if (l > 0)
-        hash_value = g_new0(char, 1);
+    guint l = g_strv_length(parts);
+    if (l > 0) {
+        char *hash_value = g_new0(char, 1);
 
-    for (i = 0; i < l; i++) {
-        if (g_strcmp0(parts[i], "") == 0)
-            continue;
-        g_hash_table_insert (session->excluded_users, g_strdup(parts[i]), hash_value);
+        for (int i = 0; i < l; i++) {
+            if (g_strcmp0(parts[i], "") == 0)
+                continue;
+            g_hash_table_insert (session->excluded_users, g_strdup(parts[i]), hash_value);
+        }
+
+        g_free (hash_value);
     }
 
     g_strfreev (parts);
