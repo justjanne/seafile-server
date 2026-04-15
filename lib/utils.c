@@ -188,20 +188,6 @@ objstore_mkdir (const char *base)
     return 0;
 }
 
-void
-objstore_get_path (char *path, const char *base, const char *obj_id)
-{
-    int len;
-
-    len = strlen(base);
-    memcpy(path, base, len);
-    path[len] = G_DIR_SEPARATOR;
-    path[len+1] = obj_id[0];
-    path[len+2] = obj_id[1];
-    path[len+3] = G_DIR_SEPARATOR;
-    strcpy(path+len+4, obj_id+2);
-}
-
 #ifdef WIN32
 
 /* UNIX epoch expressed in Windows time, the unit is 100 nanoseconds.

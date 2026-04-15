@@ -181,7 +181,6 @@ char* ccnet_expand_path (const char *src);
  * `base` and subdir will be created if they are not existing. 
  */
 int objstore_mkdir (const char *base);
-void objstore_get_path (char *path, const char *base, const char *obj_id);
 
 /* Read "n" bytes from a descriptor. */
 ssize_t	readn(int fd, void *vptr, size_t n);
