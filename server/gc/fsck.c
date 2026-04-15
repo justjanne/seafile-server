@@ -8,6 +8,8 @@
 
 #include "fsck.h"
 
+#include "seaf-utils.h"
+
 typedef struct FsckData {
     FsckOptions *options;
     SeafRepo *repo;

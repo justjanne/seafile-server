@@ -2655,8 +2655,8 @@ upload_headers_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
     seaf_metric_manager_in_flight_request_inc (seaf->metric_mgr);
 
     /* Set up per-request hooks, so that we can read file data piece by piece. */
-    evhtp_set_hook (&req->hooks, evhtp_hook_on_read, upload_read_cb, fsm);
-    evhtp_set_hook (&req->hooks, evhtp_hook_on_request_fini, upload_finish_cb, fsm);
+    evhtp_set_hook (&req->hooks, evhtp_hook_on_read, (evhtp_hook) upload_read_cb, fsm);
+    evhtp_set_hook (&req->hooks, evhtp_hook_on_request_fini, (evhtp_hook) upload_finish_cb, fsm);
     /* Set arg for upload_cb or update_cb. */
     req->cbarg = fsm;
 
@@ -2921,32 +2921,32 @@ upload_file_init (evhtp_t *htp, const char *http_temp_dir)
     g_free (cluster_shared_dir);
 
     cb = evhtp_set_regex_cb (htp, "^/upload-api/.*", upload_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
 
     cb = evhtp_set_regex_cb (htp, "^/upload-raw-blks-api/.*",
                              upload_raw_blks_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
 
     cb = evhtp_set_regex_cb (htp, "^/upload-blks-api/.*", upload_blks_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
 
     /* cb = evhtp_set_regex_cb (htp, "^/upload-blks-aj/.*", upload_blks_ajax_cb, NULL); */
     /* evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL); */
 
     cb = evhtp_set_regex_cb (htp, "^/upload-aj/.*", upload_ajax_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
 
     cb = evhtp_set_regex_cb (htp, "^/update-api/.*", update_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
 
     cb = evhtp_set_regex_cb (htp, "^/update-blks-api/.*", update_blks_api_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
 
     /* cb = evhtp_set_regex_cb (htp, "^/update-blks-aj/.*", update_blks_ajax_cb, NULL); */
     /* evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL); */
 
     cb = evhtp_set_regex_cb (htp, "^/update-aj/.*", update_ajax_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, upload_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) upload_headers_cb, NULL);
 
     // upload links
     // cb = evhtp_set_regex_cb (htp, "^/u/.*", upload_link_cb, NULL);

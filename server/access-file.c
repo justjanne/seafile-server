@@ -2351,7 +2351,7 @@ access_headers_cb (evhtp_request_t *req, evhtp_headers_t *hdr, void *arg)
     gettimeofday (&info->start, NULL);
 
     seaf_metric_manager_in_flight_request_inc (seaf->metric_mgr);
-    evhtp_set_hook (&req->hooks, evhtp_hook_on_request_fini, request_finish_cb, info);
+    evhtp_set_hook (&req->hooks, evhtp_hook_on_request_fini, (evhtp_hook) request_finish_cb, info);
     req->cbarg = info;
 
     return EVHTP_RES_OK;
@@ -2363,19 +2363,19 @@ access_file_init (evhtp_t *htp)
     evhtp_callback_t *cb;
 
     cb = evhtp_set_regex_cb (htp, "^/files/.*", access_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, access_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
 
     cb = evhtp_set_regex_cb (htp, "^/blks/.*", access_blks_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, access_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
 
     cb = evhtp_set_regex_cb (htp, "^/zip/.*", access_zip_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, access_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
 
     cb = evhtp_set_regex_cb (htp, "^/f/.*", access_link_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, access_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
     //evhtp_set_regex_cb (htp, "^/d/.*", access_dir_link_cb, NULL);
     cb = evhtp_set_regex_cb (htp, "^/repos/[\\da-z]{8}-[\\da-z]{4}-[\\da-z]{4}-[\\da-z]{4}-[\\da-z]{12}/files/.*", access_v2_cb, NULL);
-    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, access_headers_cb, NULL);
+    evhtp_set_hook(&cb->hooks, evhtp_hook_on_headers, (evhtp_hook) access_headers_cb, NULL);
 
     return 0;
 }
