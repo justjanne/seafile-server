@@ -138,7 +138,7 @@ static int
 handle_frame_content (struct evbuffer *buf, FrameParser *parser)
 {
     char *frame;
-    EVP_CIPHER_CTX *ctx;
+    EVP_CIPHER_CTX *ctx = nullptr;
     char *out;
     int outlen, outlen2;
     int ret = 0;
