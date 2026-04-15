@@ -983,10 +983,7 @@ seafile_from_json (const char *id, void *data, int len)
     object = json_loadb ((const char *)decompressed, outlen, 0, &error);
     g_free (decompressed);
     if (!object) {
-        if (error.text)
-            seaf_warning ("Failed to load seafile json object: %s.\n", error.text);
-        else
-            seaf_warning ("Failed to load seafile json object.\n");
+        seaf_warning ("Failed to load seafile json object: %s.\n", error.text);
         return nullptr;
     }
 
@@ -1458,10 +1455,7 @@ seaf_dir_from_json (const char *dir_id, uint8_t *data, int len)
     object = json_loadb ((const char *)decompressed, outlen, 0, &error);
     g_free (decompressed);
     if (!object) {
-        if (error.text)
-            seaf_warning ("Failed to load seafdir json object: %s.\n", error.text);
-        else
-            seaf_warning ("Failed to load seafdir json object.\n");
+        seaf_warning ("Failed to load seafdir json object: %s.\n", error.text);
         return nullptr;
     }
 
@@ -1753,10 +1747,7 @@ parse_metadata_type_json (const char *obj_id, uint8_t *data, int len)
     object = json_loadb ((const char *)decompressed, outlen, 0, &error);
     g_free (decompressed);
     if (!object) {
-        if (error.text)
-            seaf_warning ("Failed to load fs json object: %s.\n", error.text);
-        else
-            seaf_warning ("Failed to load fs json object.\n");
+        seaf_warning ("Failed to load fs json object: %s.\n", error.text);
         return SEAF_METADATA_TYPE_INVALID;
     }
 
@@ -1809,10 +1800,7 @@ fs_object_from_json (const char *obj_id, uint8_t *data, int len)
     object = json_loadb ((const char *)decompressed, outlen, 0, &error);
     g_free (decompressed);
     if (!object) {
-        if (error.text)
-            seaf_warning ("Failed to load fs json object: %s.\n", error.text);
-        else
-            seaf_warning ("Failed to load fs json object.\n");
+        seaf_warning ("Failed to load fs json object: %s.\n", error.text);
         return nullptr;
     }
 
