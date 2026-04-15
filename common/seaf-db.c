@@ -263,9 +263,7 @@ seaf_db_new_mysql (const char *host,
                    const char *charset,
                    int max_connections)
 {
-    SeafDB *db;
-
-    db = mysql_db_new (host, port, user, passwd, db_name, unix_socket, use_ssl, skip_verify, ca_path, charset);
+    SeafDB *db = mysql_db_new (host, port, user, passwd, db_name, unix_socket, use_ssl, skip_verify, ca_path, charset);
     if (!db)
         return nullptr;
     db->type = SEAF_DB_TYPE_MYSQL;
@@ -286,6 +284,7 @@ seaf_db_new_mysql (const char *host,
     int ret = pthread_create (&tid, nullptr, mysql_conn_keepalive, db->pool);
     if (ret != 0) {
         seaf_warning ("Failed to create mysql connection keepalive thread.\n");
+        free(db);
         return nullptr;
     }
     pthread_detach (tid);
