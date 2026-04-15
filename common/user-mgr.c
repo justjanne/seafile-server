@@ -1879,34 +1879,31 @@ ccnet_user_manager_update_emailuser_id (CcnetUserManager *manager,
                                         const char *new_email,
                                         GError **error)
 {
+    SeafDB *db = seaf->db;
+    SeafDBQueries *queries = seaf_db_get_queries(db);
+
     int ret = -1;
     int rc;
     GString *sql = g_string_new ("");
 
     //1.update RepoOwner
-    g_string_printf (sql, "UPDATE RepoOwner SET owner_id=? WHERE owner_id=?");
-    rc = seaf_db_statement_query (seaf->db, sql->str, 2,
-                                  "string", new_email,
-                                  "string", old_email);
+    rc = seaf_db_statement_query (db, queries->user_manager_update_id_repo_owner_id,
+        2, "string", new_email, "string", old_email);
     if (rc < 0){
         ccnet_warning ("Failed to update repo owner\n");
         goto out;
     }
 
     //2.update SharedRepo
-    g_string_printf (sql, "UPDATE SharedRepo SET from_email=? WHERE from_email=?");
-    rc = seaf_db_statement_query (seaf->db, sql->str, 2,
-                                  "string", new_email,
-                                  "string", old_email);
+    rc = seaf_db_statement_query (db, queries->user_manager_update_id_shared_repo_from,
+        2, "string", new_email, "string", old_email);
     if (rc < 0){
         ccnet_warning ("Failed to update from_email\n");
         goto out;
     }
 
-    g_string_printf (sql, "UPDATE SharedRepo SET to_email=? WHERE to_email=?");
-    rc = seaf_db_statement_query (seaf->db, sql->str, 2,
-                                  "string", new_email,
-                                  "string", old_email);
+    rc = seaf_db_statement_query (db, queries->user_manager_update_id_shared_repo_to,
+        2, "string", new_email, "string", old_email);
     if (rc < 0){
         ccnet_warning ("Failed to update to_email\n");
         goto out;
@@ -1920,30 +1917,24 @@ ccnet_user_manager_update_emailuser_id (CcnetUserManager *manager,
     }
 
     //4.update RepoUserToken
-    g_string_printf (sql, "UPDATE RepoUserToken SET email=? WHERE email=?");
-    rc = seaf_db_statement_query (seaf->db, sql->str, 2,
-                                  "string", new_email,
-                                  "string", old_email);
+    rc = seaf_db_statement_query (db, queries->user_manager_update_id_repo_user_token_email,
+        2, "string", new_email, "string", old_email);
     if (rc < 0){
         ccnet_warning ("Failed to update repo user token\n");
         goto out;
     }
 
     //5.uptede FolderUserPerm
-    g_string_printf (sql, "UPDATE FolderUserPerm SET user=? WHERE user=?");
-    rc = seaf_db_statement_query (seaf->db, sql->str, 2,
-                                  "string", new_email,
-                                  "string", old_email);
+    rc = seaf_db_statement_query (db, queries->user_manager_update_id_folder_user_perm_user,
+        2, "string", new_email, "string", old_email);
     if (rc < 0){
         ccnet_warning ("Failed to update user folder permission\n");
         goto out;
     }
 
     //6.update EmailUser
-    g_string_printf (sql, "UPDATE EmailUser SET email=? WHERE email=?");
-    rc = seaf_db_statement_query (manager->priv->db, sql->str, 2,
-                                  "string", new_email,
-                                  "string", old_email);
+    rc = seaf_db_statement_query (manager->priv->db, queries->user_manager_update_id_email_user_email,
+        2, "string", new_email, "string", old_email);
     if (rc < 0){
         ccnet_warning ("Failed to update email user\n");
         goto out;
@@ -1960,10 +1951,8 @@ ccnet_user_manager_update_emailuser_id (CcnetUserManager *manager,
     }
 #endif
     //7.update UserQuota
-    g_string_printf (sql, "UPDATE UserQuota SET user=? WHERE user=?");
-    rc = seaf_db_statement_query (seaf->db, sql->str, 2,
-                                  "string", new_email,
-                                  "string", old_email);
+    rc = seaf_db_statement_query (db, queries->user_manager_update_id_user_quota_user,
+        2,"string", new_email, "string", old_email);
     if (rc < 0){
         ccnet_warning ("Failed to update user quota\n");
         goto out;

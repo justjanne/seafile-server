@@ -134,5 +134,13 @@ struct SeafDBQueries {
     const char *get_branch_commit_id;
     const char *get_branch_name;
     const char *get_branch;
+
+    const char *user_manager_update_id_repo_owner_id;
+    const char *user_manager_update_id_shared_repo_from;
+    const char *user_manager_update_id_shared_repo_to;
+    const char *user_manager_update_id_repo_user_token_email;
+    const char *user_manager_update_id_folder_user_perm_user;
+    const char *user_manager_update_id_email_user_email;
+    const char *user_manager_update_id_user_quota_user;
 };
 typedef const struct SeafDBQueries SeafDBQueries;

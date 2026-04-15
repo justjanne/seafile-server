@@ -574,4 +574,19 @@ SeafDBQueries queries_sqlite = {
     .get_branch =
         "SELECT name, repo_id, commit_id FROM Branch"
         " WHERE repo_id=?;",
+
+    .user_manager_update_id_repo_owner_id =
+        "UPDATE RepoOwner SET owner_id=? WHERE owner_id=?",
+    .user_manager_update_id_shared_repo_from =
+        "UPDATE SharedRepo SET from_email=? WHERE from_email=?",
+    .user_manager_update_id_shared_repo_to =
+        "UPDATE SharedRepo SET to_email=? WHERE to_email=?",
+    .user_manager_update_id_repo_user_token_email =
+        "UPDATE RepoUserToken SET email=? WHERE email=?",
+    .user_manager_update_id_folder_user_perm_user  =
+        "UPDATE FolderUserPerm SET user=? WHERE user=?",
+    .user_manager_update_id_email_user_email =
+        "UPDATE EmailUser SET email=? WHERE email=?",
+    .user_manager_update_id_user_quota_user =
+        "UPDATE UserQuota SET user=? WHERE user=?",
 };
