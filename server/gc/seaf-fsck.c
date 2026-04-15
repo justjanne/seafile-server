@@ -74,6 +74,9 @@ check_user (const char *seafile_dir, uid_t *current_user, uid_t *seafile_user)
     if (stat (seafile_dir, &st) < 0) {
         seaf_warning ("Failed to stat seafile data dir %s: %s\n",
                       seafile_dir, strerror(errno));
+
+        *current_user = -1;
+        *seafile_user = -1;
         return false;
     }
 
