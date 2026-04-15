@@ -88,7 +88,7 @@ open_db (CcnetGroupManager *manager)
 
     if (!db)
         return -1;
-    
+
     manager->priv->db = db;
     if (manager->session->ccnet_create_tables && check_db_table (manager, db) < 0) {
         ccnet_warning ("Failed to create group db tables.\n");
@@ -219,7 +219,7 @@ int ccnet_group_manager_create_group (CcnetGroupManager *mgr,
 /* { */
 /*     GList *org_groups = nullptr, *ptr; */
 /*     CcnetOrgManager *org_mgr = seaf->org_mgr; */
-    
+
 /*     org_groups = ccnet_org_manager_get_org_groups (org_mgr, org_id, -1, -1); */
 /*     if (!org_groups) */
 /*         return false; */
@@ -252,7 +252,7 @@ int ccnet_group_manager_create_org_group (CcnetGroupManager *mgr,
                                           GError **error)
 {
     CcnetOrgManager *org_mgr = seaf->org_mgr;
-    
+
     /* if (duplicate_org_group_name (mgr, org_id, group_name)) { */
     /*     g_set_error (error, CCNET_DOMAIN, 0, */
     /*                  "The group has already created in this org."); */
@@ -344,7 +344,7 @@ int ccnet_group_manager_remove_group (CcnetGroupManager *mgr,
     seaf_db_statement_query (db, queries->delete_group, 1, "int", group_id);
     seaf_db_statement_query (db, queries->delete_group_user_by_group, 1, "int", group_id);
     seaf_db_statement_query (db, queries->delete_group_structure_by_group, 1, "int", group_id);
-    
+
     return 0;
 }
 
@@ -456,7 +456,7 @@ int ccnet_group_manager_set_group_name (CcnetGroupManager *mgr,
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries(db);
 
-    seaf_db_statement_query (db, queries->update_group,
+    seaf_db_statement_query (db, queries->update_group_name,
         2, "string", group_name, "int", group_id);
 
     return 0;
@@ -469,7 +469,7 @@ int ccnet_group_manager_quit_group (CcnetGroupManager *mgr,
 {
     CcnetDB *db = mgr->priv->db;
     SeafDBQueries *queries = seaf_db_get_queries (db);
-    
+
     /* check whether group exists */
     if (!check_group_exists (mgr, db, group_id)) {
         g_set_error (error, CCNET_DOMAIN, 0, "Group not exists");
@@ -595,48 +595,42 @@ ccnet_group_manager_get_groups_by_user (CcnetGroupManager *mgr,
         return groups;
     }
 
-    // TODO: What the actual fuck
     /* Get ancestor groups in descending order by group_id.*/
-    GString *paths = g_string_new ("");
+    GString *query_params = g_string_new ("");
     g_string_erase (sql, 0, -1);
     for (ptr = groups; ptr; ptr = ptr->next) {
         group = ptr->data;
         g_object_get (group, "parent_group_id", &parent_group_id, nullptr);
         g_object_get (group, "id", &group_id, nullptr);
+
         if (parent_group_id != 0) {
-            if (g_strcmp0(sql->str, "") == 0)
-                g_string_append_printf (sql, "SELECT path FROM GroupStructure WHERE group_id IN (%d", group_id);
+            if (g_strcmp0(query_params->str, "") == 0)
+                g_string_append_printf (query_params, "%d", group_id);
             else
-                g_string_append_printf (sql, ", %d", group_id);
+                g_string_append_printf (query_params, ", %d", group_id);
         } else {
             g_object_ref (group);
             ret = g_list_insert_sorted (ret, group, group_comp_func);
         }
     }
-    if (g_strcmp0(sql->str, "") != 0) {
-        g_string_append_printf (sql, ")");
-        if (seaf_db_statement_foreach_row (db,
-                                            sql->str,
-                                            get_group_paths_cb,
-                                            paths, 0) < 0) {
+    if (g_strcmp0(query_params->str, "") != 0) {
+        g_string_printf (sql, queries->list_group_structure_path,  query_params->str);
+        if (seaf_db_statement_foreach_row (db, sql->str,
+                get_group_paths_cb, query_params, 0) < 0) {
             g_list_free_full (ret, g_object_unref);
             ret = nullptr;
             goto out;
         }
-        if (g_strcmp0(paths->str, "") == 0) {
+        if (g_strcmp0(query_params->str, "") == 0) {
             ccnet_warning ("Failed to get groups path for user %s\n", user_name);
             g_list_free_full (ret, g_object_unref);
             ret = nullptr;
             goto out;
         }
 
-        g_string_printf (sql, "SELECT g.group_id, group_name, creator_name, timestamp, parent_group_id FROM "
-                         "`Group` g WHERE g.group_id IN (%s) ORDER BY g.group_id DESC",
-                         paths->str);
-        if (seaf_db_statement_foreach_row (db,
-                                        sql->str,
-                                        get_user_groups_cb,
-                                        &ret, 0) < 0) {
+        g_string_printf (sql, queries->list_group_by_id, query_params->str);
+        if (seaf_db_statement_foreach_row (db, sql->str,
+                get_user_groups_cb, &ret, 0) < 0) {
             g_list_free_full (ret, g_object_unref);
             ret = nullptr;
             goto out;
@@ -647,7 +641,7 @@ ccnet_group_manager_get_groups_by_user (CcnetGroupManager *mgr,
 out:
     g_string_free (sql, true);
     g_list_free_full (groups, g_object_unref);
-    g_string_free (paths, true);
+    g_string_free (query_params, true);
 
     return ret;
 }
@@ -661,7 +655,7 @@ get_ccnetgroup_cb (CcnetDBRow *row, void *data)
     const char *creator;
     int parent_group_id;
     gint64 ts;
-    
+
     group_id = seaf_db_row_get_column_int (row, 0);
     group_name = (const char *)seaf_db_row_get_column_text (row, 1);
     creator = (const char *)seaf_db_row_get_column_text (row, 2);
@@ -750,7 +744,7 @@ get_ccnet_groupuser_cb (CcnetDBRow *row, void *data)
 {
     GList **plist = data;
     CcnetGroupUser *group_user;
-    
+
     int group_id = seaf_db_row_get_column_int (row, 0);
     const char *user = (const char *)seaf_db_row_get_column_text (row, 1);
     int is_staff = seaf_db_row_get_column_int (row, 2);
@@ -765,7 +759,7 @@ get_ccnet_groupuser_cb (CcnetDBRow *row, void *data)
     if (group_user != nullptr) {
         *plist = g_list_prepend (*plist, group_user);
     }
-    
+
     return true;
 }
 
@@ -781,7 +775,7 @@ ccnet_group_manager_get_group_members (CcnetGroupManager *mgr,
 
     GList *group_users = nullptr;
     int rc;
-    
+
     if (limit == -1) {
         rc =seaf_db_statement_foreach_row (db, queries->list_group_user,
             get_ccnet_groupuser_cb, &group_users,
@@ -949,7 +943,7 @@ get_all_ccnetgroups_cb (CcnetDBRow *row, void *data)
     g_free (creator_l);
 
     *plist = g_list_prepend (*plist, group);
-    
+
     return true;
 }
 
@@ -959,36 +953,14 @@ ccnet_group_manager_get_top_groups (CcnetGroupManager *mgr,
                                     GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries (db);
+
     GList *ret = nullptr;
-    GString *sql = g_string_new ("");
     int rc;
 
-    if (seaf_db_type(mgr->priv->db) == SEAF_DB_TYPE_PGSQL) {
-        if (including_org)
-            g_string_printf (sql, "SELECT group_id, group_name, "
-                                  "creator_name, timestamp, parent_group_id FROM \"group\" "
-                                  "WHERE parent_group_id=-1 ORDER BY timestamp DESC");
-        else
-            g_string_printf (sql, "SELECT g.group_id, g.group_name, "
-                                  "g.creator_name, g.timestamp, g.parent_group_id FROM \"group\" g "
-                                  "LEFT JOIN OrgGroup o ON g.group_id = o.group_id "
-                                  "WHERE g.parent_group_id=-1 AND o.group_id is NULL "
-                                  "ORDER BY timestamp DESC");
-    } else {
-        if (including_org)
-            g_string_printf (sql, "SELECT group_id, group_name, "
-                                  "creator_name, timestamp, parent_group_id FROM `Group` "
-                                  "WHERE parent_group_id=-1 ORDER BY timestamp DESC");
-        else
-            g_string_printf (sql, "SELECT g.group_id, g.group_name, "
-                                  "g.creator_name, g.timestamp, g.parent_group_id FROM `Group` g "
-                                  "LEFT JOIN OrgGroup o ON g.group_id = o.group_id "
-                                  "WHERE g.parent_group_id=-1 AND o.group_id is NULL "
-                                  "ORDER BY timestamp DESC");
-    }
-    rc = seaf_db_statement_foreach_row (db, sql->str,
+    const char* sql = including_org ? queries->list_group_root : queries->list_group_root_without_org;
+    rc = seaf_db_statement_foreach_row (db, sql,
                                          get_all_ccnetgroups_cb, &ret, 0);
-    g_string_free (sql, true);
     if (rc < 0)
         return nullptr;
 
@@ -1000,29 +972,13 @@ ccnet_group_manager_list_all_departments (CcnetGroupManager *mgr,
                                           GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries (db);
+
     GList *ret = nullptr;
-    GString *sql = g_string_new ("");
     int rc;
-    int db_type = seaf_db_type(db);
 
-    if (db_type == SEAF_DB_TYPE_PGSQL) {
-        g_string_printf (sql, "SELECT group_id, group_name, "
-                              "creator_name, timestamp, type, "
-                              "parent_group_id FROM \"group\" "
-                              "WHERE parent_group_id = -1 OR parent_group_id > 0 "
-                              "ORDER BY group_id");
-        rc = seaf_db_statement_foreach_row (db, sql->str,
-                                             get_all_ccnetgroups_cb, &ret, 0);
-    } else {
-        g_string_printf (sql, "SELECT `group_id`, `group_name`, "
-                              "`creator_name`, `timestamp`, `type`, `parent_group_id` FROM `Group` "
-                              "WHERE parent_group_id = -1 OR parent_group_id > 0 "
-                              "ORDER BY group_id");
-        rc = seaf_db_statement_foreach_row (db, sql->str,
-                                             get_all_ccnetgroups_cb, &ret, 0);
-    }
-    g_string_free (sql, true);
-
+    rc = seaf_db_statement_foreach_row (db, queries->list_group_departments,
+        get_all_ccnetgroups_cb, &ret, 0);
     if (rc < 0)
         return nullptr;
 
@@ -1034,42 +990,19 @@ ccnet_group_manager_get_all_groups (CcnetGroupManager *mgr,
                                     int start, int limit, GError **error)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries (db);
+
     GList *ret = nullptr;
-    GString *sql = g_string_new ("");
     int rc;
 
-    if (seaf_db_type(mgr->priv->db) == SEAF_DB_TYPE_PGSQL) {
-        if (start == -1 && limit == -1) {
-            g_string_printf (sql, "SELECT group_id, group_name, "
-                                  "creator_name, timestamp, parent_group_id FROM \"group\" "
-                                  "ORDER BY timestamp DESC");
-            rc = seaf_db_statement_foreach_row (db, sql->str,
-                                                 get_all_ccnetgroups_cb, &ret, 0);
-        } else {
-            g_string_printf (sql, "SELECT group_id, group_name, "
-                                  "creator_name, timestamp, parent_group_id FROM \"group\" "
-                                  "ORDER BY timestamp DESC LIMIT ? OFFSET ?");
-            rc = seaf_db_statement_foreach_row (db, sql->str,
-                                                 get_all_ccnetgroups_cb, &ret,
-                                                 2, "int", limit, "int", start);
-        }
+    if (start == -1 && limit == -1) {
+        rc = seaf_db_statement_foreach_row (db, queries->list_group,
+            get_all_ccnetgroups_cb, &ret, 0);
     } else {
-        if (start == -1 && limit == -1) {
-            g_string_printf (sql, "SELECT `group_id`, `group_name`, "
-                                  "`creator_name`, `timestamp`, `parent_group_id` FROM `Group` "
-                                  "ORDER BY timestamp DESC");
-            rc = seaf_db_statement_foreach_row (db, sql->str,
-                                                 get_all_ccnetgroups_cb, &ret, 0);
-        } else {
-            g_string_printf (sql, "SELECT `group_id`, `group_name`, "
-                                  "`creator_name`, `timestamp`, `parent_group_id` FROM `Group` "
-                                  "ORDER BY timestamp DESC LIMIT ? OFFSET ?");
-            rc = seaf_db_statement_foreach_row (db, sql->str,
-                                                 get_all_ccnetgroups_cb, &ret,
-                                                 2, "int", limit, "int", start);
-        }
+        rc = seaf_db_statement_foreach_row (db, queries->list_group_paginated,
+            get_all_ccnetgroups_cb, &ret,
+            2, "int", limit, "int", start);
     }
-    g_string_free (sql, true);
 
     if (rc < 0)
         return nullptr;
@@ -1083,19 +1016,13 @@ ccnet_group_manager_set_group_creator (CcnetGroupManager *mgr,
                                        const char *user_name)
 {
     CcnetDB *db = mgr->priv->db;
-    GString *sql = g_string_new ("");
+    SeafDBQueries *queries = seaf_db_get_queries (db);
 
-    if (seaf_db_type(db) == SEAF_DB_TYPE_PGSQL) {
-        g_string_printf (sql, "UPDATE \"group\" SET creator_name = ? WHERE group_id = ?");
-    } else {
-        g_string_printf (sql, "UPDATE `Group` SET creator_name = ? WHERE group_id = ?");
-    }
-
-    seaf_db_statement_query (db, sql->str, 2, "string", user_name, "int", group_id);
-    g_string_free (sql, true);
+    seaf_db_statement_query (db, queries->update_group_creator,
+        2, "string", user_name, "int", group_id);
 
     return 0;
-    
+
 }
 
 GList *
@@ -1104,55 +1031,23 @@ ccnet_group_manager_search_groups (CcnetGroupManager *mgr,
                                    int start, int limit)
 {
     CcnetDB *db = mgr->priv->db;
+    SeafDBQueries *queries = seaf_db_get_queries (db);
+
     GList *ret = nullptr;
-    GString *sql = g_string_new ("");
 
     int rc;
     char *db_patt = g_strdup_printf ("%%%s%%", keyword);
 
-    if (seaf_db_type(db) == SEAF_DB_TYPE_PGSQL) {
-        if (start == -1 && limit == -1) {
-            g_string_printf (sql,
-                             "SELECT group_id, group_name, "
-                             "creator_name, timestamp, parent_group_id "
-                             "FROM \"group\" WHERE group_name LIKE ?");
-            rc = seaf_db_statement_foreach_row (db, sql->str,
-                                                 get_all_ccnetgroups_cb, &ret,
-                                                 1, "string", db_patt);
-        } else {
-            g_string_printf (sql,
-                             "SELECT group_id, group_name, "
-                             "creator_name, timestamp, parent_group_id "
-                             "FROM \"group\" WHERE group_name LIKE ? "
-                             "LIMIT ? OFFSET ?");
-            rc = seaf_db_statement_foreach_row (db, sql->str,
-                                                 get_all_ccnetgroups_cb, &ret,
-                                                 3, "string", db_patt,
-                                                 "int", limit, "int", start);
-        }
+    if (start == -1 && limit == -1) {
+        rc = seaf_db_statement_foreach_row (db, queries->list_group_name_like,
+            get_all_ccnetgroups_cb, &ret,
+            1, "string", db_patt);
     } else {
-        if (start == -1 && limit == -1) {
-            g_string_printf (sql,
-                             "SELECT group_id, group_name, "
-                             "creator_name, timestamp, parent_group_id "
-                             "FROM `Group` WHERE group_name LIKE ?");
-            rc = seaf_db_statement_foreach_row (db, sql->str,
-                                                 get_all_ccnetgroups_cb, &ret,
-                                                 1, "string", db_patt);
-        } else {
-            g_string_printf (sql,
-                             "SELECT group_id, group_name, "
-                             "creator_name, timestamp, parent_group_id "
-                             "FROM `Group` WHERE group_name LIKE ? "
-                             "LIMIT ? OFFSET ?");
-            rc = seaf_db_statement_foreach_row (db, sql->str,
-                                                 get_all_ccnetgroups_cb, &ret,
-                                                 3, "string", db_patt,
-                                                 "int", limit, "int", start);
-        }
+        rc = seaf_db_statement_foreach_row (db, queries->list_group_name_like_paginated,
+            get_all_ccnetgroups_cb, &ret,
+            3, "string", db_patt, "int", limit, "int", start);
     }
     g_free (db_patt);
-    g_string_free (sql, true);
 
     if (rc < 0) {
         while (ret != nullptr) {

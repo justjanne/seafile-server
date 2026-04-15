@@ -264,7 +264,17 @@ SeafDBQueries queries_sqlite = {
         "SELECT g.group_id, group_name, creator_name, timestamp, parent_group_id"
         " FROM `Group` g, GroupStructure s"
         " WHERE g.group_id=s.group_id AND (s.path LIKE ? OR s.path LIKE ? OR g.group_id=?);",
-    .update_group =
+    .list_group_root =
+        "SELECT group_id, group_name, creator_name, timestamp, parent_group_id"
+        " FROM `Group`"
+        " WHERE parent_group_id=-1"
+        " ORDER BY timestamp DESC;",
+    .list_group_root_without_org =
+        "SELECT g.group_id, g.group_name, g.creator_name, g.timestamp, g.parent_group_id"
+        " FROM `Group` g LEFT JOIN OrgGroup o ON g.group_id = o.group_id"
+        " WHERE g.parent_group_id=-1 AND o.group_id is NULL"
+        " ORDER BY timestamp DESC;",
+    .update_group_name =
         "UPDATE `Group` SET group_name = ?"
         " WHERE group_id = ?;",
     .delete_group =

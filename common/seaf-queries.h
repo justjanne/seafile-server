@@ -49,11 +49,20 @@ struct SeafDBQueries {
     const char *get_group_group_id;
     const char *get_group_exists;
     const char *get_group_has_children;
+    const char *list_group;
+    const char *list_group_paginated;
     const char *list_group_by_path;
     const char *list_group_by_user;
     const char *list_group_by_parent;
     const char *list_group_by_ancestor;
-    const char *update_group;
+    const char *list_group_root;
+    const char *list_group_root_without_org;
+    const char *list_group_departments;
+    const char *list_group_name_like;
+    const char *list_group_name_like_paginated;
+    const char *list_group_by_id;
+    const char *update_group_name;
+    const char *update_group_creator;
     const char *delete_group;
 
     const char *create_table_group_user;
@@ -71,6 +80,7 @@ struct SeafDBQueries {
     const char *create_table_group_structure;
     const char *insert_group_structure;
     const char *get_group_structure_path;
+    const char *list_group_structure_path;
     const char *delete_group_structure_by_group;
 
     const char *create_table_organization;

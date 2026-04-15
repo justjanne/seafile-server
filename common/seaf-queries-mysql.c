@@ -291,6 +291,15 @@ SeafDBQueries queries_mysql = {
         "SELECT 1"
         " FROM `Group`"
         " WHERE parent_group_id=?;",
+    .list_group =
+        "SELECT `group_id`, `group_name`, `creator_name`, `timestamp`, `parent_group_id`"
+        " FROM `Group`"
+        " ORDER BY timestamp DESC;",
+    .list_group_paginated =
+        "SELECT `group_id`, `group_name`, `creator_name`, `timestamp`, `parent_group_id`"
+        " FROM `Group`"
+        " ORDER BY timestamp DESC"
+        " LIMIT ? OFFSET ?;",
     .list_group_by_path =
         "SELECT g.group_id, group_name, creator_name, timestamp, parent_group_id"
         " FROM `Group` g"
@@ -309,8 +318,40 @@ SeafDBQueries queries_mysql = {
         "SELECT g.group_id, group_name, creator_name, timestamp, parent_group_id"
         " FROM `Group` g, GroupStructure s"
         " WHERE g.group_id=s.group_id AND (s.path LIKE ? OR s.path LIKE ? OR g.group_id=?);",
-    .update_group =
+    .list_group_root =
+        "SELECT group_id, group_name, creator_name, timestamp, parent_group_id"
+        " FROM `Group`"
+        " WHERE parent_group_id=-1"
+        " ORDER BY timestamp DESC;",
+    .list_group_root_without_org =
+        "SELECT g.group_id, g.group_name, g.creator_name, g.timestamp, g.parent_group_id"
+        " FROM `Group` g LEFT JOIN OrgGroup o ON g.group_id = o.group_id"
+        " WHERE g.parent_group_id=-1 AND o.group_id is NULL"
+        " ORDER BY timestamp DESC;",
+    .list_group_departments =
+        "SELECT `group_id`, `group_name`, `creator_name`, `timestamp`, `type`, `parent_group_id`"
+        " FROM `Group`"
+        " WHERE parent_group_id = -1 OR parent_group_id > 0"
+        " ORDER BY group_id;",
+    .list_group_name_like =
+        "SELECT group_id, group_name, creator_name, timestamp, parent_group_id"
+        " FROM `Group`"
+        " WHERE group_name LIKE ?;",
+    .list_group_name_like_paginated =
+        "SELECT group_id, group_name, creator_name, timestamp, parent_group_id"
+        " FROM `Group`"
+        " WHERE group_name LIKE ?"
+        " LIMIT ? OFFSET ?;",
+    .list_group_by_id =
+        "SELECT g.group_id, group_name, creator_name, timestamp, parent_group_id"
+        " FROM `Group` g"
+        " WHERE g.group_id IN (%s)"
+        " ORDER BY g.group_id DESC;",
+    .update_group_name =
         "UPDATE `Group` SET group_name = ?"
+        " WHERE group_id = ?;",
+    .update_group_creator =
+        "UPDATE `Group` SET creator_name = ?"
         " WHERE group_id = ?;",
     .delete_group =
         "DELETE FROM `Group`"
@@ -375,6 +416,10 @@ SeafDBQueries queries_mysql = {
     .get_group_structure_path =
         "SELECT path FROM GroupStructure"
         " WHERE group_id=?;",
+    .list_group_structure_path =
+        "SELECT path"
+        " FROM GroupStructure"
+        " WHERE group_id IN (%s);",
     .delete_group_structure_by_group =
         "DELETE FROM GroupStructure"
         " WHERE group_id=?;",
