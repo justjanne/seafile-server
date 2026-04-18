@@ -13,7 +13,9 @@ dependencies = [
     "requests-toolbelt",
     "pysearpc",
     "python-dotenv>=1.2.2",
+    "libseaserv"
 ]
 
 [tool.uv.sources]
 pysearpc = { git = "https://github.com/justjanne/libsearpc.git" }
+libseaserv = { git = "https://github.com/justjanne/libseaserv.git" }
