@@ -5,8 +5,8 @@ github.com/go-sql-driver/mysql v1.5.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LB
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
 github.com/gorilla/mux v1.7.4/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
-github.com/haiwen/seafile-server/fileserver v0.0.0-20220621072834-faf434def97d h1:7W5BeFzUFCx+xz5pINiuRJesr82pA2Gq0LZeHXBI0jE=
-github.com/haiwen/seafile-server/fileserver v0.0.0-20220621072834-faf434def97d/go.mod h1:3r5rRrKrYibzy1quQOR0/yvT+7L+iuAFAwTcggCp6wg=
+github.com/justjanne/seafile-fileserver v0.0.0-20220621072834-faf434def97d h1:7W5BeFzUFCx+xz5pINiuRJesr82pA2Gq0LZeHXBI0jE=
+github.com/justjanne/seafile-fileserver v0.0.0-20220621072834-faf434def97d/go.mod h1:3r5rRrKrYibzy1quQOR0/yvT+7L+iuAFAwTcggCp6wg=
 github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=
 github.com/mattn/go-sqlite3 v1.14.0/go.mod h1:JIl7NbARA7phWnGvh0LKTyg7S9BA+6gx71ShQilpsus=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

@@ -12,7 +12,7 @@ import "mime/multipart"
 import "path/filepath"
 
 import "gopkg.in/ini.v1"
-import "github.com/haiwen/seafile-server/fileserver/searpc"
+import "github.com/justjanne/seafile-fileserver/searpc"
 
 type Options struct {
 	server    string
