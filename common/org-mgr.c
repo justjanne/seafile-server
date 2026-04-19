@@ -76,7 +76,7 @@ open_db (CcnetOrgManager *manager)
     case SEAF_DB_TYPE_SQLITE:
         db = open_sqlite_db (manager);
         break;
-    case SEAF_DB_TYPE_PGSQL:
+    default:
         db = manager->session->ccnet_db;
         break;
     }
@@ -85,7 +85,7 @@ open_db (CcnetOrgManager *manager)
         return -1;
     
     manager->priv->db = db;
-    if ((manager->session->create_tables || seaf_db_type(db) == SEAF_DB_TYPE_PGSQL)
+    if ((manager->session->create_tables)
          && check_db_table (db) < 0) {
         ccnet_warning ("Failed to create org db tables.\n");
         return -1;

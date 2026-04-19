@@ -194,7 +194,7 @@ SeafDBQueries queries_mysql = {
         "CREATE TABLE IF NOT EXISTS GCID ("
             "id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
             "repo_id CHAR(36),"
-            "gc_id CHAR(36"
+            "gc_id CHAR(36),"
             "UNIQUE INDEX(repo_id)"
         ") ENGINE=INNODB;",
     .create_table_last_gcid =
