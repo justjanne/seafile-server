@@ -9,8 +9,8 @@ from seaserv import seafile_api as api
 
 file1_name = 'file1.txt'
 file2_name = 'file2.txt'
-file1_path = os.getcwd() + '/tests/resources/' + file1_name
-file2_path = os.getcwd() + '/tests/resources/' + file2_name
+file1_path = os.getcwd()+ '/resources/' + file1_name
+file2_path = os.getcwd()+ '/resources/' + file2_name
 file1_content ='File1 content'
 file2_content ='File2 content'
 download_dir_path = os.getcwd() + '/tests/resources/download_dir'

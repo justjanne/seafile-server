@@ -11,7 +11,7 @@ new_file_name_2 = 'new_test_2.txt'
 empty_file_name = 'empty_test.txt'
 new_empty_file_name = 'new_empty_test.txt'
 file_content = 'test file content'
-file_path = os.getcwd() + '/tests/resources/' + file_name
+file_path = os.getcwd()+ '/resources/' + file_name
 dir_name = "test_dir"
 
 def create_the_file ():

@@ -21,10 +21,10 @@ jobs:
         run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml up seafile --wait
       - name: Install python
         working-directory: ./ci
-        run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml exec seafile /bin/bash -c "cd /source/seafile-server/python && pip3 install --break-system-packages -r ../ci/requirements.txt"
+        run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml exec seafile /bin/bash -c "cd /tests && pip3 install --break-system-packages -r requirements.txt"
       - name: Run tests
         working-directory: ./ci
-        run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml exec seafile /bin/bash -c "cd /source/seafile-server/python && python3 -m pytest"
+        run: docker compose -f docker-compose.yml -f docker-compose.pgsql.yml exec seafile /bin/bash -c "cd /tests && python3 -m pytest"
       - name: Show docker logs
         working-directory: ./ci
         if: always()

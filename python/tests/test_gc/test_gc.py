@@ -10,15 +10,15 @@ from requests_toolbelt import MultipartEncoder
 
 file_name = 'file.txt'
 first_name = 'first.txt'
-first_path = os.getcwd() + '/tests/resources/' + first_name
+first_path = os.getcwd()+ '/resources/' + first_name
 first_content = 'Fist file content.\r\n'
 
 second_name = 'second.txt'
 second_content = 'Second file content.\r\n'
-second_path = os.getcwd() + '/tests/resources/' + second_name
+second_path = os.getcwd()+ '/resources/' + second_name
 
 third_name = 'third.txt'
-third_path = os.getcwd() + '/tests/resources/' + third_name
+third_path = os.getcwd()+ '/resources/' + third_name
 third_content = 'Third file content.\r\n'
 
 def create_test_file():

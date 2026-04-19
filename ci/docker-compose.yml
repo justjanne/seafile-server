@@ -2,7 +2,7 @@ services:
   seafile:
     build:
       context: ..
-      dockerfile: ./Dockerfile
+      dockerfile: ./test.dockerfile
     volumes:
       - ./config:/config
       - shared-run:/run/seafile
