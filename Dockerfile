@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS builder
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y \
@@ -46,24 +46,9 @@ RUN apt-get install -y \
     valac  \
     xz-utils
 
-RUN apt-get install -y python3 python3-dev python3-pip python3-setuptools python3-ldap
-RUN pip3 install --break-system-packages \
-    pytz \
-    jinja2 \
-    Django==5.2.* \
-    django-statici18n==2.3.* \
-    django_webpack_loader==1.7.* \
-    django_picklefield==3.1 \
-    django_formtools==2.4 django_simple_captcha==0.6.* djangosaml2==1.11.* \
-    djangorestframework==3.14.* python-dateutil==2.8.* pyjwt==2.10.* \
-    pycryptodome==3.23.* python-cas==1.6.* pysaml2==7.5.* requests==2.28.* requests_oauthlib==1.3.* future==1.0.* gunicorn==20.1.* \
-    mysqlclient==2.2.* qrcode==7.3.* pillow==11.3.* pillow-heif==1.0.* chardet==5.1.* cffi==1.17.1 captcha==0.7.* \
-    psycopg2-binary \
-    openpyxl==3.0.* Markdown==3.4.* bleach==5.0.* python-ldap==3.4.* sqlalchemy==2.0.* redis mock pytest \
-    pymysql==1.1.* configparser pylibmc django-pylibmc nose exam splinter \
-    pytest-django psd-tools lxml cairosvg==2.8.*
-
 RUN mkdir /source
+WORKDIR /source
+
 RUN git clone https://github.com/justjanne/libevhtp /source/libevhtp
 RUN mkdir -p /source/libevhtp/build
 WORKDIR /source/libevhtp/build
@@ -83,13 +68,36 @@ RUN ldconfig
 ADD . /source/seafile-server
 RUN mkdir -p /source/seafile-server/build
 WORKDIR /source/seafile-server/build
-RUN cmake -DENABLE_FUSE=OFF -DWITH_POSTGRESQL=ON -GNinja ..
+RUN cmake -DENABLE_FUSE=OFF -DWITH_MYSQL=ON -DWITH_POSTGRESQL=ON -GNinja ..
 RUN ninja
 RUN ninja install
 RUN ldconfig
 
+FROM ubuntu:24.04
+
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+    libarchive13t64 \
+    libargon2-1 \
+    libcurl4t64 \
+    libevent-2.1-7t64 \
+    libglib2.0-0t64 \
+    libhiredis1.1.0 \
+    libjansson4 \
+    libjwt2 \
+    libmysqlclient21 \
+    libpq5 \
+    libsqlite3-0 \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /usr/local/lib /usr/local/lib
+RUN ldconfig
+
 RUN mkdir -p /run/seafile
 RUN chown -R 1000:1000 /run/seafile
+RUN mkdir -p /source/seafile-server/python/tests/resources
 RUN chown -R 1000:1000 /source/seafile-server/python/tests/resources
 RUN mkdir /config && chown 1000:1000 /config
 RUN mkdir /data && chown 1000:1000 /data
