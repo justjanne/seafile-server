@@ -5,7 +5,6 @@ project(seafile VERSION 13.0.20 LANGUAGES C)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-option(ENABLE_FUSE "Enable fuse virtual file system" ON)
 option(ENABLE_LDAP "Enable LDAP" OFF)
 option(ENABLE_HTTPSERVER "Enable httpserver" ON)
 option(WITH_POSTGRESQL "Enable postgresql support" OFF)
@@ -79,10 +78,6 @@ if(ENABLE_HTTPSERVER)
     endif()
 endif()
 
-if(ENABLE_FUSE)
-    pkg_check_modules(FUSE fuse>=2.7.3 REQUIRED)
-endif()
-
 configure_file(config.cmake.h config.h)
 
 include_directories(
@@ -103,16 +98,7 @@ include_directories(
     ${PGSQL_INCLUDE_DIRS}
 )
 
-if(ENABLE_FUSE)
-    include_directories(${FUSE_INCLUDE_DIRS})
-endif()
-
 add_subdirectory(lib)
 add_subdirectory(common/cdc)
 add_subdirectory(server)
-add_subdirectory(controller)
 add_subdirectory(scripts)
-
-if(ENABLE_FUSE)
-    add_subdirectory(fuse)
-endif()
