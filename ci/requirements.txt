@@ -6,3 +6,5 @@ tenacity>=4.8.0
 future
 requests-toolbelt
 python-dotenv>=1.2.2
+libseaserv @ git+https://github.com/justjanne/libseaserv.git@main
+pysearpc @ git+https://github.com/justjanne/libsearpc.git@main
