@@ -40,7 +40,7 @@ SeafDBQueries queries_pgsql = {
             "repo_id VARCHAR(37) UNIQUE,"
             "owner_id VARCHAR(255)"
         ");"
-        "CREATE INDEX IF NOT EXISTS RepoOwner_owner_id_idx"
+        "CREATE INDEX IF NOT EXISTS repoowner_owner_idx"
             " ON RepoOwner(owner_id);",
     .create_table_repo_group =
         "CREATE TABLE IF NOT EXISTS RepoGroup ("
@@ -51,9 +51,9 @@ SeafDBQueries queries_pgsql = {
             "permission VARCHAR(15),"
             "UNIQUE (group_id, repo_id)"
         ");"
-        "CREATE INDEX IF NOT EXISTS RepoGroup_repo_id_idx"
+        "CREATE INDEX IF NOT EXISTS repogroup_repoid_idx"
             " ON RepoGroup(repo_id);"
-        "CREATE INDEX IF NOT EXISTS RepoGroup_user_name_idx"
+        "CREATE INDEX IF NOT EXISTS repogroup_username_idx"
             " ON RepoGroup(user_name);",
     .create_table_inner_pub_repo =
         "CREATE TABLE IF NOT EXISTS InnerPubRepo ("
@@ -69,11 +69,11 @@ SeafDBQueries queries_pgsql = {
               "to_email VARCHAR(255),"
               "permission VARCHAR(15)"
         ");"
-        "CREATE INDEX IF NOT EXISTS SharedRepo_repo_id_idx"
+        "CREATE INDEX IF NOT EXISTS sharedrepo_repoid_idx"
             " ON SharedRepo(repo_id);"
-        "CREATE INDEX IF NOT EXISTS SharedRepo_from_email_idx"
+        "CREATE INDEX IF NOT EXISTS sharedrepo_from_email_idx"
             " ON SharedRepo(from_email);"
-        "CREATE INDEX IF NOT EXISTS SharedRepo_to_email_idx"
+        "CREATE INDEX IF NOT EXISTS sharedrepo_to_email_idx"
             " ON SharedRepo(to_email);",
 
     .create_table_org_repo =
@@ -137,9 +137,9 @@ SeafDBQueries queries_pgsql = {
             "token VARCHAR(41),"
             "UNIQUE (repo_id, token)"
         ");"
-        "CREATE INDEX IF NOT EXISTS RepoUserToken_token_idx"
+        "CREATE INDEX IF NOT EXISTS repousertoken_token_idx"
             " ON RepoUserToken(token);"
-        "CREATE INDEX IF NOT EXISTS RepoUserToken_email_idx"
+        "CREATE INDEX IF NOT EXISTS repousertoken_email_idx"
             " ON RepoUserToken(email);",
     .create_table_repo_token_peer_info =
         "CREATE TABLE IF NOT EXISTS RepoTokenPeerInfo ("
@@ -151,7 +151,7 @@ SeafDBQueries queries_pgsql = {
             "sync_time BIGINT,"
             "client_ver VARCHAR(20)"
         ");"
-        "CREATE INDEX IF NOT EXISTS RepoTokenPeerInfo_peer_id_idx"
+        "CREATE INDEX IF NOT EXISTS idx_RepoTokenPeerInfo_peer_id"
             " ON RepoTokenPeerInfo(peer_id);",
     .create_table_repo_head =
         "CREATE TABLE IF NOT EXISTS RepoHead ("
@@ -192,7 +192,7 @@ SeafDBQueries queries_pgsql = {
             "path TEXT,"
             "base_commit VARCHAR(40)"
         ");"
-        "CREATE INDEX IF NOT EXISTS VirtualRepo_origin_repo_idx"
+        "CREATE INDEX IF NOT EXISTS virtualrepo_origin_repo_idx"
             " ON VirtualRepo(origin_repo);",
     .create_table_garbage_repos =
         "CREATE TABLE IF NOT EXISTS GarbageRepos ("
@@ -224,9 +224,9 @@ SeafDBQueries queries_pgsql = {
             "org_id INTEGER,"
             "del_time BIGINT"
         ");"
-        "CREATE INDEX IF NOT EXISTS RepoTrash_owner_id_idx"
+        "CREATE INDEX IF NOT EXISTS repotrash_owner_id"
             " ON RepoTrash(owner_id);"
-        "CREATE INDEX IF NOT EXISTS RepoTrash_org_id_idx"
+        "CREATE INDEX IF NOT EXISTS repotrash_org_id"
             " ON RepoTrash(org_id);",
     .create_table_repo_file_count =
         "CREATE TABLE IF NOT EXISTS RepoFileCount ("
@@ -246,7 +246,7 @@ SeafDBQueries queries_pgsql = {
             "status INTEGER DEFAULT 0,"
             "type VARCHAR(10)"
         ");"
-        "CREATE INDEX IF NOT EXISTS RepoInfo_type_idx"
+        "CREATE INDEX IF NOT EXISTS idx_RepoInfo_type"
             " ON RepoInfo(type);",
     .create_table_webupload_temp_files =
         "CREATE TABLE IF NOT EXISTS WebUploadTempFiles ("
@@ -255,7 +255,7 @@ SeafDBQueries queries_pgsql = {
             "file_path TEXT NOT NULL,"
             "tmp_file_path TEXT NOT NULL"
         ");"
-        "CREATE INDEX IF NOT EXISTS WebUploadTempFiles_repo_id_idx"
+        "CREATE INDEX IF NOT EXISTS idx_WebUploadTempFiles_repo_id"
             " ON WebUploadTempFiles(repo_id);",
 
     .create_table_user_quota =
